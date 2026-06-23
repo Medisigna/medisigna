@@ -1,0 +1,221 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  PATIENT
+  PHARMACIST
+  ADMIN
+}
+
+enum AccountStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum PharmacistVerificationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+  NEEDS_REVISION
+}
+
+enum PharmacistAvailabilityStatus {
+  ONLINE
+  OFFLINE
+}
+
+enum ConsultationSessionStatus {
+  ACTIVE
+  WAITING_USER
+  WAITING_PHARMACIST
+  COMPLETED
+  REFERRED
+  CANCELED
+}
+
+enum ConsultationMessageType {
+  TEXT
+  IMAGE
+  SYSTEM
+  SUMMARY
+}
+
+enum ConsultationFinalStatus {
+  COMPLETED
+  REFERRED
+}
+
+model User {
+  id                String                @id
+  name              String
+  email             String                @unique
+  emailVerified     Boolean               @default(false)
+  image             String?
+  phone             String?               @unique
+  role              UserRole              @default(PATIENT)
+  status            AccountStatus         @default(ACTIVE)
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+  sessions          Session[]
+  accounts          Account[]
+  patientProfile    PatientProfile?
+  pharmacistProfile PharmacistProfile?
+  patientSessions   ConsultationSession[] @relation("PatientConsultations")
+  pharmacistSessions ConsultationSession[] @relation("PharmacistConsultations")
+  sentMessages      ConsultationMessage[] @relation("MessageSender")
+  createdSummaries  ConsultationSummary[] @relation("SummaryCreator")
+
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+model PatientProfile {
+  id        String    @id @default(cuid())
+  userId    String    @unique
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  birthDate DateTime?
+  age       Int?
+  phone     String?
+  gender    Gender?
+  address   String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model PharmacistProfile {
+  id                  String                         @id @default(cuid())
+  userId              String                         @unique
+  user                User                           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title               String
+  strNumber           String                         @unique
+  profilePhotoUrl     String?
+  bio                 String
+  topics              String[]
+  practiceLocation    String
+  serviceHours        String
+  experienceSummary   String
+  strDocumentUrl      String?
+  verificationStatus  PharmacistVerificationStatus   @default(PENDING)
+  availabilityStatus  PharmacistAvailabilityStatus   @default(OFFLINE)
+  adminNote           String?
+  createdAt           DateTime                       @default(now())
+  updatedAt           DateTime                       @updatedAt
+}
+
+model ConsultationSession {
+  id           String                    @id @default(cuid())
+  patientId    String
+  patient      User                      @relation("PatientConsultations", fields: [patientId], references: [id], onDelete: Cascade)
+  pharmacistId String
+  pharmacist   User                      @relation("PharmacistConsultations", fields: [pharmacistId], references: [id], onDelete: Cascade)
+  status       ConsultationSessionStatus @default(ACTIVE)
+  startedAt    DateTime                  @default(now())
+  endedAt      DateTime?
+  createdAt    DateTime                  @default(now())
+  updatedAt    DateTime                  @updatedAt
+  messages     ConsultationMessage[]
+  summary      ConsultationSummary?
+
+  @@index([patientId])
+  @@index([pharmacistId])
+  @@index([status])
+}
+
+model ConsultationMessage {
+  id          String                    @id @default(cuid())
+  sessionId   String
+  session     ConsultationSession       @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  senderId    String
+  sender      User                      @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  type        ConsultationMessageType   @default(TEXT)
+  body        String?
+  createdAt   DateTime                  @default(now())
+  attachments ConsultationAttachment[]
+
+  @@index([sessionId])
+  @@index([senderId])
+}
+
+model ConsultationAttachment {
+  id        String              @id @default(cuid())
+  messageId String
+  message   ConsultationMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  fileUrl   String
+  fileType  String
+  fileName  String
+  createdAt DateTime            @default(now())
+
+  @@index([messageId])
+}
+
+model ConsultationSummary {
+  id             String                  @id @default(cuid())
+  sessionId      String                  @unique
+  session        ConsultationSession     @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  mainProblem    String
+  education      String
+  warning        String
+  followUpAdvice String
+  finalStatus    ConsultationFinalStatus
+  createdBy      String
+  creator        User                    @relation("SummaryCreator", fields: [createdBy], references: [id], onDelete: Cascade)
+  createdAt      DateTime                @default(now())
+
+  @@index([createdBy])
+}
