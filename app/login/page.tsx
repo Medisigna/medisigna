@@ -20,6 +20,7 @@ type PageProps = {
 
 export default async function LoginPage({ searchParams }: PageProps) {
   const params = await searchParams
+  const identifier = Array.isArray(params?.identifier) ? params.identifier[0] : params?.identifier
 
   return (
     <main className="flex min-h-svh items-center justify-center bg-background bg-[linear-gradient(to_right,color-mix(in_oklch,var(--border)_30%,transparent)_1px,transparent_1px),linear-gradient(to_bottom,color-mix(in_oklch,var(--border)_30%,transparent)_1px,transparent_1px)] bg-[size:32px_32px] px-6 py-10">
@@ -33,7 +34,7 @@ export default async function LoginPage({ searchParams }: PageProps) {
             <AppMessage error={params?.error} />
             <label className="flex flex-col gap-2 text-sm font-medium">
               Email atau nomor WhatsApp
-              <Input name="identifier" required autoComplete="username" />
+              <Input name="identifier" required autoComplete="username" defaultValue={identifier} />
             </label>
             <label className="flex flex-col gap-2 text-sm font-medium">
               Password

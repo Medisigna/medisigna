@@ -10,7 +10,7 @@ export function value(formData: FormData, name: string) {
 }
 
 export function fail(path: string, message: string) {
-  redirect(`${path}?error=${encodeURIComponent(message)}`)
+  redirect(`${path}${path.includes("?") ? "&" : "?"}error=${encodeURIComponent(message)}`)
 }
 
 export function ok(path: string, message = "Perubahan tersimpan.") {

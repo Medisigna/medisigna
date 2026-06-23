@@ -158,7 +158,7 @@ export function UserDashboardShell({
             </form>
           </header>
           <div className="flex-1">{children}</div>
-          <nav className="fixed bottom-[calc(env(safe-area-inset-bottom)+0.75rem)] left-1/2 z-20 w-[calc(100%-1rem)] max-w-md -translate-x-1/2 rounded-xl border bg-card/95 p-2 shadow-lg shadow-foreground/10 backdrop-blur md:hidden">
+          <nav className="fixed bottom-[calc(env(safe-area-inset-bottom)+0.75rem)] left-1/2 z-20 w-[calc(100%-1rem)] max-w-md -translate-x-1/2 rounded-xl border border-border/60 bg-background/65 p-2 shadow-lg shadow-foreground/10 backdrop-blur-xl md:hidden">
             <div className="grid grid-cols-4 gap-1">
               {navItems.map((item) => {
                 const active = isActivePath(pathname, item.href)

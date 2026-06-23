@@ -1,291 +1,623 @@
-# PLAN: Fitur 1 - Realtime Chat Konseling Apoteker
+# PLAN TEKNIS: Fitur Realtime Chat Konseling Apoteker
 
-## Tujuan
+Dokumen ini adalah instruksi implementasi. Ikuti urutan fase. Jangan lompat ke WebSocket/SSE sebelum polling MVP selesai.
 
-Bangun fitur chat realtime antara masyarakat dan apoteker. User harus bisa memilih apoteker yang tersedia, langsung masuk ruang chat, mengirim pesan, upload foto obat/resep, lalu menerima ringkasan konseling dari apoteker.
+## Target MVP
 
-Fitur ini harus mobile-first. Tampilan mobile menjadi prioritas utama. Desktop cukup usable.
+User pasien bisa:
 
-## Prerequisite
+- melihat apoteker terverifikasi,
+- membuka detail apoteker,
+- memulai sesi chat dengan apoteker online,
+- mengirim pesan teks,
+- upload gambar obat/resep,
+- melihat balasan tanpa refresh manual,
+- melihat ringkasan konseling saat sesi ditutup.
 
-- `PLAN_AUTHENTIKASI_ONBOARDING.md` sudah selesai.
-- User masyarakat sudah bisa login.
-- Apoteker sudah bisa login dan punya status verifikasi.
-- Apoteker punya status ketersediaan: `Online`, `Sibuk`, `Offline`.
-- Hanya apoteker `Terverifikasi` yang boleh tampil di list publik.
+Apoteker bisa:
 
-## Role Access
+- melihat daftar sesi miliknya,
+- membuka chat,
+- membalas pesan,
+- melihat patient snapshot,
+- membuat ringkasan,
+- menutup sesi sebagai `COMPLETED` atau `REFERRED`.
 
-**Guest**
+Admin cukup bisa audit lewat data yang sudah tersimpan. UI admin untuk chat tidak wajib MVP.
 
-- Tidak bisa membuka chat.
-- Jika mencoba chat, arahkan ke login.
+## Batasan Implementasi
 
-**Masyarakat**
+- Gunakan polling 2-3 detik untuk MVP realtime.
+- Jangan buat WebSocket/SSE dulu.
+- Jangan tambah dependency realtime.
+- Jangan tambah table baru kecuali schema yang ada terbukti tidak cukup.
+- Gunakan model Prisma yang sudah ada:
+  - `ConsultationSession`
+  - `ConsultationMessage`
+  - `ConsultationAttachment`
+  - `ConsultationSummary`
+- Gunakan enum yang sudah ada:
+  - `ConsultationSessionStatus`
+  - `ConsultationMessageType`
+  - `ConsultationFinalStatus`
+  - `PharmacistAvailabilityStatus`
+  - `PharmacistVerificationStatus`
 
-- Bisa melihat list apoteker terverifikasi.
-- Bisa membuka detail apoteker.
-- Bisa memulai chat dengan apoteker `Online`.
-- Bisa mengirim pesan teks.
-- Bisa upload foto obat/resep.
-- Bisa melihat riwayat chat sendiri.
+## Route yang Dibuat/Diubah
 
-**Apoteker**
+### Pasien
 
-- Bisa melihat chat aktif yang masuk ke dirinya.
-- Bisa membalas pesan.
-- Bisa melihat Patient Snapshot user.
-- Bisa membuat ringkasan konseling.
-- Bisa menutup sesi chat.
+1. `app/(dashboard)/dashboard/pharmacists/page.tsx`
+   - Ubah dari list sederhana menjadi list apoteker terverifikasi.
+   - Query hanya `verificationStatus: "VERIFIED"`.
+   - Tambahkan filter query param opsional:
+     - `?status=all`
+     - `?status=online`
+     - `?status=offline`
+   - Tombol chat:
+     - `ONLINE`: aktif, submit ke server action start session.
+     - `OFFLINE`: disabled, teks `Offline`.
 
-**Admin**
+2. `app/(dashboard)/dashboard/pharmacists/[id]/page.tsx`
+   - Buat halaman detail apoteker.
+   - Ambil `PharmacistProfile` berdasarkan `id`.
+   - Jika tidak ada atau bukan `VERIFIED`, panggil `notFound()`.
+   - Tombol `Mulai Chat` memakai server action start session.
 
-- Bisa melihat daftar sesi chat untuk audit/support.
-- Tidak perlu ikut membalas chat pada MVP.
+3. `app/(dashboard)/dashboard/chat/page.tsx`
+   - Ubah menjadi daftar chat pasien.
+   - Tampilkan sesi milik pasien login.
+   - Urutkan `updatedAt desc`.
+   - Klik item menuju `/dashboard/chat/[sessionId]`.
 
-## State/Status
+4. `app/(dashboard)/dashboard/chat/[sessionId]/page.tsx`
+   - Chat room pasien.
+   - Server component untuk validasi akses dan render shell.
+   - User hanya boleh membuka session dengan `patientId === currentUser.id`.
+   - Pass initial session + messages ke client component.
 
-**Status Apoteker**
+### Apoteker
 
-- `Online`: tombol chat aktif.
-- `Sibuk`: tombol chat tidak aktif atau tampil sebagai `Sedang Sibuk`.
-- `Offline`: tombol chat tidak aktif.
+1. `app/pharmacist/dashboard/chat/page.tsx`
+   - Buat dashboard chat apoteker.
+   - Query sesi dengan `pharmacistId === currentUser.id`.
+   - Pisah tab:
+     - aktif: `ACTIVE`, `WAITING_USER`, `WAITING_PHARMACIST`
+     - selesai: `COMPLETED`, `REFERRED`, `CANCELED`
 
-**Status Sesi Chat**
+2. `app/pharmacist/dashboard/chat/[sessionId]/page.tsx`
+   - Detail chat apoteker.
+   - Apoteker hanya boleh membuka session dengan `pharmacistId === currentUser.id`.
+   - Tampilkan chat, patient snapshot, dan form ringkasan.
 
-- `Aktif`: chat sedang berjalan.
-- `Menunggu User`: apoteker sudah membalas dan menunggu respon user.
-- `Menunggu Apoteker`: user sudah mengirim pesan dan menunggu apoteker.
-- `Selesai`: apoteker sudah membuat ringkasan dan menutup sesi.
-- `Dirujuk ke Faskes`: apoteker menilai user perlu ke dokter/faskes.
-- `Dibatalkan`: sesi dibatalkan oleh user, apoteker, atau admin.
+## Komponen yang Dibuat
 
-**Jenis Pesan**
+### Shared Chat UI
 
-- `Text`: pesan teks biasa.
-- `Image`: foto obat, resep, atau dokumen kesehatan.
-- `System`: pesan otomatis dari sistem.
-- `Summary`: ringkasan konseling dari apoteker.
+Lokasi: `components/consultation/`
 
-## Halaman yang Dibuat
+1. `chat-room.tsx`
+   - Client component.
+   - Props:
+     - `sessionId`
+     - `currentUserId`
+     - `currentUserRole`
+     - `initialMessages`
+     - `sessionStatus`
+   - State:
+     - `messages`
+     - `isSending`
+     - `text`
+     - `file`
+   - Polling:
+     - `setInterval(fetchMessages, 2500)`
+     - berhenti saat component unmount.
+     - tetap polling meski session selesai agar summary terakhir muncul.
+   - Render:
+     - list bubble pesan,
+     - input teks,
+     - input file gambar,
+     - tombol kirim.
+   - Disable input jika session status final:
+     - `COMPLETED`
+     - `REFERRED`
+     - `CANCELED`
+
+2. `message-bubble.tsx`
+   - Props:
+     - `message`
+     - `isOwnMessage`
+   - Tipe render:
+     - `TEXT`: bubble teks.
+     - `IMAGE`: bubble gambar + caption opsional.
+     - `SYSTEM`: centered muted text.
+     - `SUMMARY`: card ringkasan.
+
+3. `session-list.tsx`
+   - Render daftar sesi untuk pasien/apoteker.
+   - Input data sudah diformat dari server component.
+
+4. `patient-snapshot.tsx`
+   - Render data profil pasien.
+   - Jika kosong tampilkan `Belum diisi`.
+
+5. `summary-form.tsx`
+   - Form apoteker.
+   - Submit ke `saveConsultationSummary`.
+   - Field wajib:
+     - `mainProblem`
+     - `education`
+     - `warning`
+     - `followUpAdvice`
+     - `finalStatus`
+
+## Server Actions
+
+Lokasi: `app/actions/consultation/`
+
+### `start-session.ts`
+
+Export: `startConsultationSession(pharmacistProfileId: string)`
+
+Langkah:
+
+1. Ambil user pasien dengan `requireRole("PATIENT")`.
+2. Cari `PharmacistProfile`:
+   - `id === pharmacistProfileId`
+   - `verificationStatus === "VERIFIED"`
+   - include `user`
+3. Jika tidak ada, return error atau `notFound`.
+4. Jika `availabilityStatus !== "ONLINE"`, return error `Apoteker sedang offline.`
+5. Buat `ConsultationSession` dengan:
+   - `patientId: currentUser.id`
+   - `pharmacistId: pharmacistProfile.userId`
+   - `status: "ACTIVE"`
+6. Buat welcome `ConsultationMessage` dalam transaction yang sama:
+   - `sessionId`
+   - `senderId: pharmacistProfile.userId`
+   - `type: "SYSTEM"`
+   - `body: Halo, kamu terhubung dengan Apt. [Nama]. Silakan tulis pertanyaan atau upload foto obat/resep. Apoteker akan menanyakan data tambahan jika diperlukan.`
+7. Redirect ke `/dashboard/chat/${session.id}`.
+
+Gunakan `db.$transaction`.
+
+### `send-message.ts`
+
+Export: `sendConsultationMessage(formData: FormData)`
+
+Input:
+
+- `sessionId`
+- `body`
+- `image` opsional
+
+Langkah:
+
+1. Ambil session user:
+   - pasien boleh jika `session.patientId === currentUser.id`
+   - apoteker boleh jika `session.pharmacistId === currentUser.id`
+2. Tolak jika status final:
+   - `COMPLETED`
+   - `REFERRED`
+   - `CANCELED`
+3. Validasi:
+   - `body.trim()` tidak kosong atau ada image.
+   - image hanya `image/jpeg`, `image/png`, `image/webp`.
+   - ukuran maksimal 5 MB.
+4. Jika ada image:
+   - simpan file lewat helper upload.
+   - buat message type `IMAGE`.
+   - buat `ConsultationAttachment`.
+5. Jika tidak ada image:
+   - buat message type `TEXT`.
+6. Update status session:
+   - jika sender pasien: `WAITING_PHARMACIST`
+   - jika sender apoteker: `WAITING_USER`
+7. Redirect tidak perlu. Return `{ ok: true }`.
+
+### `save-summary.ts`
+
+Export: `saveConsultationSummary(formData: FormData)`
+
+Input:
+
+- `sessionId`
+- `mainProblem`
+- `education`
+- `warning`
+- `followUpAdvice`
+- `finalStatus`: `COMPLETED` atau `REFERRED`
+
+Langkah:
+
+1. Ambil user apoteker dengan `requireRole("PHARMACIST")`.
+2. Cari session dengan:
+   - `id === sessionId`
+   - `pharmacistId === currentUser.id`
+3. Tolak jika tidak ada.
+4. Validasi semua field wajib.
+5. Upsert `ConsultationSummary` berdasarkan `sessionId`.
+6. Buat message type `SUMMARY` dengan body JSON string:
+   - `mainProblem`
+   - `education`
+   - `warning`
+   - `followUpAdvice`
+   - `finalStatus`
+7. Update session:
+   - `status = finalStatus`
+   - `endedAt = new Date()`
+8. Return `{ ok: true }`.
+
+### `cancel-session.ts`
+
+Export: `cancelConsultationSession(sessionId: string)`
+
+Langkah:
+
+1. Current user harus pasien pemilik session atau apoteker pemilik session.
+2. Tolak jika session sudah final.
+3. Update:
+   - `status: "CANCELED"`
+   - `endedAt: new Date()`
+4. Buat `SYSTEM` message: `Sesi dibatalkan.`
+
+## API Route untuk Polling
+
+### `app/api/consultation/sessions/[sessionId]/messages/route.ts`
+
+Method: `GET`
+
+Query param opsional:
+
+- `after=<messageId>` atau `afterTime=<ISO string>`
+
+Implementasi MVP paling sederhana:
+
+1. Ambil current session user.
+2. Validasi user adalah pasien/apoteker dalam session.
+3. Query messages:
+   - `where: { sessionId }`
+   - include attachments
+   - orderBy `createdAt asc`
+4. Return JSON:
+
+```ts
+{
+  session: {
+    id: string
+    status: string
+  }
+  messages: Array<{
+    id: string
+    senderId: string
+    type: string
+    body: string | null
+    createdAt: string
+    attachments: Array<{
+      id: string
+      fileUrl: string
+      fileType: string
+      fileName: string
+    }>
+  }>
+}
+```
+
+Untuk MVP, boleh return semua messages setiap polling. Optimasi `afterTime` dibuat setelah jumlah pesan terasa berat.
+
+## Upload File
+
+Helper: `lib/consultation-upload.ts`
+
+Fungsi:
+
+```ts
+export async function saveConsultationImage(file: File): Promise<{
+  fileUrl: string
+  fileType: string
+  fileName: string
+}>
+```
+
+MVP lokal:
+
+- Simpan ke `public/uploads/consultations`.
+- Nama file: `${Date.now()}-${crypto.randomUUID()}.${ext}`.
+- Return `fileUrl` seperti `/uploads/consultations/name.webp`.
+
+Catatan deployment:
+
+- Jika target deploy serverless/Vercel, ganti helper ini ke object storage.
+- Jangan ubah caller. Cukup ubah isi helper upload.
+
+## Query Utama
 
 ### List Apoteker
 
-Yang harus tampil:
+```ts
+db.pharmacistProfile.findMany({
+  where: {
+    verificationStatus: "VERIFIED",
+    ...(statusFilter ? { availabilityStatus: statusFilter } : {}),
+  },
+  include: { user: true },
+  orderBy: [
+    { availabilityStatus: "asc" },
+    { updatedAt: "desc" },
+  ],
+})
+```
 
-- Judul halaman: `Pilih Apoteker`.
-- List apoteker `Terverifikasi`.
-- Filter status sederhana: `Semua`, `Online`, `Sibuk`, `Offline`.
-- Card apoteker.
+Mapping filter:
 
-Isi card apoteker:
+- `online` -> `ONLINE`
+- `offline` -> `OFFLINE`
+- `all` atau kosong -> tanpa filter status
 
-- Foto.
-- Nama.
-- Gelar.
-- Status ketersediaan.
-- Topik bantuan.
-- Bio singkat maksimal 2 baris.
-- Tombol `Chat`.
+### Session Pasien
 
-Behavior:
+```ts
+db.consultationSession.findMany({
+  where: { patientId: user.id },
+  include: {
+    pharmacist: { include: { pharmacistProfile: true } },
+    messages: { orderBy: { createdAt: "desc" }, take: 1 },
+    summary: true,
+  },
+  orderBy: { updatedAt: "desc" },
+})
+```
 
-- Apoteker `Online`: tombol `Chat` aktif.
-- Apoteker `Sibuk`: tombol disabled dengan teks `Sedang Sibuk`.
-- Apoteker `Offline`: tombol disabled dengan teks `Offline`.
-- Klik card membuka detail apoteker.
-- Hanya apoteker `Terverifikasi` yang tampil.
+### Session Apoteker
 
-### Detail Apoteker
+```ts
+db.consultationSession.findMany({
+  where: { pharmacistId: user.id },
+  include: {
+    patient: { include: { patientProfile: true } },
+    messages: { orderBy: { createdAt: "desc" }, take: 1 },
+    summary: true,
+  },
+  orderBy: { updatedAt: "desc" },
+})
+```
 
-Yang harus tampil:
+### Detail Session
 
-- Foto.
-- Nama.
-- Gelar.
-- Status ketersediaan.
-- Bio.
-- Topik bantuan.
-- Lokasi praktik.
-- Jam layanan.
-- Pengalaman singkat.
-- Badge `Terverifikasi`.
-- Tombol `Mulai Chat`.
+```ts
+db.consultationSession.findUnique({
+  where: { id: sessionId },
+  include: {
+    patient: { include: { patientProfile: true } },
+    pharmacist: { include: { pharmacistProfile: true } },
+    messages: {
+      include: { attachments: true },
+      orderBy: { createdAt: "asc" },
+    },
+    summary: true,
+  },
+})
+```
 
-Behavior:
+Setelah query, validasi akses manual berdasarkan `patientId` atau `pharmacistId`.
 
-- Tombol `Mulai Chat` aktif hanya jika apoteker `Online`.
-- Jika user belum login, tombol mengarah ke login.
-- Jika apoteker `Sibuk` atau `Offline`, tampilkan pesan bahwa apoteker belum tersedia.
+## Status Transition
 
-### Chat Room Masyarakat
+Gunakan aturan ini di server action, bukan di UI saja.
 
-Yang harus tampil:
+| Action | Role | From | To |
+| --- | --- | --- | --- |
+| start session | PATIENT | none | ACTIVE |
+| patient sends message | PATIENT | ACTIVE, WAITING_USER, WAITING_PHARMACIST | WAITING_PHARMACIST |
+| pharmacist sends message | PHARMACIST | ACTIVE, WAITING_USER, WAITING_PHARMACIST | WAITING_USER |
+| pharmacist saves completed summary | PHARMACIST | ACTIVE, WAITING_USER, WAITING_PHARMACIST | COMPLETED |
+| pharmacist saves referred summary | PHARMACIST | ACTIVE, WAITING_USER, WAITING_PHARMACIST | REFERRED |
+| cancel session | PATIENT/PHARMACIST | ACTIVE, WAITING_USER, WAITING_PHARMACIST | CANCELED |
 
-- Header berisi nama apoteker, foto kecil, dan status.
-- Area pesan dengan bubble chat.
-- Input pesan teks.
-- Tombol upload foto.
-- Tombol kirim.
-- Indikator status sesi.
+Final status:
 
-Behavior:
+- `COMPLETED`
+- `REFERRED`
+- `CANCELED`
 
-- Saat chat baru dibuat, sistem otomatis mengirim welcome message.
-- Welcome message: `Halo, kamu terhubung dengan Apt. [Nama]. Silakan tulis pertanyaan atau upload foto obat/resep. Apoteker akan menanyakan data tambahan jika diperlukan.`
-- User bisa mengirim pesan teks.
-- User bisa upload foto obat/resep.
-- Pesan baru muncul tanpa refresh halaman.
-- Jika sesi sudah `Selesai`, input pesan dinonaktifkan.
-- Jika apoteker menutup sesi, ringkasan konseling tampil sebagai kartu khusus.
+Final status tidak boleh menerima pesan baru.
 
-### Dashboard Apoteker - Chat
+## Validasi Akses
 
-Yang harus tampil:
+Selalu validasi di server.
 
-- Tab `Chat Aktif`.
-- Tab `Selesai`.
-- List chat dengan nama user, pesan terakhir, waktu terakhir, dan status.
-- Detail chat saat sesi dipilih.
-- Patient Snapshot.
-- Form ringkasan konseling.
+Pasien:
 
-Behavior:
+- `requireRole("PATIENT")`
+- hanya session dengan `patientId === user.id`
 
-- Apoteker bisa membuka chat aktif.
-- Apoteker bisa membalas pesan.
-- Apoteker bisa melihat Patient Snapshot di sisi/detail chat.
-- Apoteker bisa membuat ringkasan konseling.
-- Setelah ringkasan disimpan, apoteker bisa menandai sesi `Selesai`.
+Apoteker:
 
-### Patient Snapshot
+- `requireRole("PHARMACIST")`
+- hanya session dengan `pharmacistId === user.id`
+- summary hanya boleh dibuat apoteker pemilik session
 
-Yang harus tampil:
+Guest:
 
-- Nama user.
-- Umur atau tanggal lahir.
-- Nomor HP.
-- Jenis kelamin.
-- Alamat.
-- Catatan jika data profil belum lengkap.
+- route dashboard sudah perlu login.
+- untuk public detail apoteker di luar dashboard, tombol chat arahkan ke `/login`.
 
-Behavior:
+## UI Detail
 
-- Snapshot hanya dibaca apoteker.
-- Jika data belum lengkap, tampilkan `Belum diisi`.
-- Apoteker tetap bisa bertanya langsung di chat jika data kurang.
+Gunakan copy Bahasa Indonesia.
 
-### Ringkasan Konseling
+### Chat Room Mobile
 
-Field wajib:
+Layout:
 
-- Masalah utama.
-- Edukasi apoteker.
-- Peringatan.
-- Saran tindak lanjut.
-- Status akhir.
+- header sticky:
+  - nama lawan chat,
+  - status session,
+  - tombol kembali.
+- message list:
+  - `flex flex-col gap-3`
+  - bubble kanan untuk pesan sendiri.
+  - bubble kiri untuk pesan lawan.
+  - system message centered.
+- composer sticky bottom:
+  - textarea 1-4 baris,
+  - file input gambar,
+  - button kirim.
 
-Status akhir:
+Jangan pakai table untuk chat.
 
-- `Selesai`.
-- `Dirujuk ke Faskes`.
+### Ringkasan Card
 
-Behavior:
+Tampilkan field:
 
-- Ringkasan hanya bisa dibuat oleh apoteker.
-- Setelah ringkasan dibuat, tampilkan sebagai kartu di chat user.
-- Setelah sesi selesai, chat masuk ke riwayat.
+- Masalah utama
+- Edukasi
+- Peringatan
+- Saran tindak lanjut
+- Status akhir
 
-### Riwayat Chat
+Jika `finalStatus === "REFERRED"`, tampilkan badge `Dirujuk ke Faskes`.
 
-Yang harus tampil:
+## Error Handling
 
-- List sesi chat user.
-- Nama apoteker.
-- Status akhir.
-- Tanggal sesi.
-- Preview ringkasan jika ada.
+Server action return error string untuk validasi user-facing.
 
-Behavior:
+Pesan error minimal:
 
-- User hanya bisa melihat riwayat miliknya sendiri.
-- Klik riwayat membuka detail chat read-only jika sesi sudah selesai.
+- `Apoteker sedang offline.`
+- `Sesi tidak ditemukan.`
+- `Kamu tidak punya akses ke sesi ini.`
+- `Sesi sudah selesai.`
+- `Pesan tidak boleh kosong.`
+- `File harus berupa gambar.`
+- `Ukuran gambar maksimal 5 MB.`
+- `Ringkasan wajib diisi lengkap.`
 
-## Field Form
+Client:
 
-**Kirim Pesan**
+- tampilkan toast loading/success/error untuk submit.
+- jika polling gagal, jangan crash. Simpan error singkat atau diamkan dan coba polling berikutnya.
 
-- Isi pesan: wajib jika tidak ada foto.
-- Foto: opsional jika ada isi pesan, wajib jika isi pesan kosong.
+## Urutan Implementasi
 
-Validasi:
+### Fase 1: Session dan List Apoteker
 
-- Tidak boleh mengirim pesan kosong.
-- File upload hanya gambar untuk MVP.
-- Jika upload gagal, tampilkan error dan jangan kirim pesan.
+1. Update list apoteker dengan filter online/offline.
+2. Buat detail apoteker.
+3. Buat `startConsultationSession`.
+4. Pastikan session + welcome message terbentuk.
+5. Redirect ke chat room.
 
-**Ringkasan Konseling**
+Acceptance:
 
-- Masalah utama: wajib.
-- Edukasi apoteker: wajib.
-- Peringatan: wajib.
-- Saran tindak lanjut: wajib.
-- Status akhir: wajib.
+- user pasien bisa mulai chat dengan apoteker online.
+- apoteker offline tidak bisa dibuatkan session.
+- welcome message tersimpan.
 
-Validasi:
+### Fase 2: Chat Pasien
 
-- Semua field wajib harus terisi.
-- Status akhir hanya boleh `Selesai` atau `Dirujuk ke Faskes`.
+1. Buat route `/dashboard/chat/[sessionId]`.
+2. Buat `ChatRoom`.
+3. Buat API polling messages.
+4. Buat `sendConsultationMessage` teks.
+5. Polling menampilkan pesan baru tanpa refresh.
 
-## Behavior Utama
+Acceptance:
 
-- User tidak mengisi form intake sebelum chat.
-- Apoteker yang bertanya langsung jika data pasien kurang.
-- Sistem memakai data profil user sebagai Patient Snapshot.
-- Chat baru hanya bisa dibuat dengan apoteker `Online`.
-- Satu user boleh punya lebih dari satu sesi chat, tapi tidak perlu membatasi jumlah sesi pada MVP.
-- Realtime berarti pesan muncul tanpa refresh halaman.
-- Jika teknologi realtime belum siap, fallback MVP boleh polling berkala, selama user tidak perlu refresh manual.
+- pasien bisa kirim pesan.
+- pesan muncul lagi setelah reload.
+- input disabled saat session final.
 
-## Acceptance Criteria
+### Fase 3: Chat Apoteker
 
-- Guest yang klik chat diarahkan ke login.
-- User login bisa melihat list apoteker terverifikasi.
-- Apoteker belum terverifikasi tidak tampil di list publik.
-- Apoteker `Online` punya tombol chat aktif.
-- Apoteker `Sibuk` dan `Offline` tidak bisa menerima chat baru.
-- User bisa membuat sesi chat dengan apoteker online.
-- Sistem mengirim welcome message otomatis saat sesi dibuat.
-- User bisa mengirim pesan teks.
-- User bisa upload foto obat/resep.
-- Apoteker bisa membaca dan membalas pesan.
-- Apoteker bisa melihat Patient Snapshot.
-- Apoteker bisa membuat ringkasan konseling.
-- Setelah ringkasan dibuat, sesi bisa ditandai selesai.
-- User bisa melihat ringkasan dan riwayat chat.
+1. Buat `/pharmacist/dashboard/chat`.
+2. Buat `/pharmacist/dashboard/chat/[sessionId]`.
+3. Reuse `ChatRoom`.
+4. Tambahkan patient snapshot.
+5. Apoteker bisa balas pesan.
 
-## Test Scenario
+Acceptance:
 
-- Guest membuka detail apoteker lalu klik chat, pastikan diarahkan ke login.
-- User login membuka list apoteker, pastikan hanya apoteker `Terverifikasi` yang tampil.
-- Apoteker `Online` tampil dengan tombol `Chat` aktif.
-- Apoteker `Sibuk` tampil dengan tombol disabled.
-- Apoteker `Offline` tampil dengan tombol disabled.
-- User klik `Chat` ke apoteker online, pastikan chat room dibuat.
-- Saat chat room dibuat, pastikan welcome message muncul.
-- User kirim pesan teks, pastikan pesan tampil di chat apoteker.
-- User upload foto resep, pastikan foto tampil di chat apoteker.
-- Apoteker membalas pesan, pastikan pesan tampil di chat user.
-- Apoteker membuka Patient Snapshot, pastikan data profil user tampil.
-- Apoteker membuat ringkasan konseling, pastikan kartu ringkasan tampil di chat user.
-- Apoteker menandai sesi selesai, pastikan input chat user dinonaktifkan.
-- User membuka riwayat, pastikan sesi selesai muncul.
+- apoteker hanya melihat session miliknya.
+- balasan apoteker muncul di chat pasien lewat polling.
 
-## Assumptions
+### Fase 4: Upload Gambar
 
-- Konseling gratis selama MVP.
-- User tidak wajib mengisi form intake sebelum chat.
-- Patient Snapshot berasal dari profil masyarakat yang sudah dibuat di fitur auth.
-- Upload file MVP hanya gambar.
-- Voice call, video call, rating, pembayaran, auto matching, dan bot klinis tidak dibuat di fitur ini.
-- Reminder obat dari chat dibuat di fitur berikutnya.
+1. Buat helper `saveConsultationImage`.
+2. Tambahkan validasi file di `sendConsultationMessage`.
+3. Simpan attachment.
+4. Render gambar di bubble.
+
+Acceptance:
+
+- pasien/apoteker bisa kirim gambar.
+- gambar tampil di kedua sisi chat.
+- file non-image ditolak.
+- file lebih dari 5 MB ditolak.
+
+### Fase 5: Ringkasan dan Tutup Sesi
+
+1. Buat `summary-form`.
+2. Buat `saveConsultationSummary`.
+3. Render message `SUMMARY` sebagai card.
+4. Set session final dan `endedAt`.
+5. Disable composer.
+
+Acceptance:
+
+- apoteker bisa simpan ringkasan.
+- user melihat kartu ringkasan.
+- session pindah ke riwayat/selesai.
+- pesan baru ditolak setelah final.
+
+## Test Manual
+
+Jalankan minimal skenario ini:
+
+1. Pasien buka list apoteker, hanya `VERIFIED` tampil.
+2. Filter `Online` hanya menampilkan `ONLINE`.
+3. Pasien klik chat apoteker `OFFLINE`, harus ditolak.
+4. Pasien klik chat apoteker `ONLINE`, session dibuat.
+5. Welcome message muncul.
+6. Pasien kirim pesan teks.
+7. Apoteker membuka dashboard chat dan melihat pesan.
+8. Apoteker balas pesan.
+9. Pasien melihat balasan tanpa refresh manual.
+10. Pasien upload gambar valid.
+11. Upload PDF ditolak.
+12. Upload gambar lebih dari 5 MB ditolak.
+13. Apoteker melihat patient snapshot.
+14. Apoteker simpan ringkasan `COMPLETED`.
+15. Pasien melihat kartu ringkasan.
+16. Composer pasien disabled.
+17. Server action menolak pesan baru ke session final.
+18. Pasien tidak bisa membuka session milik pasien lain.
+19. Apoteker tidak bisa membuka session milik apoteker lain.
+
+## Checklist Kode
+
+- Semua akses session divalidasi di server.
+- Semua submit mutation memakai server action.
+- Polling API tidak mengembalikan session milik user lain.
+- Query message selalu `orderBy createdAt asc`.
+- Status final dicek sebelum membuat message.
+- Upload file validasi MIME dan size.
+- UI copy Bahasa Indonesia.
+- Tidak ada dependency realtime baru.
+- Tidak ada WebSocket/SSE di MVP.
+- Tidak ada logic role hanya di client.
+
+## Yang Tidak Dibuat di MVP
+
+- WebSocket/SSE.
+- Typing indicator.
+- Read receipt.
+- Push notification chat.
+- Pembayaran.
+- Rating apoteker.
+- Auto matching apoteker.
+- Bot klinis.
+- Voice/video call.
+- Reminder obat dari ringkasan.
+
+Reminder dibuat di fitur berikutnya.

@@ -6,12 +6,16 @@ import { redirect } from "next/navigation"
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { homeForRole } from "@/lib/session"
-import { emailForLogin, fail, requireText } from "../shared"
+import { emailForLogin, fail, value } from "../shared"
 
 export async function login(formData: FormData) {
-  const path = "/login"
-  const identifier = requireText(formData, "identifier", "Email atau nomor WhatsApp", path)
-  const password = requireText(formData, "password", "Password", path)
+  const identifier = value(formData, "identifier")
+  const path = `/login?identifier=${encodeURIComponent(identifier)}`
+  if (!identifier) fail("/login", "Email atau nomor WhatsApp wajib diisi.")
+
+  const password = value(formData, "password")
+  if (!password) fail(path, "Password wajib diisi.")
+
   const email = await emailForLogin(identifier)
 
   if (!email) fail(path, "Email, nomor WhatsApp, atau password salah.")
