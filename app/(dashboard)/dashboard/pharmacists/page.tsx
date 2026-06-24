@@ -6,8 +6,8 @@ import {
   ShieldCheckIcon,
 } from "lucide-react"
 
-import { startConsultationSession } from "@/app/actions/consultation/start-session"
 import { AppMessage } from "@/components/app-message"
+import { StartChatPrompt } from "@/components/consultation/start-chat-prompt"
 import { Avatar, AvatarBadge, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
@@ -71,31 +71,34 @@ export default async function PharmacistListPage({ searchParams }: PageProps) {
   })) as PharmacistCard[]
 
   return (
-    <main className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-5 md:px-6 md:py-8">
-      <AppMessage error={params?.error} success={params?.success} />
+    <main className="min-h-full bg-muted-foreground/5">
+      <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-5 md:px-6 md:py-8">
+        <AppMessage error={params?.error} success={params?.success} />
 
-      <section className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <h1 className="text-2xl font-semibold tracking-tight">Pilih Apoteker</h1>
-        <nav
-          aria-label="Filter ketersediaan apoteker"
-          className="flex w-fit gap-1 rounded-xl bg-muted p-1"
-        >
-          {Object.entries(statusLabels).map(([key, label]) => (
-            <Button key={key} asChild variant={key === status ? "default" : "ghost"} size="sm">
-              <Link
-                href={
-                  key === "all" ? "/dashboard/pharmacists" : `/dashboard/pharmacists?status=${key}`
-                }
-                aria-current={key === status ? "page" : undefined}
-              >
-                {label}
-              </Link>
-            </Button>
-          ))}
-        </nav>
-      </section>
+        <section className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <h1 className="text-2xl font-semibold tracking-tight">Pilih Apoteker</h1>
+          <nav
+            aria-label="Filter ketersediaan apoteker"
+            className="flex w-fit gap-1 rounded-xl bg-muted p-1"
+          >
+            {Object.entries(statusLabels).map(([key, label]) => (
+              <Button key={key} asChild variant={key === status ? "default" : "ghost"} size="sm">
+                <Link
+                  href={
+                    key === "all"
+                      ? "/dashboard/pharmacists"
+                      : `/dashboard/pharmacists?status=${key}`
+                  }
+                  aria-current={key === status ? "page" : undefined}
+                >
+                  {label}
+                </Link>
+              </Button>
+            ))}
+          </nav>
+        </section>
 
-      <div className="grid gap-4 xl:grid-cols-2">
+        <div className="grid gap-4 xl:grid-cols-2">
         {pharmacists.length ? (
           pharmacists.map((profile) => {
             const isOnline = profile.availabilityStatus === "ONLINE"
@@ -103,15 +106,15 @@ export default async function PharmacistListPage({ searchParams }: PageProps) {
             return (
               <Card
                 key={profile.id}
-                className="rounded-3xl py-5 transition-shadow duration-200 hover:shadow-md"
+                className="rounded-3xl bg-card py-5 shadow-none ring-0 transition-shadow duration-200 hover:shadow-md"
               >
                 <CardHeader className="items-center">
                   <div className="flex items-center gap-3">
-                    <div className="flex size-10 items-center justify-center rounded-xl bg-muted text-muted-foreground">
+                    {/* <div className="flex size-10 items-center justify-center rounded-xl bg-muted text-muted-foreground">
                       <MessageCircleIcon className="size-4" />
-                    </div>
+                    </div> */}
                     <CardTitle className="text-base text-muted-foreground">
-                      Chat dengan apoteker
+                      Apoteker
                     </CardTitle>
                   </div>
                   <CardAction>
@@ -119,7 +122,7 @@ export default async function PharmacistListPage({ searchParams }: PageProps) {
                       className={cn(
                         "rounded-xl border px-3 py-1.5 text-xs font-medium",
                         isOnline
-                          ? "border-primary/30 text-primary"
+                          ? "border-green-500 text-green-500"
                           : "border-border text-muted-foreground"
                       )}
                     >
@@ -138,10 +141,10 @@ export default async function PharmacistListPage({ searchParams }: PageProps) {
                     <AvatarFallback className="rounded-2xl text-xl font-semibold">
                       {initials(profile.user.name)}
                     </AvatarFallback>
-                    <AvatarBadge
+                    {/* <AvatarBadge
                       className={isOnline ? "bg-primary" : "bg-muted-foreground"}
                       aria-label={availabilityLabels[profile.availabilityStatus]}
-                    />
+                    /> */}
                   </Avatar>
 
                   <div className="flex min-w-0 flex-col">
@@ -166,11 +169,16 @@ export default async function PharmacistListPage({ searchParams }: PageProps) {
 
                     <div className="mt-auto pt-4">
                       {isOnline ? (
-                        <form action={startConsultationSession.bind(null, profile.id)}>
-                          <Button type="submit" className="w-full">
-                            Mulai Chat
-                          </Button>
-                        </form>
+                        <StartChatPrompt
+                          pharmacistId={profile.id}
+                          name={profile.user.name}
+                          title={profile.title}
+                          image={profile.profilePhotoUrl ?? profile.user.image ?? undefined}
+                          bio={profile.bio}
+                          topics={profile.topics}
+                          practiceLocation={profile.practiceLocation}
+                          serviceHours={profile.serviceHours}
+                        />
                       ) : (
                         <Button disabled className="w-full">
                           Apoteker Offline
@@ -183,7 +191,7 @@ export default async function PharmacistListPage({ searchParams }: PageProps) {
             )
           })
         ) : (
-          <Card className="md:col-span-2 xl:col-span-3">
+          <Card className="bg-card shadow-none ring-0 md:col-span-2 xl:col-span-3">
             <CardContent className="flex flex-col items-center gap-4 py-8 text-center">
               <div className="flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
                 {status === "online" ? (
@@ -206,6 +214,7 @@ export default async function PharmacistListPage({ searchParams }: PageProps) {
             </CardContent>
           </Card>
         )}
+        </div>
       </div>
     </main>
   )
