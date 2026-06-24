@@ -21,6 +21,7 @@
 - Before creating or changing any shadcn/ui-based UI, read and follow `.agents/skills/shadcn/SKILL.md`.
 - Apply both skills together for dashboard, forms, tables, navigation, empty states, loading states, responsive layouts, and visual polish.
 - Do not start UI implementation until the relevant project-local UI skills have been checked.
+- Design UI with a modern, clean look and a little fun: clear hierarchy, calm spacing, crisp controls, and subtle playful accents without making the interface noisy.
 - Use Bahasa Indonesia for user-facing UI copy, labels, messages, empty states, and dashboard text.
 - Keep UI copy concise. Do not add descriptive or explanatory text in the interface unless it is necessary for the user to complete the task.
 - Keep the codebase in English: file names, route names, variables, functions, types, database fields, comments, and technical identifiers should remain English.

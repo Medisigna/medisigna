@@ -1,4 +1,3 @@
-import { logout } from "@/app/actions/auth/logout"
 import { savePharmacistProfile } from "@/app/actions/pharmacist/save-profile"
 import { AppMessage } from "@/components/app-message"
 import { Button } from "@/components/ui/button"
@@ -23,8 +22,8 @@ export default async function PharmacistDashboardPage({ searchParams }: PageProp
   const params = await searchParams
 
   return (
-    <main className="mx-auto flex min-h-svh max-w-3xl flex-col gap-6 px-6 py-8">
-      <header className="flex flex-wrap items-start justify-between gap-3">
+    <main className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-5 sm:px-6 sm:py-8">
+      <header>
         <div>
           <p className="text-sm text-muted-foreground">Dashboard Apoteker</p>
           <h1 className="text-2xl font-semibold">{user.name}</h1>
@@ -32,11 +31,6 @@ export default async function PharmacistDashboardPage({ searchParams }: PageProp
             {verificationLabels[profile?.verificationStatus ?? "PENDING"]}
           </p>
         </div>
-        <form action={logout}>
-          <Button variant="outline" type="submit">
-            Keluar
-          </Button>
-        </form>
       </header>
 
       <form action={savePharmacistProfile} className="flex flex-col gap-5 rounded-md border bg-card p-5">

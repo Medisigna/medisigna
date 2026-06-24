@@ -5,7 +5,7 @@ import { requireRole } from "@/lib/session"
 function toSessionListItem(session: any) {
   return {
     id: session.id,
-    name: session.pharmacist.name,
+    name: session.patient.name,
     status: session.status,
     lastMessage:
       session.messages[0]?.type === "SUMMARY"
@@ -13,16 +13,16 @@ function toSessionListItem(session: any) {
         : session.messages[0]?.body ??
           (session.messages[0]?.type === "IMAGE" ? "Gambar" : "Belum ada pesan."),
     updatedAt: session.updatedAt.toISOString(),
-    unreadCount: session.patientUnreadCount,
+    unreadCount: session.pharmacistUnreadCount,
   }
 }
 
-export default async function ChatPage() {
-  const user = await requireRole("PATIENT")
+export default async function PharmacistChatPage() {
+  const user = await requireRole("PHARMACIST")
   const sessions = await db.consultationSession.findMany({
-    where: { patientId: user.id },
+    where: { pharmacistId: user.id },
     include: {
-      pharmacist: { include: { pharmacistProfile: true } },
+      patient: { include: { patientProfile: true } },
       messages: { orderBy: { createdAt: "desc" }, take: 1 },
       summary: true,
     },
@@ -32,10 +32,12 @@ export default async function ChatPage() {
   return (
     <main className="mx-auto grid h-[calc(100svh-9.5rem)] w-full min-w-0 max-w-6xl overflow-hidden gap-4 px-3 py-4 sm:px-4 md:h-[calc(100svh-3.5rem)] md:px-6 md:py-8 lg:grid-cols-[340px_minmax(0,1fr)]">
       <section className="flex min-h-0 min-w-0 flex-col gap-4 rounded-xl border bg-card p-3 sm:p-4 lg:rounded-2xl lg:p-6">
-        <div>
-          <h1 className="text-xl font-semibold">Riwayat Chat</h1>
-        </div>
-        <SessionList filterable sessions={sessions.map(toSessionListItem)} />
+        <h1 className="text-xl font-semibold">Riwayat Chat</h1>
+        <SessionList
+          filterable
+          basePath="/pharmacist/dashboard/chat"
+          sessions={sessions.map(toSessionListItem)}
+        />
       </section>
 
       <section className="hidden min-h-0 items-center justify-center rounded-md border bg-card p-6 text-center text-sm text-muted-foreground lg:flex">
