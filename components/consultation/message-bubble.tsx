@@ -1,4 +1,10 @@
-import { CheckCheckIcon, LoaderCircleIcon, SparklesIcon } from "lucide-react"
+import {
+  CheckCheckIcon,
+  ClipboardCheckIcon,
+  HeartPulseIcon,
+  LoaderCircleIcon,
+  SparklesIcon,
+} from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
@@ -114,18 +120,49 @@ function SummaryCard({ body }: { body: string | null }) {
       .filter(Boolean)
       .join("\n\n")
   const status = summary.status ?? summary.finalStatus
+  const isReferred = status === "REFERRED"
 
   return (
-    <article className="rounded-md border bg-card p-4 text-sm">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h3 className="font-semibold">{title || "Ringkasan Konseling"}</h3>
-        {status === "REFERRED" ? (
-          <span className="rounded-md bg-secondary px-2 py-1 text-xs text-secondary-foreground">
-            Dirujuk ke Faskes
-          </span>
-        ) : null}
+    <article className="relative isolate overflow-hidden rounded-2xl border border-primary/20 bg-card text-sm shadow-sm">
+      <div className="absolute -top-10 -right-8 -z-10 size-28 rounded-full bg-primary/10 blur-2xl" />
+      <div className="flex items-start gap-3 border-b border-primary/10 bg-primary/5 p-4 sm:p-5">
+        <div className="flex size-11 shrink-0 rotate-3 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
+          <ClipboardCheckIcon className="size-5" aria-hidden="true" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="mb-1 flex items-center gap-1.5 text-xs font-medium tracking-wide text-primary uppercase">
+            <SparklesIcon className="size-3" aria-hidden="true" />
+            Ringkasan konsultasi
+          </p>
+          <h3 className="text-base leading-snug font-semibold sm:text-lg">
+            {title || "Ringkasan Konseling"}
+          </h3>
+        </div>
+        <span className="shrink-0 rounded-full border bg-background/80 px-2.5 py-1 text-xs font-medium shadow-xs">
+          {isReferred ? "Perlu rujukan" : "Selesai"}
+        </span>
       </div>
-      <p className="mt-3 whitespace-pre-wrap text-muted-foreground">{description}</p>
+
+      <div className="flex flex-col gap-4 p-4 sm:p-5">
+        <div className="rounded-xl bg-muted/50 p-4">
+          <p className="mb-2 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+            Catatan apoteker
+          </p>
+          <p className="whitespace-pre-wrap leading-relaxed text-foreground">
+            {description || "Tidak ada catatan tambahan."}
+          </p>
+        </div>
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <span className="flex size-7 items-center justify-center rounded-full bg-primary/10 text-primary">
+            <HeartPulseIcon className="size-3.5" aria-hidden="true" />
+          </span>
+          <span>
+            {isReferred
+              ? "Lanjutkan pemeriksaan ke fasilitas kesehatan."
+              : "Konsultasi telah ditutup oleh apoteker."}
+          </span>
+        </div>
+      </div>
     </article>
   )
 }

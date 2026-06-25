@@ -9,6 +9,11 @@ export function value(formData: FormData, name: string) {
   return String(formData.get(name) ?? "").trim()
 }
 
+export function safeCallbackPath(formData: FormData, fallback: string) {
+  const path = value(formData, "callbackUrl")
+  return path.startsWith("/") && !path.startsWith("//") ? path : fallback
+}
+
 export function fail(path: string, message: string) {
   redirect(`${path}${path.includes("?") ? "&" : "?"}error=${encodeURIComponent(message)}`)
 }

@@ -1,54 +1,16 @@
 import Link from "next/link"
-import {
-  ArrowRightIcon,
-  ClockIcon,
-  MessageCircleIcon,
-  PillIcon,
-  SearchIcon,
-  ShieldCheckIcon,
-} from "lucide-react"
+import { ArrowRightIcon, ShieldCheckIcon } from "lucide-react"
 
+import { StartChatPrompt } from "@/components/consultation/start-chat-prompt"
 import { DashboardPromoCarousel } from "@/components/dashboard-promo-carousel"
-import { Button } from "@/components/ui/button"
 import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+  PharmacistCard,
+  type PharmacistCardData,
+} from "@/components/pharmacists/pharmacist-card"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
 import { db } from "@/lib/db"
 import { requireRole } from "@/lib/session"
-import { cn } from "@/lib/utils"
-
-const sessionStatusLabels: Record<string, string> = {
-  ACTIVE: "Aktif",
-  WAITING_USER: "Menunggu kamu",
-  WAITING_PHARMACIST: "Menunggu apoteker",
-  COMPLETED: "Selesai",
-  REFERRED: "Dirujuk",
-  CANCELED: "Dibatalkan",
-}
-
-type PharmacistCard = {
-  id: string
-  title: string
-  bio: string
-  practiceLocation: string
-  serviceHours: string
-  availabilityStatus: string
-  user: { name: string }
-}
-
-type SessionPreview = {
-  id: string
-  status: string
-  updatedAt: Date
-  pharmacist: { name: string }
-  summary: { mainProblem: string } | null
-}
 
 function greeting() {
   const hour = new Date().getHours()
@@ -57,43 +19,6 @@ function greeting() {
   if (hour < 15) return "Selamat siang"
   if (hour < 18) return "Selamat sore"
   return "Selamat malam"
-}
-
-function formatDate(date: Date) {
-  return new Intl.DateTimeFormat("id-ID", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  }).format(date)
-}
-
-function StatusPill({
-  children,
-  tone = "neutral",
-}: {
-  children: React.ReactNode
-  tone?: "neutral" | "primary" | "muted" | "danger"
-}) {
-  return (
-    <span
-      className={cn(
-        "inline-flex w-fit items-center rounded-md border px-2 py-0.5 text-xs font-medium",
-        tone === "primary" && "border-primary/20 bg-primary/10 text-primary",
-        tone === "muted" && "border-border bg-muted text-muted-foreground",
-        tone === "danger" && "border-destructive/20 bg-destructive/10 text-destructive",
-        tone === "neutral" && "border-border bg-secondary text-secondary-foreground"
-      )}
-    >
-      {children}
-    </span>
-  )
-}
-
-function sessionTone(status: string): React.ComponentProps<typeof StatusPill>["tone"] {
-  if (status === "ACTIVE" || status === "WAITING_USER") return "primary"
-  if (status === "CANCELED") return "danger"
-  if (status === "COMPLETED") return "muted"
-  return "neutral"
 }
 
 function SectionHeading({
@@ -147,30 +72,20 @@ function EmptyState({
 
 export default async function HomePage() {
   const user = await requireRole("PATIENT")
-  const [pharmacists, sessions] = (await Promise.all([
-    db.pharmacistProfile.findMany({
-      where: { verificationStatus: "VERIFIED" },
-      include: { user: true },
-      take: 3,
-      orderBy: { updatedAt: "desc" },
-    }),
-    db.consultationSession.findMany({
-      where: { patientId: user.id },
-      include: {
-        pharmacist: { select: { name: true } },
-        summary: { select: { mainProblem: true } },
-      },
-      take: 3,
-      orderBy: { updatedAt: "desc" },
-    }),
-  ])) as [PharmacistCard[], SessionPreview[]]
+  const pharmacists = (await db.pharmacistProfile.findMany({
+    where: { verificationStatus: "VERIFIED" },
+    include: { user: true },
+    take: 3,
+    orderBy: { updatedAt: "desc" },
+  })) as PharmacistCardData[]
 
   return (
     <main className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-5 md:px-6 md:py-8">
       <section className="grid gap-4 md:grid-cols-[1fr_auto] md:items-end">
         <div className="flex min-w-0 flex-row gap-1">
-          <span className="text-sm md:text-base text-foreground">
-            {greeting()}, <span className="font-bold text-lg md:text-xl">{user.name}😇</span>
+          <span className="text-sm text-foreground md:text-base">
+            {greeting()},{" "}
+            <span className="text-lg font-bold md:text-xl">{user.name}😇</span>
           </span>
         </div>
       </section>
@@ -191,40 +106,35 @@ export default async function HomePage() {
           }
         />
         {pharmacists.length ? (
-          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-4 xl:grid-cols-2">
             {pharmacists.map((profile) => (
-              <Card key={profile.id} size="sm" className="min-h-52">
-                <CardHeader>
-                  <CardTitle className="line-clamp-2">
-                    {profile.user.name}, {profile.title}
-                  </CardTitle>
-                  <CardDescription className="line-clamp-1">
-                    {profile.practiceLocation}
-                  </CardDescription>
-                  <CardAction>
-                    <StatusPill
-                      tone={profile.availabilityStatus === "ONLINE" ? "primary" : "muted"}
-                    >
-                      {profile.availabilityStatus === "ONLINE" ? "Online" : "Offline"}
-                    </StatusPill>
-                  </CardAction>
-                </CardHeader>
-                <CardContent className="flex flex-1 flex-col gap-3">
-                  <p className="line-clamp-3 text-sm text-muted-foreground">{profile.bio}</p>
-                  <div className="mt-auto flex items-center gap-2 text-xs text-muted-foreground">
-                    <ClockIcon className="size-3.5" />
-                    <span className="truncate">{profile.serviceHours}</span>
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  <Button asChild variant="outline" size="sm" className="w-full">
-                    <Link href="/dashboard/chat">
-                      Mulai Chat
-                      <MessageCircleIcon data-icon="inline-end" />
-                    </Link>
-                  </Button>
-                </CardFooter>
-              </Card>
+              <PharmacistCard
+                key={profile.id}
+                profile={profile}
+                href={`/dashboard/pharmacists/${profile.id}`}
+                action={
+                  profile.availabilityStatus === "ONLINE" ? (
+                    <StartChatPrompt
+                      pharmacistId={profile.id}
+                      name={profile.user.name}
+                      title={profile.title}
+                      image={
+                        profile.profilePhotoUrl ??
+                        profile.user.image ??
+                        undefined
+                      }
+                      bio={profile.bio}
+                      topics={profile.topics}
+                      practiceLocation={profile.practiceLocation}
+                      serviceHours={profile.serviceHours}
+                    />
+                  ) : (
+                    <Button disabled className="w-full">
+                      Apoteker Offline
+                    </Button>
+                  )
+                }
+              />
             ))}
           </div>
         ) : (
@@ -235,55 +145,6 @@ export default async function HomePage() {
             action={
               <Button asChild variant="outline" size="sm">
                 <Link href="/dashboard/pharmacists">Cek Apoteker</Link>
-              </Button>
-            }
-          />
-        )}
-      </section>
-
-      <section className="flex flex-col gap-3">
-        <SectionHeading title="Chat terakhir" description="Lanjutkan konsultasi yang pernah kamu mulai." />
-        {sessions.length ? (
-          <div className="grid gap-3">
-            {sessions.map((session) => (
-              <Card key={session.id} size="sm">
-                <CardHeader>
-                  <CardTitle>{session.pharmacist.name}</CardTitle>
-                  <CardDescription>{formatDate(session.updatedAt)}</CardDescription>
-                  <CardAction>
-                    <Button asChild size="icon-sm" variant="outline" aria-label="Buka chat">
-                      <Link href="/dashboard/chat">
-                        <MessageCircleIcon />
-                      </Link>
-                    </Button>
-                  </CardAction>
-                </CardHeader>
-                <CardContent className="flex flex-col gap-3">
-                  <StatusPill tone={sessionTone(session.status)}>
-                    {sessionStatusLabels[session.status] ?? "Status tidak diketahui"}
-                  </StatusPill>
-                  {session.summary ? (
-                    <p className="line-clamp-2 text-sm text-muted-foreground">
-                      {session.summary.mainProblem}
-                    </p>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">Belum ada ringkasan konsultasi.</p>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        ) : (
-          <EmptyState
-            icon={PillIcon}
-            title="Belum ada chat"
-            description="Mulai chat pertama dengan apoteker pilihan."
-            action={
-              <Button asChild size="sm">
-                <Link href="/dashboard/pharmacists">
-                  Cari Apoteker
-                  <ArrowRightIcon data-icon="inline-end" />
-                </Link>
               </Button>
             }
           />

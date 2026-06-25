@@ -1,5 +1,6 @@
 import { savePharmacistProfile } from "@/app/actions/pharmacist/save-profile"
 import { AppMessage } from "@/components/app-message"
+import { ProfilePhotoField } from "@/components/pharmacists/profile-photo-field"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -35,6 +36,10 @@ export default async function PharmacistDashboardPage({ searchParams }: PageProp
 
       <form action={savePharmacistProfile} className="flex flex-col gap-5 rounded-md border bg-card p-5">
         <AppMessage error={params?.error} success={params?.success} />
+        <ProfilePhotoField
+          currentImage={profile?.profilePhotoUrl ?? user.image}
+          name={user.name}
+        />
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="flex flex-col gap-2 text-sm font-medium">
             Nama lengkap
@@ -58,10 +63,6 @@ export default async function PharmacistDashboardPage({ searchParams }: PageProp
           <label className="flex flex-col gap-2 text-sm font-medium">
             Nomor STR
             <Input name="strNumber" required defaultValue={profile?.strNumber ?? ""} />
-          </label>
-          <label className="flex flex-col gap-2 text-sm font-medium">
-            Foto profil
-            <Input name="profilePhoto" type="file" accept="image/png,image/jpeg,image/webp" />
           </label>
           <label className="flex flex-col gap-2 text-sm font-medium">
             Dokumen pendukung STR

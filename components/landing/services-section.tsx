@@ -1,3 +1,4 @@
+import Link from "next/link"
 import { BellRing, Info, Pill, ShoppingCart } from "lucide-react"
 
 const services = [
@@ -5,21 +6,28 @@ const services = [
     title: "Konsultasi Obat",
     icon: Pill,
     accent: "text-primary",
+    href: undefined,
+    status: undefined,
   },
   {
     title: "Informasi Obat",
     icon: Info,
     accent: "text-chart-2",
+    href: "/obat",
+    status: undefined,
   },
   {
     title: "Pengingat Obat",
     icon: BellRing,
     accent: "text-chart-4",
+    href: undefined,
+    status: undefined,
   },
   {
     title: "Beli Obat",
     icon: ShoppingCart,
     accent: "text-muted-foreground",
+    href: undefined,
     status: "Coming soon",
   },
 ]
@@ -43,12 +51,8 @@ export function ServicesSection() {
         <div className="grid grid-cols-4 gap-2 md:gap-3">
           {services.map((service) => {
             const Icon = service.icon
-
-            return (
-              <div
-                key={service.title}
-                className="relative flex min-w-0 flex-col items-center overflow-hidden rounded-lg bg-primary-foreground/10 p-2 text-center transition-colors duration-200 hover:bg-primary-foreground/20 md:rounded-2xl md:py-5"
-              >
+            const content = (
+              <>
                 {service.status ? (
                   <span className="pointer-events-none absolute left-1/2 top-1/2 w-[160%] -translate-x-1/2 -translate-y-1/2 rotate-45 bg-yellow-400 py-0.5 text-[8px] font-bold uppercase tracking-wide text-yellow-950 shadow-sm md:py-1 md:text-[11px]">
                     {service.status}
@@ -62,6 +66,21 @@ export function ServicesSection() {
                 <h3 className="mt-2 text-[10px] font-semibold leading-3 md:mt-3 md:text-sm md:leading-5">
                   {service.title}
                 </h3>
+              </>
+            )
+            const className =
+              "relative flex min-w-0 flex-col items-center overflow-hidden rounded-lg bg-primary-foreground/10 p-2 text-center transition-colors duration-200 hover:bg-primary-foreground/20 md:rounded-2xl md:py-5"
+
+            return service.href ? (
+              <Link key={service.title} href={service.href} className={className}>
+                {content}
+              </Link>
+            ) : (
+              <div
+                key={service.title}
+                className={className}
+              >
+                {content}
               </div>
             )
           })}

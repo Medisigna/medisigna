@@ -1,8 +1,9 @@
 import Link from "next/link"
 import { SearchIcon } from "lucide-react"
 
-import { AppMessage } from "@/components/app-message"
 import { StartChatPrompt } from "@/components/consultation/start-chat-prompt"
+import { SiteFooter } from "@/components/landing/site-footer"
+import { SiteHeader } from "@/components/landing/site-header"
 import {
   PharmacistCard,
   type PharmacistCardData,
@@ -11,53 +12,65 @@ import { PharmacistSearch } from "@/components/pharmacists/pharmacist-search"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { db } from "@/lib/db"
+import { getCurrentUser, homeForRole } from "@/lib/session"
 
 type PageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>
 }
 
-export default async function PharmacistListPage({ searchParams }: PageProps) {
+export default async function PublicPharmacistsPage({ searchParams }: PageProps) {
   const params = await searchParams
   const query = typeof params?.q === "string" ? params.q.trim() : ""
-  const pharmacists = (await db.pharmacistProfile.findMany({
-    where: {
-      verificationStatus: "VERIFIED",
-      ...(query
-        ? {
-            OR: [
-              { title: { contains: query, mode: "insensitive" } },
-              { bio: { contains: query, mode: "insensitive" } },
-              { practiceLocation: { contains: query, mode: "insensitive" } },
-              { experienceSummary: { contains: query, mode: "insensitive" } },
-              { topics: { has: query } },
-              { user: { name: { contains: query, mode: "insensitive" } } },
-            ],
-          }
-        : {}),
-    },
-    include: { user: true },
-    orderBy: [{ availabilityStatus: "asc" }, { updatedAt: "desc" }],
-  })) as PharmacistCardData[]
+  const selectedPharmacist =
+    typeof params?.pharmacist === "string" ? params.pharmacist : undefined
+  const [pharmacists, user] = await Promise.all([
+    db.pharmacistProfile.findMany({
+      where: {
+        verificationStatus: "VERIFIED",
+        ...(query
+          ? {
+              OR: [
+                { title: { contains: query, mode: "insensitive" } },
+                { bio: { contains: query, mode: "insensitive" } },
+                { practiceLocation: { contains: query, mode: "insensitive" } },
+                { experienceSummary: { contains: query, mode: "insensitive" } },
+                { topics: { has: query } },
+                { user: { name: { contains: query, mode: "insensitive" } } },
+              ],
+            }
+          : {}),
+      },
+      include: { user: true },
+      orderBy: [{ availabilityStatus: "asc" }, { updatedAt: "desc" }],
+    }) as Promise<PharmacistCardData[]>,
+    getCurrentUser(),
+  ])
 
   return (
-    <main className="min-h-full bg-muted-foreground/5">
+    <main className="min-h-svh bg-muted-foreground/5">
+      <SiteHeader />
       <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-5 md:px-6 md:py-8">
-        <AppMessage error={params?.error} success={params?.success} />
-
         <section className="flex flex-col items-start gap-4">
           <h1 className="text-2xl font-semibold tracking-tight">Pilih Apoteker</h1>
-          <PharmacistSearch action="/dashboard/pharmacists" query={query} />
+          <PharmacistSearch action="/pharmacists" query={query} />
         </section>
 
-        <div className="grid gap-4 xl:grid-cols-2">
+        <section className="grid gap-4 xl:grid-cols-2">
           {pharmacists.length ? (
             pharmacists.map((profile) => (
               <PharmacistCard
                 key={profile.id}
                 profile={profile}
-                href={`/dashboard/pharmacists/${profile.id}`}
                 action={
-                  profile.availabilityStatus === "ONLINE" ? (
+                  profile.availabilityStatus !== "ONLINE" ? (
+                    <Button disabled className="w-full">
+                      Apoteker Offline
+                    </Button>
+                  ) : user && user.role !== "PATIENT" ? (
+                    <Button asChild className="w-full">
+                      <Link href={homeForRole(user.role)}>Kembali ke Dashboard</Link>
+                    </Button>
+                  ) : (
                     <StartChatPrompt
                       pharmacistId={profile.id}
                       name={profile.user.name}
@@ -67,11 +80,15 @@ export default async function PharmacistListPage({ searchParams }: PageProps) {
                       topics={profile.topics}
                       practiceLocation={profile.practiceLocation}
                       serviceHours={profile.serviceHours}
+                      loginHref={
+                        user
+                          ? undefined
+                          : `/login?callbackUrl=${encodeURIComponent(
+                              `/pharmacists?pharmacist=${profile.id}`
+                            )}`
+                      }
+                      defaultOpen={selectedPharmacist === profile.id}
                     />
-                  ) : (
-                    <Button disabled className="w-full">
-                      Apoteker Offline
-                    </Button>
                   )
                 }
               />
@@ -90,14 +107,15 @@ export default async function PharmacistListPage({ searchParams }: PageProps) {
                 </div>
                 {query ? (
                   <Button asChild variant="outline" size="sm">
-                    <Link href="/dashboard/pharmacists">Lihat Semua</Link>
+                    <Link href="/pharmacists">Lihat Semua</Link>
                   </Button>
                 ) : null}
               </CardContent>
             </Card>
           )}
-        </div>
+        </section>
       </div>
+      <SiteFooter />
     </main>
   )
 }

@@ -38,13 +38,13 @@ export function HeroSection() {
         </div>
         <div className="flex flex-wrap gap-3">
           <Button asChild size="lg">
-            <Link href="/register">
+            <Link href="/pharmacists">
               Mulai Konsultasi
               <ArrowRight data-icon="inline-end" />
             </Link>
           </Button>
           <Button asChild variant="outline" size="lg">
-            <Link href="/register">Daftar Sekarang</Link>
+            <Link href="/pharmacists">Lihat Apoteker</Link>
           </Button>
         </div>
       </div>

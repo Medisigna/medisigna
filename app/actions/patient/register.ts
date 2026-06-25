@@ -4,10 +4,18 @@ import { redirect } from "next/navigation"
 
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
-import { existingAccount, fail, passwordPair, patientIdentity, requireText } from "../shared"
+import {
+  existingAccount,
+  fail,
+  passwordPair,
+  patientIdentity,
+  requireText,
+  safeCallbackPath,
+} from "../shared"
 
 export async function registerPatient(formData: FormData) {
-  const path = "/register"
+  const callbackUrl = safeCallbackPath(formData, "")
+  const path = callbackUrl ? `/register?callbackUrl=${encodeURIComponent(callbackUrl)}` : "/register"
   const name = requireText(formData, "name", "Nama lengkap", path)
   const identity = patientIdentity(formData, path)
   const password = passwordPair(formData, path)
@@ -39,5 +47,5 @@ export async function registerPatient(formData: FormData) {
     fail(path, "Registrasi gagal. Periksa data lalu coba lagi.")
   }
 
-  redirect("/dashboard")
+  redirect(callbackUrl || "/dashboard")
 }

@@ -16,7 +16,7 @@ export function FinalCtaSection() {
           </p>
         </div>
         <Button asChild>
-          <Link href="/register">
+          <Link href="/pharmacists">
             Mulai Konsultasi
             <ArrowRight data-icon="inline-end" />
           </Link>

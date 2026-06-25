@@ -5,7 +5,8 @@ const footerLinks = [
   {
     title: "Produk",
     links: [
-      ["Konsultasi Obat", "/register"],
+      ["Informasi Obat", "/obat"],
+      ["Konsultasi Obat", "/pharmacists"],
       ["FAQ", "/faq"],
       ["Kontak", "/contact"],
     ],

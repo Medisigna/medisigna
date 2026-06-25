@@ -1,7 +1,9 @@
 "use client"
 
+import Link from "next/link"
+import * as React from "react"
 import { useFormStatus } from "react-dom"
-import { ClockIcon, MapPinIcon } from "lucide-react"
+import { ClockIcon, MapPinIcon, ShieldCheckIcon } from "lucide-react"
 
 import { startConsultationSession } from "@/app/actions/consultation/start-session"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -33,6 +35,8 @@ type StartChatPromptProps = {
   topics: string[]
   practiceLocation: string
   serviceHours: string
+  loginHref?: string
+  defaultOpen?: boolean
 }
 
 function initials(name: string) {
@@ -59,8 +63,11 @@ function PromptContent({
   name,
   title,
   image,
+  bio,
+  topics,
   practiceLocation,
   serviceHours,
+  loginHref,
 }: StartChatPromptProps) {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -75,6 +82,12 @@ function PromptContent({
 
       <div className="relative -mt-10 flex max-h-[60svh] flex-col gap-5 overflow-y-auto rounded-t-[2.5rem] bg-background px-7 pt-9 pb-8">
         <div className="text-center">
+          <div className="mb-3 flex justify-center">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+              <ShieldCheckIcon className="size-3.5" />
+              Apoteker terverifikasi
+            </span>
+          </div>
           <h2 className="text-2xl font-semibold tracking-tight">{name}</h2>
           <p className="mt-1 text-sm text-muted-foreground">{title}</p>
         </div>
@@ -90,7 +103,8 @@ function PromptContent({
           </div>
         </div>
 
-        {/* <div className="flex flex-col gap-2">
+        {/* {topics.length ? (
+          <div className="flex flex-col gap-2">
           <p className="text-sm font-medium">Topik bantuan</p>
           <div className="flex flex-wrap gap-2">
             {topics.map((topic) => (
@@ -102,16 +116,23 @@ function PromptContent({
               </span>
             ))}
           </div>
-        </div> */}
+          </div>
+        ) : null} */}
 
-        {/* <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2">
           <p className="text-sm font-medium">Tentang apoteker</p>
-          <p className="text-sm leading-relaxed text-muted-foreground">{bio}</p>
-        </div> */}
+          <p className="line-clamp-4 text-sm leading-relaxed text-muted-foreground">{bio}</p>
+        </div>
 
-        <form action={startConsultationSession.bind(null, pharmacistId)} className="w-full">
-          <StartButton />
-        </form>
+        {loginHref ? (
+          <Button asChild size="lg" className="w-full rounded-full">
+            <Link href={loginHref}>Masuk untuk Mulai Chat</Link>
+          </Button>
+        ) : (
+          <form action={startConsultationSession.bind(null, pharmacistId)} className="w-full">
+            <StartButton />
+          </form>
+        )}
       </div>
     </div>
   )
@@ -119,10 +140,11 @@ function PromptContent({
 
 export function StartChatPrompt(props: StartChatPromptProps) {
   const isMobile = useIsMobile()
+  const [open, setOpen] = React.useState(props.defaultOpen ?? false)
 
   if (isMobile) {
     return (
-      <Drawer>
+      <Drawer open={open} onOpenChange={setOpen}>
         <DrawerTrigger asChild>
           <Button className="w-full">Mulai Chat</Button>
         </DrawerTrigger>
@@ -146,7 +168,7 @@ export function StartChatPrompt(props: StartChatPromptProps) {
   }
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button className="w-full">Mulai Chat</Button>
       </DialogTrigger>

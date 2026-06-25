@@ -9,6 +9,7 @@ import {
   HomeIcon,
   LogOutIcon,
   MessageCircleIcon,
+  PillIcon,
   SearchIcon,
   UserIcon,
 } from "lucide-react"
@@ -45,6 +46,7 @@ type NavItem = {
 
 const patientNavItems: NavItem[] = [
   { href: "/dashboard", label: "Beranda", icon: HomeIcon, exact: true },
+  { href: "/dashboard/obat", label: "Obat", icon: PillIcon },
   { href: "/dashboard/pharmacists", label: "Apoteker", icon: SearchIcon },
   { href: "/dashboard/chat", label: "Chat", icon: MessageCircleIcon },
   { href: "/dashboard/profile", label: "Profil", icon: UserIcon },
@@ -227,7 +229,11 @@ function DashboardShell({
               <div
                 className={cn(
                   "grid gap-1",
-                  navItems.length === 2 ? "grid-cols-2" : "grid-cols-4"
+                  navItems.length === 2
+                    ? "grid-cols-2"
+                    : navItems.length === 5
+                      ? "grid-cols-5"
+                      : "grid-cols-4"
                 )}
               >
                 {navItems.map((item) => {

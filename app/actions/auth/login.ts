@@ -6,11 +6,13 @@ import { redirect } from "next/navigation"
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { homeForRole } from "@/lib/session"
-import { emailForLogin, fail, value } from "../shared"
+import { emailForLogin, fail, safeCallbackPath, value } from "../shared"
 
 export async function login(formData: FormData) {
   const identifier = value(formData, "identifier")
-  const path = `/login?identifier=${encodeURIComponent(identifier)}`
+  const callbackUrl = safeCallbackPath(formData, "")
+  const callbackQuery = callbackUrl ? `&callbackUrl=${encodeURIComponent(callbackUrl)}` : ""
+  const path = `/login?identifier=${encodeURIComponent(identifier)}${callbackQuery}`
   if (!identifier) fail("/login", "Email atau nomor WhatsApp wajib diisi.")
 
   const password = value(formData, "password")
@@ -34,5 +36,5 @@ export async function login(formData: FormData) {
     fail(path, "Akun tidak aktif.")
   }
 
-  redirect(homeForRole(user.role))
+  redirect(user.role === "PATIENT" && callbackUrl ? callbackUrl : homeForRole(user.role))
 }
