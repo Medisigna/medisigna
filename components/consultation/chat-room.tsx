@@ -11,7 +11,13 @@ import {
   useRef,
   useState,
 } from "react"
-import { CameraIcon, ImagePlusIcon, PlusIcon, SendIcon, XIcon } from "lucide-react"
+import {
+  CameraIcon,
+  ImagePlusIcon,
+  PlusIcon,
+  SendIcon,
+  XIcon,
+} from "lucide-react"
 import toast from "react-hot-toast"
 
 import { sendConsultationMessage } from "@/app/actions/consultation/send-message"
@@ -57,18 +63,23 @@ export function ChatRoom({
   const cameraInputRef = useRef<HTMLInputElement>(null)
   const messagesRef = useRef<HTMLDivElement>(null)
   const isSendingRef = useRef(false)
-  const typingStopTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
-  const remoteTypingTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(
+  const typingStopTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(
     undefined
   )
+  const remoteTypingTimerRef = useRef<
+    ReturnType<typeof setTimeout> | undefined
+  >(undefined)
   const lastTypingSentAtRef = useRef(0)
   const disabled = finalStatuses.includes(status)
 
   const fetchMessages = useCallback(async () => {
     try {
-      const response = await fetch(`/api/consultation/sessions/${sessionId}/messages`, {
-        cache: "no-store",
-      })
+      const response = await fetch(
+        `/api/consultation/sessions/${sessionId}/messages`,
+        {
+          cache: "no-store",
+        }
+      )
       if (!response.ok) return
       const data = await response.json()
       startTransition(() => {
@@ -84,7 +95,9 @@ export function ChatRoom({
   }, [sessionId])
 
   useEffect(() => {
-    const events = new EventSource(`/api/consultation/sessions/${sessionId}/events`)
+    const events = new EventSource(
+      `/api/consultation/sessions/${sessionId}/events`
+    )
     const refresh = () => {
       if (!isSendingRef.current) fetchMessages()
     }
@@ -110,7 +123,10 @@ export function ChatRoom({
       clearTimeout(remoteTypingTimerRef.current)
       setIsOtherTyping(event.isTyping === true)
       if (event.isTyping) {
-        remoteTypingTimerRef.current = setTimeout(() => setIsOtherTyping(false), 2500)
+        remoteTypingTimerRef.current = setTimeout(
+          () => setIsOtherTyping(false),
+          2500
+        )
       }
     }
     return () => {
@@ -236,6 +252,8 @@ export function ChatRoom({
         clearAttachment()
         setAttachmentMenuOpen(false)
         form.reset()
+      } catch {
+        toast.error("Pesan gagal dikirim. Coba lagi.")
       } finally {
         isSendingRef.current = false
         setIsSending(false)
@@ -251,7 +269,6 @@ export function ChatRoom({
       )}
     >
       <div className="flex min-h-0 flex-1 flex-col">
-        
         <div
           ref={messagesRef}
           className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain bg-muted/20 p-3 sm:p-4"
@@ -381,7 +398,12 @@ export function ChatRoom({
               placeholder={disabled ? "Sesi sudah selesai" : "Tulis pesan..."}
               className="max-h-28 min-h-11 resize-none rounded-lg bg-background"
             />
-            <Button type="submit" disabled={disabled || isSending} size="icon-lg" aria-label="Kirim pesan">
+            <Button
+              type="submit"
+              disabled={disabled || isSending}
+              size="icon-lg"
+              aria-label="Kirim pesan"
+            >
               <SendIcon data-icon="inline-start" />
             </Button>
           </div>
