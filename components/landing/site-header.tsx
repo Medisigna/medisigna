@@ -4,6 +4,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { ArrowRightIcon, HeartPulseIcon, MenuIcon } from "lucide-react"
 
+import { ThemeToggle } from "@/components/theme-toggle"
 import { Button } from "@/components/ui/button"
 import {
   Drawer,
@@ -61,6 +62,7 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex shrink-0 items-center gap-2">
+          <ThemeToggle />
           <Drawer>
             <DrawerTrigger asChild>
               <Button
@@ -103,6 +105,9 @@ export function SiteHeader() {
                 })}
               </nav>
               <DrawerFooter>
+                <div className="flex justify-center">
+                  <ThemeToggle />
+                </div>
                 <DrawerClose asChild>
                   <Button asChild variant="outline">
                     <Link href="/login">Masuk</Link>

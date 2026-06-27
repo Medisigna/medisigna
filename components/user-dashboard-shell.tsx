@@ -15,6 +15,7 @@ import {
 } from "lucide-react"
 
 import { logout } from "@/app/actions/auth/logout"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { Button } from "@/components/ui/button"
 import {
   Sidebar,
@@ -53,8 +54,10 @@ const patientNavItems: NavItem[] = [
 ]
 
 const pharmacistNavItems: NavItem[] = [
-  { href: "/pharmacist/dashboard", label: "Profil", icon: UserIcon, exact: true },
+  { href: "/pharmacist/dashboard", label: "Beranda", icon: HomeIcon, exact: true },
+  { href: "/pharmacist/dashboard/obat", label: "Obat", icon: PillIcon },
   { href: "/pharmacist/dashboard/chat", label: "Chat", icon: MessageCircleIcon },
+  { href: "/pharmacist/dashboard/profile", label: "Profil", icon: UserIcon },
 ]
 
 function pageTitle(pathname: string, navItems: NavItem[]) {
@@ -213,15 +216,18 @@ function DashboardShell({
                 <p className="truncate text-xs text-muted-foreground md:hidden">{user.name}</p>
               </div>
             </div>
-            <div className="hidden min-w-0 text-right text-xs md:block">
-              <p className="truncate font-medium">{user.name}</p>
-              <p className="truncate text-muted-foreground">{user.email}</p>
+            <div className="flex items-center gap-2">
+              <div className="hidden min-w-0 text-right text-xs md:block">
+                <p className="truncate font-medium">{user.name}</p>
+                <p className="truncate text-muted-foreground">{user.email}</p>
+              </div>
+              <ThemeToggle />
+              <form action={logout} className="md:hidden">
+                <Button type="submit" variant="ghost" size="icon-sm" aria-label="Keluar">
+                  <LogOutIcon />
+                </Button>
+              </form>
             </div>
-            <form action={logout} className="md:hidden">
-              <Button type="submit" variant="ghost" size="icon-sm" aria-label="Keluar">
-                <LogOutIcon />
-              </Button>
-            </form>
           </header>
           <div className="min-w-0 flex-1 overflow-x-clip">{children}</div>
           {!isChatRoom ? (

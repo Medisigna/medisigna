@@ -1,13 +1,11 @@
 import Link from "next/link"
 
 import { reviewPharmacist } from "@/app/actions/admin/review-pharmacist"
-import { logout } from "@/app/actions/auth/logout"
 import { AppMessage } from "@/components/app-message"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Textarea } from "@/components/ui/textarea"
 import { db } from "@/lib/db"
-import { requireRole } from "@/lib/session"
 
 type PageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>
@@ -36,7 +34,6 @@ function filePreview(src?: string | null) {
 }
 
 export default async function AdminPage({ searchParams }: PageProps) {
-  await requireRole("ADMIN")
   const params = await searchParams
   const status = typeof params?.status === "string" && statuses.includes(params.status) ? params.status : "PENDING"
   const pharmacists = await db.pharmacistProfile.findMany({
@@ -47,18 +44,13 @@ export default async function AdminPage({ searchParams }: PageProps) {
   const users = await db.user.count()
 
   return (
-    <main className="mx-auto flex min-h-svh max-w-6xl flex-col gap-6 px-6 py-8">
+    <main className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-6 py-8">
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-sm text-muted-foreground">Dashboard Admin</p>
           <h1 className="text-2xl font-semibold">Verifikasi Apoteker</h1>
           <p className="mt-1 text-sm text-muted-foreground">{users} user terdaftar</p>
         </div>
-        <form action={logout}>
-          <Button variant="outline" type="submit">
-            Keluar
-          </Button>
-        </form>
       </header>
 
       <AppMessage error={params?.error} success={params?.success} />

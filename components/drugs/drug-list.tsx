@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { ArrowRightIcon, SearchIcon, XIcon } from "lucide-react"
 
+import { AlphabetFilter } from "@/components/drugs/alphabet-filter"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -16,27 +17,49 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from "@/components/ui/input-group"
-import type { DrugListItem } from "@/lib/drugs"
+import type { DrugListResult } from "@/lib/drugs"
+import { cn } from "@/lib/utils"
 
 export function DrugList({
-  drugs,
+  result,
   query,
+  letter,
   action,
   detailBasePath,
+  bordered = true,
 }: {
-  drugs: DrugListItem[]
+  result: DrugListResult
   query: string
+  letter: string
   action: string
   detailBasePath: string
+  bordered?: boolean
 }) {
+  const { drugs, page, total, hasPreviousPage, hasNextPage } = result
+  const pageHref = (nextPage: number) => {
+    const params = new URLSearchParams()
+    if (query) params.set("q", query)
+    if (letter) params.set("letter", letter)
+    params.set("page", String(nextPage))
+
+    return `${action}?${params.toString()}`
+  }
+  const letterHref = (nextLetter: string) => {
+    const params = new URLSearchParams()
+    if (query) params.set("q", query)
+    if (nextLetter !== letter) params.set("letter", nextLetter)
+
+    return params.size ? `${action}?${params.toString()}` : action
+  }
+
   return (
     <section className="flex flex-col gap-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">
-          {query ? `Hasil untuk “${query}”` : "Daftar obat"}
+          {query ? `Hasil untuk "${query}"` : "Daftar obat"}
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          {drugs.length} informasi ditemukan
+          {drugs.length} dari {total} informasi
         </p>
       </div>
 
@@ -56,11 +79,12 @@ export function DrugList({
             placeholder="Cari nama obat, merek, atau alias"
             aria-label="Cari obat"
           />
+          {letter ? <input type="hidden" name="letter" value={letter} /> : null}
           <InputGroupAddon align="inline-end">
             <InputGroupButton type="submit">Cari</InputGroupButton>
           </InputGroupAddon>
         </InputGroup>
-        {query ? (
+        {query || letter ? (
           <Button
             asChild
             variant="ghost"
@@ -74,12 +98,17 @@ export function DrugList({
         ) : null}
       </form>
 
+      <AlphabetFilter activeLetter={letter} hrefForLetter={letterHref} />
+
       {drugs.length ? (
         <div className="grid gap-4 md:grid-cols-2">
           {drugs.map((drug) => (
             <Card
               key={drug.id}
-              className="rounded-3xl bg-card py-5 shadow-none ring-0 transition-[transform,box-shadow] duration-200 hover:-translate-y-1 hover:shadow-lg"
+              className={cn(
+                "rounded-3xl bg-card py-5 shadow-none ring-0 transition-[transform,box-shadow] duration-200 hover:-translate-y-1 hover:shadow-lg",
+                bordered && "border border-border/70"
+              )}
             >
               <CardHeader>
                 <CardTitle className="text-left text-xl">
@@ -87,7 +116,7 @@ export function DrugList({
                 </CardTitle>
                 <CardDescription className="text-left">
                   {drug.brandNames.length
-                    ? drug.brandNames.join(" · ")
+                    ? drug.brandNames.join(" - ")
                     : "Nama generik"}
                 </CardDescription>
               </CardHeader>
@@ -120,6 +149,30 @@ export function DrugList({
           </CardContent>
         </Card>
       )}
+
+      {total ? (
+        <div className="flex items-center justify-between gap-3">
+          {hasPreviousPage ? (
+            <Button asChild variant="outline">
+              <Link href={pageHref(page - 1)}>Sebelumnya</Link>
+            </Button>
+          ) : (
+            <Button variant="outline" disabled>
+              Sebelumnya
+            </Button>
+          )}
+          <p className="text-sm text-muted-foreground">Halaman {page}</p>
+          {hasNextPage ? (
+            <Button asChild variant="outline">
+              <Link href={pageHref(page + 1)}>Berikutnya</Link>
+            </Button>
+          ) : (
+            <Button variant="outline" disabled>
+              Berikutnya
+            </Button>
+          )}
+        </div>
+      ) : null}
 
       <Card className="border-primary/20 bg-primary/5 shadow-none">
         <CardHeader>

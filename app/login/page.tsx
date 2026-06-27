@@ -3,7 +3,7 @@ import Link from "next/link"
 import { login } from "@/app/actions/auth/login"
 import { AppMessage } from "@/components/app-message"
 import { PasswordInput } from "@/components/password-input"
-import { Button } from "@/components/ui/button"
+import { SubmitButton } from "@/components/submit-button"
 import {
   Card,
   CardContent,
@@ -44,7 +44,7 @@ export default async function LoginPage({ searchParams }: PageProps) {
             </label>
           </CardContent>
           <CardFooter className="flex-col items-stretch gap-4">
-            <Button type="submit">Masuk</Button>
+            <SubmitButton pendingText="Masuk...">Masuk</SubmitButton>
             <p className="text-center text-sm text-muted-foreground">
               Belum punya akun?{" "}
               <Link

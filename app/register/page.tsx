@@ -3,7 +3,7 @@ import Link from "next/link"
 import { registerPatient } from "@/app/actions/patient/register"
 import { AppMessage } from "@/components/app-message"
 import { PasswordInput } from "@/components/password-input"
-import { Button } from "@/components/ui/button"
+import { SubmitButton } from "@/components/submit-button"
 import {
   Card,
   CardContent,
@@ -55,7 +55,7 @@ export default async function RegisterPage({ searchParams }: PageProps) {
             </label>
           </CardContent>
           <CardFooter className="flex-col items-stretch gap-4">
-            <Button type="submit">Daftar</Button>
+            <SubmitButton pendingText="Mendaftar...">Daftar</SubmitButton>
             <p className="text-center text-sm text-muted-foreground">
               Sudah punya akun?{" "}
               <Link

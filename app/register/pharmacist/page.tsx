@@ -2,7 +2,7 @@ import Link from "next/link"
 
 import { registerPharmacist } from "@/app/actions/pharmacist/register"
 import { AppMessage } from "@/components/app-message"
-import { Button } from "@/components/ui/button"
+import { SubmitButton } from "@/components/submit-button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 
@@ -79,7 +79,7 @@ export default async function RegisterPharmacistPage({ searchParams }: PageProps
           Pengalaman singkat
           <Textarea name="experienceSummary" required />
         </label>
-        <Button type="submit">Kirim Pendaftaran</Button>
+        <SubmitButton pendingText="Mengirim...">Kirim Pendaftaran</SubmitButton>
         <Link className="text-sm text-muted-foreground underline-offset-4 hover:underline" href="/login">
           Sudah punya akun? Masuk
         </Link>

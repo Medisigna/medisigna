@@ -61,25 +61,25 @@ enum DrugPublicationStatus {
 }
 
 model User {
-  id                String                @id
-  name              String
-  email             String                @unique
-  emailVerified     Boolean               @default(false)
-  image             String?
-  phone             String?               @unique
-  role              UserRole              @default(PATIENT)
-  status            AccountStatus         @default(ACTIVE)
-  createdAt         DateTime              @default(now())
-  updatedAt         DateTime              @updatedAt
-  sessions          Session[]
-  accounts          Account[]
-  patientProfile    PatientProfile?
-  pharmacistProfile PharmacistProfile?
-  patientSessions   ConsultationSession[] @relation("PatientConsultations")
+  id                 String                @id
+  name               String
+  email              String                @unique
+  emailVerified      Boolean               @default(false)
+  image              String?
+  phone              String?               @unique
+  role               UserRole              @default(PATIENT)
+  status             AccountStatus         @default(ACTIVE)
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @updatedAt
+  sessions           Session[]
+  accounts           Account[]
+  patientProfile     PatientProfile?
+  pharmacistProfile  PharmacistProfile?
+  patientSessions    ConsultationSession[] @relation("PatientConsultations")
   pharmacistSessions ConsultationSession[] @relation("PharmacistConsultations")
-  sentMessages      ConsultationMessage[] @relation("MessageSender")
-  createdSummaries  ConsultationSummary[] @relation("SummaryCreator")
-  reviewedDrugs     DrugInformation[]      @relation("DrugReviewer")
+  sentMessages       ConsultationMessage[] @relation("MessageSender")
+  createdSummaries   ConsultationSummary[] @relation("SummaryCreator")
+  reviewedDrugs      DrugInformation[]     @relation("DrugReviewer")
 
   @@map("user")
 }
@@ -145,40 +145,40 @@ model PatientProfile {
 }
 
 model PharmacistProfile {
-  id                  String                         @id @default(cuid())
-  userId              String                         @unique
-  user                User                           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  title               String
-  strNumber           String                         @unique
-  profilePhotoUrl     String?
-  bio                 String
-  topics              String[]
-  practiceLocation    String
-  serviceHours        String
-  experienceSummary   String
-  strDocumentUrl      String?
-  verificationStatus  PharmacistVerificationStatus   @default(PENDING)
-  availabilityStatus  PharmacistAvailabilityStatus   @default(OFFLINE)
-  adminNote           String?
-  createdAt           DateTime                       @default(now())
-  updatedAt           DateTime                       @updatedAt
+  id                 String                       @id @default(cuid())
+  userId             String                       @unique
+  user               User                         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title              String
+  strNumber          String                       @unique
+  profilePhotoUrl    String?
+  bio                String
+  topics             String[]
+  practiceLocation   String
+  serviceHours       String
+  experienceSummary  String
+  strDocumentUrl     String?
+  verificationStatus PharmacistVerificationStatus @default(PENDING)
+  availabilityStatus PharmacistAvailabilityStatus @default(OFFLINE)
+  adminNote          String?
+  createdAt          DateTime                     @default(now())
+  updatedAt          DateTime                     @updatedAt
 }
 
 model ConsultationSession {
-  id           String                    @id @default(cuid())
-  patientId    String
-  patient      User                      @relation("PatientConsultations", fields: [patientId], references: [id], onDelete: Cascade)
-  pharmacistId String
-  pharmacist   User                      @relation("PharmacistConsultations", fields: [pharmacistId], references: [id], onDelete: Cascade)
-  status       ConsultationSessionStatus @default(ACTIVE)
-  startedAt    DateTime                  @default(now())
-  endedAt      DateTime?
-  patientUnreadCount    Int              @default(0)
-  pharmacistUnreadCount Int              @default(0)
-  createdAt    DateTime                  @default(now())
-  updatedAt    DateTime                  @updatedAt
-  messages     ConsultationMessage[]
-  summary      ConsultationSummary?
+  id                    String                    @id @default(cuid())
+  patientId             String
+  patient               User                      @relation("PatientConsultations", fields: [patientId], references: [id], onDelete: Cascade)
+  pharmacistId          String
+  pharmacist            User                      @relation("PharmacistConsultations", fields: [pharmacistId], references: [id], onDelete: Cascade)
+  status                ConsultationSessionStatus @default(ACTIVE)
+  startedAt             DateTime                  @default(now())
+  endedAt               DateTime?
+  patientUnreadCount    Int                       @default(0)
+  pharmacistUnreadCount Int                       @default(0)
+  createdAt             DateTime                  @default(now())
+  updatedAt             DateTime                  @updatedAt
+  messages              ConsultationMessage[]
+  summary               ConsultationSummary?
 
   @@index([patientId])
   @@index([pharmacistId])
@@ -186,14 +186,14 @@ model ConsultationSession {
 }
 
 model ConsultationMessage {
-  id          String                    @id @default(cuid())
+  id          String                   @id @default(cuid())
   sessionId   String
-  session     ConsultationSession       @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  session     ConsultationSession      @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   senderId    String
-  sender      User                      @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
-  type        ConsultationMessageType   @default(TEXT)
+  sender      User                     @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  type        ConsultationMessageType  @default(TEXT)
   body        String?
-  createdAt   DateTime                  @default(now())
+  createdAt   DateTime                 @default(now())
   attachments ConsultationAttachment[]
 
   @@index([sessionId])
@@ -232,14 +232,27 @@ model DrugInformation {
   id                String                @id @default(cuid())
   slug              String                @unique
   genericName       String
-  brandNames        String[]
-  aliases           String[]
+  brandNames        String[]              @default([])
+  aliases           String[]              @default([])
+  drugClass         String?
+  dosageForm        String?
   uses              String
   generalUsage      String
   foodGuidance      String?
-  commonSideEffects String[]
-  warnings          String[]
-  seekHelpWhen      String[]
+  commonSideEffects String[]              @default([])
+  warnings          String[]              @default([])
+  seekHelpWhen      String[]              @default([])
+  pharmacistIndications String?
+  counselingPoints      String[]          @default([])
+  screeningQuestions    String[]          @default([])
+  contraindications     String[]          @default([])
+  majorInteractions     String[]          @default([])
+  seriousSideEffects    String[]          @default([])
+  monitoringParameters  String[]          @default([])
+  referralCriteria      String[]          @default([])
+  internalNotes         String?
+  references            String[]          @default([])
+  reviewDueAt           DateTime?
   reviewerId        String
   reviewer          User                  @relation("DrugReviewer", fields: [reviewerId], references: [id], onDelete: Restrict)
   reviewedAt        DateTime

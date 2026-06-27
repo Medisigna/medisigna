@@ -188,6 +188,54 @@ const demoDrugs = [
   },
 ] as const
 
+function getDemoPharmacistDrugData(genericName: string) {
+  return {
+    drugClass: "Data demo: golongan obat perlu diverifikasi apoteker",
+    dosageForm: "Data demo: bentuk sediaan mengikuti produk yang digunakan",
+    pharmacistIndications: `Data demo untuk apoteker: evaluasi kesesuaian penggunaan ${genericName} berdasarkan keluhan, riwayat pasien, dan obat lain yang digunakan.`,
+    counselingPoints: [
+      "Pastikan pasien memahami cara pakai pada label atau arahan tenaga kesehatan.",
+      "Tanyakan obat lain yang sedang digunakan untuk menghindari duplikasi atau interaksi.",
+      "Ingatkan pasien bahwa data ini masih demo dan perlu validasi konten produksi.",
+    ],
+    screeningQuestions: [
+      "Siapa yang akan menggunakan obat ini?",
+      "Apa keluhan utama dan sejak kapan terjadi?",
+      "Apakah ada riwayat alergi obat, kehamilan, menyusui, atau penyakit kronis?",
+      "Obat, suplemen, atau produk herbal apa yang sedang digunakan?",
+    ],
+    contraindications: [
+      "Data demo: cek kontraindikasi spesifik sesuai monografi resmi.",
+      "Rujuk atau konsultasikan bila ada riwayat reaksi alergi berat terhadap kandungan obat.",
+    ],
+    majorInteractions: [
+      "Data demo: telaah interaksi dengan obat rutin pasien sebelum rekomendasi.",
+      "Waspadai penggunaan bersama obat dengan efek samping atau kandungan yang serupa.",
+    ],
+    seriousSideEffects: [
+      "Reaksi alergi berat seperti sesak, bengkak wajah, atau ruam luas.",
+      "Keluhan berat, menetap, atau memburuk setelah penggunaan obat.",
+    ],
+    monitoringParameters: [
+      "Perbaikan gejala dan durasi keluhan.",
+      "Munculnya efek samping atau tanda bahaya.",
+      "Kepatuhan terhadap petunjuk pakai pada label atau resep.",
+    ],
+    referralCriteria: [
+      "Gejala berat, memburuk, atau tidak membaik sesuai batas waktu wajar.",
+      "Pasien berisiko tinggi seperti bayi, lansia, hamil, menyusui, atau memiliki penyakit kronis.",
+      "Ada tanda bahaya yang membutuhkan pemeriksaan tenaga kesehatan.",
+    ],
+    internalNotes:
+      "Konten seed ini hanya demo untuk pengujian mode apoteker. Jangan gunakan sebagai rujukan klinis produksi.",
+    references: [
+      "Data demo Medisigna - perlu diganti dengan referensi monografi resmi.",
+      "Validasi akhir wajib oleh apoteker terverifikasi sebelum produksi.",
+    ],
+    reviewDueAt: new Date("2026-12-25T00:00:00.000Z"),
+  }
+}
+
 async function main() {
   for (const pharmacist of pharmacists) {
     const user = await db.user.upsert({
@@ -264,10 +312,13 @@ async function main() {
   const reviewedAt = new Date("2026-06-25T00:00:00.000Z")
 
   for (const drug of demoDrugs) {
+    const pharmacistDrugData = getDemoPharmacistDrugData(drug.genericName)
+
     await db.drugInformation.upsert({
       where: { slug: drug.slug },
       create: {
         ...drug,
+        ...pharmacistDrugData,
         brandNames: [...drug.brandNames],
         aliases: [...drug.aliases],
         commonSideEffects: [...drug.commonSideEffects],
@@ -280,6 +331,7 @@ async function main() {
       },
       update: {
         ...drug,
+        ...pharmacistDrugData,
         brandNames: [...drug.brandNames],
         aliases: [...drug.aliases],
         commonSideEffects: [...drug.commonSideEffects],

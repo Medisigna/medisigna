@@ -6,7 +6,7 @@ import { fileDataUrl, ok, requireText, splitTopics, value } from "../shared"
 
 export async function savePharmacistProfile(formData: FormData) {
   const user = await requireRole("PHARMACIST")
-  const path = "/pharmacist/dashboard"
+  const path = "/pharmacist/dashboard/profile"
   const existing = await db.pharmacistProfile.findUnique({ where: { userId: user.id } })
   const profilePhotoUrl =
     (await fileDataUrl(formData, "profilePhoto", "Foto profil", ["image/png", "image/jpeg", "image/webp"], path, false)) ??
