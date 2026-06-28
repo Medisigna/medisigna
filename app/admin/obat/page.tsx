@@ -17,19 +17,13 @@ type PageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>
 }
 
-const statusOptions = ["ALL", "DRAFT", "PUBLISHED"] as const
-const demoOptions = ["ALL", "DEMO", "PRODUCTION"] as const
+const statusOptions = ["ALL", "DRAFT", "PUBLISHED", "REJECTED"] as const
 
 const statusLabels = {
   ALL: "Semua",
-  DRAFT: "Draft",
-  PUBLISHED: "Published",
-}
-
-const demoLabels = {
-  ALL: "Semua",
-  DEMO: "Demo",
-  PRODUCTION: "Produksi",
+  DRAFT: "Menunggu",
+  PUBLISHED: "Terbit",
+  REJECTED: "Ditolak",
 }
 
 function parsePage(value: string | string[] | undefined) {
@@ -60,20 +54,17 @@ function pageHref({
   query,
   letter,
   status,
-  demo,
   page,
 }: {
   query: string
   letter: string
   status: string
-  demo: string
   page: number
 }) {
   const params = new URLSearchParams()
   if (query) params.set("q", query)
   if (letter) params.set("letter", letter)
   if (status !== "ALL") params.set("status", status)
-  if (demo !== "ALL") params.set("demo", demo)
   params.set("page", String(page))
 
   return `/admin/obat?${params.toString()}`
@@ -84,19 +75,16 @@ function letterHref({
   activeLetter,
   nextLetter,
   status,
-  demo,
 }: {
   query: string
   activeLetter: string
   nextLetter: string
   status: string
-  demo: string
 }) {
   const params = new URLSearchParams()
   if (query) params.set("q", query)
   if (nextLetter !== activeLetter) params.set("letter", nextLetter)
   if (status !== "ALL") params.set("status", status)
-  if (demo !== "ALL") params.set("demo", demo)
 
   return params.size ? `/admin/obat?${params.toString()}` : "/admin/obat"
 }
@@ -107,8 +95,7 @@ export default async function AdminDrugsPage({ searchParams }: PageProps) {
   const letter = parseAlphabetLetter(params?.letter)
   const page = parsePage(params?.page)
   const status = parseOption(params?.status, statusOptions, "ALL")
-  const demo = parseOption(params?.demo, demoOptions, "ALL")
-  const result = await getAdminDrugs({ query, letter, page, status, demo })
+  const result = await getAdminDrugs({ query, letter, page, status })
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-6 py-8">
@@ -129,7 +116,7 @@ export default async function AdminDrugsPage({ searchParams }: PageProps) {
         </Button>
       </header>
 
-      <form action="/admin/obat" className="grid gap-3 lg:grid-cols-[1fr_180px_180px_auto]">
+      <form action="/admin/obat" className="grid gap-3 lg:grid-cols-[1fr_180px_auto]">
         <InputGroup className="h-11 bg-background shadow-sm">
           <InputGroupAddon>
             <SearchIcon />
@@ -158,23 +145,11 @@ export default async function AdminDrugsPage({ searchParams }: PageProps) {
             </option>
           ))}
         </select>
-        <select
-          name="demo"
-          defaultValue={demo}
-          className="h-11 rounded-md border bg-background px-3 text-sm"
-          aria-label="Filter demo"
-        >
-          {demoOptions.map((option) => (
-            <option key={option} value={option}>
-              {demoLabels[option]}
-            </option>
-          ))}
-        </select>
         <div className="flex gap-2">
           <Button type="submit" className="flex-1 lg:flex-none">
             Terapkan
           </Button>
-          {query || letter || status !== "ALL" || demo !== "ALL" ? (
+          {query || letter || status !== "ALL" ? (
             <Button asChild variant="ghost" size="icon" aria-label="Hapus filter">
               <Link href="/admin/obat">
                 <XIcon />
@@ -187,7 +162,7 @@ export default async function AdminDrugsPage({ searchParams }: PageProps) {
       <AlphabetFilter
         activeLetter={letter}
         hrefForLetter={(nextLetter) =>
-          letterHref({ query, activeLetter: letter, nextLetter, status, demo })
+          letterHref({ query, activeLetter: letter, nextLetter, status })
         }
       />
 
@@ -196,13 +171,10 @@ export default async function AdminDrugsPage({ searchParams }: PageProps) {
           <TableHeader>
             <TableRow>
               <TableHead>Nama generik</TableHead>
-              <TableHead>Merek</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Jenis</TableHead>
               <TableHead>Reviewer</TableHead>
               <TableHead>Tanggal review</TableHead>
               <TableHead>Review ulang</TableHead>
-              <TableHead>Terakhir diubah</TableHead>
               <TableHead>Aksi</TableHead>
             </TableRow>
           </TableHeader>
@@ -211,13 +183,19 @@ export default async function AdminDrugsPage({ searchParams }: PageProps) {
               result.drugs.map((drug) => (
                 <TableRow key={drug.id}>
                   <TableCell className="font-medium">{drug.genericName}</TableCell>
-                  <TableCell>{drug.brandNames.join(", ") || "-"}</TableCell>
                   <TableCell>{statusLabels[drug.status]}</TableCell>
-                  <TableCell>{drug.isDemo ? "Demo" : "Produksi"}</TableCell>
-                  <TableCell>{drug.reviewer.name}</TableCell>
+                  <TableCell>
+                    <div className="flex flex-col">
+                      <span>{drug.reviewer.name}</span>
+                      {drug.status === "REJECTED" && drug.adminNote ? (
+                        <span className="max-w-48 truncate text-xs text-muted-foreground">
+                          {drug.adminNote}
+                        </span>
+                      ) : null}
+                    </div>
+                  </TableCell>
                   <TableCell>{formatDate(drug.reviewedAt)}</TableCell>
                   <TableCell>{formatDate(drug.reviewDueAt)}</TableCell>
-                  <TableCell>{formatDate(drug.updatedAt)}</TableCell>
                   <TableCell>
                     <div className="flex gap-1">
                       <Button asChild variant="ghost" size="icon-sm" aria-label="Edit">
@@ -238,7 +216,7 @@ export default async function AdminDrugsPage({ searchParams }: PageProps) {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={9} className="py-8 text-center text-muted-foreground">
+                <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
                   Informasi obat tidak ditemukan.
                 </TableCell>
               </TableRow>
@@ -251,7 +229,7 @@ export default async function AdminDrugsPage({ searchParams }: PageProps) {
         <div className="flex items-center justify-between gap-3">
           {result.hasPreviousPage ? (
             <Button asChild variant="outline">
-              <Link href={pageHref({ query, letter, status, demo, page: result.page - 1 })}>
+              <Link href={pageHref({ query, letter, status, page: result.page - 1 })}>
                 Sebelumnya
               </Link>
             </Button>
@@ -265,7 +243,7 @@ export default async function AdminDrugsPage({ searchParams }: PageProps) {
           </p>
           {result.hasNextPage ? (
             <Button asChild variant="outline">
-              <Link href={pageHref({ query, letter, status, demo, page: result.page + 1 })}>
+              <Link href={pageHref({ query, letter, status, page: result.page + 1 })}>
                 Berikutnya
               </Link>
             </Button>

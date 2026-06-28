@@ -92,6 +92,26 @@ export function requireText(formData: FormData, name: string, label: string, pat
   return text
 }
 
+export async function uniqueDrugSlug(genericName: string, currentId?: string) {
+  const base =
+    genericName
+      .normalize("NFKD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "") || "obat"
+
+  for (let suffix = 1; ; suffix += 1) {
+    const slug = suffix === 1 ? base : `${base}-${suffix}`
+    const duplicate = await db.drugInformation.findFirst({
+      where: { slug, ...(currentId ? { NOT: { id: currentId } } : {}) },
+      select: { id: true },
+    })
+
+    if (!duplicate) return slug
+  }
+}
+
 export async function fileDataUrl(
   formData: FormData,
   name: string,

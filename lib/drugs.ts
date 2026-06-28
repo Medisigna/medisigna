@@ -3,6 +3,8 @@ import { Prisma } from "@prisma/client"
 
 import { db } from "@/lib/db"
 
+export type DrugStatus = "DRAFT" | "PUBLISHED" | "REJECTED"
+
 export type DrugListItem = {
   id: string
   slug: string
@@ -20,7 +22,8 @@ export type PharmacistDrugListItem = DrugListItem & {
 }
 
 export type AdminDrugListItem = PharmacistDrugListItem & {
-  status: "DRAFT" | "PUBLISHED"
+  status: DrugStatus
+  adminNote: string | null
   reviewDueAt: Date | null
   updatedAt: Date
   reviewer: {
@@ -80,7 +83,8 @@ export type PharmacistDrugDetailData = PublicDrugDetailData & {
 }
 
 export type AdminDrugDetailData = PharmacistDrugDetailData & {
-  status: "DRAFT" | "PUBLISHED"
+  status: DrugStatus
+  adminNote: string | null
   reviewerId: string
   createdAt: Date
   updatedAt: Date
@@ -94,7 +98,7 @@ type DrugListParams = {
 }
 
 type AdminDrugListParams = DrugListParams & {
-  status?: "ALL" | "DRAFT" | "PUBLISHED"
+  status?: "ALL" | DrugStatus
   demo?: "ALL" | "DEMO" | "PRODUCTION"
 }
 
@@ -121,6 +125,7 @@ const pharmacistDrugListSelect = {
 const adminDrugListSelect = {
   ...pharmacistDrugListSelect,
   status: true,
+  adminNote: true,
   reviewDueAt: true,
   updatedAt: true,
   reviewer: {
@@ -177,6 +182,7 @@ const pharmacistDrugDetailSelect = {
 const adminDrugDetailSelect = {
   ...pharmacistDrugDetailSelect,
   status: true,
+  adminNote: true,
   reviewerId: true,
   createdAt: true,
   updatedAt: true,
@@ -266,7 +272,7 @@ function getPublishedDrugWhere() {
   } as const
 }
 
-function getAdminDrugWhere(status: "ALL" | "DRAFT" | "PUBLISHED" = "ALL") {
+function getAdminDrugWhere(status: "ALL" | DrugStatus = "ALL") {
   return status === "ALL" ? {} : { status }
 }
 
@@ -279,7 +285,7 @@ async function countDrugSearch({
 }: {
   query: string
   letter?: string
-  status?: "DRAFT" | "PUBLISHED"
+  status?: DrugStatus
   demo?: "DEMO" | "PRODUCTION"
   verifiedOnly: boolean
 }) {
@@ -287,7 +293,7 @@ async function countDrugSearch({
   const letterCondition = letter
     ? Prisma.sql`AND d."genericName" ILIKE ${`${letter}%`}`
     : Prisma.empty
-  const statusFilter = status ? [status] : ["DRAFT", "PUBLISHED"]
+  const statusFilter = status ? [status] : ["DRAFT", "PUBLISHED", "REJECTED"]
   const verifiedStatuses = verifiedOnly ? ["VERIFIED"] : ["VERIFIED", "PENDING", "REJECTED", "NEEDS_REVISION"]
   const demoCondition =
     demo === "DEMO"
@@ -337,7 +343,7 @@ async function searchDrugPageIds({
   letter?: string
   take: number
   skip: number
-  status?: "DRAFT" | "PUBLISHED"
+  status?: DrugStatus
   demo?: "DEMO" | "PRODUCTION"
   verifiedOnly: boolean
 }) {
@@ -345,7 +351,7 @@ async function searchDrugPageIds({
   const letterCondition = letter
     ? Prisma.sql`AND d."genericName" ILIKE ${`${letter}%`}`
     : Prisma.empty
-  const statusFilter = status ? [status] : ["DRAFT", "PUBLISHED"]
+  const statusFilter = status ? [status] : ["DRAFT", "PUBLISHED", "REJECTED"]
   const verifiedStatuses = verifiedOnly ? ["VERIFIED"] : ["VERIFIED", "PENDING", "REJECTED", "NEEDS_REVISION"]
   const demoCondition =
     demo === "DEMO"
@@ -396,7 +402,7 @@ async function getDrugList<TDrug extends DrugListItem>({
 }: DrugListParams & {
   where: object
   select: object
-  searchStatus?: "DRAFT" | "PUBLISHED"
+  searchStatus?: DrugStatus
   searchDemo?: "DEMO" | "PRODUCTION"
   verifiedOnly: boolean
 }): Promise<DrugListResult<TDrug>> {

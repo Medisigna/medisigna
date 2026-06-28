@@ -11,6 +11,7 @@ export async function publishDrug(formData: FormData) {
 
   const id = value(formData, "id")
   const action = value(formData, "action")
+  const adminNote = value(formData, "adminNote")
   const path = id ? `/admin/obat/${id}` : "/admin/obat"
 
   if (!id) fail("/admin/obat", "Obat tidak ditemukan.")
@@ -40,22 +41,39 @@ export async function publishDrug(formData: FormData) {
 
     await db.drugInformation.update({
       where: { id },
-      data: { status: "PUBLISHED" },
+      data: { status: "PUBLISHED", adminNote: null } as never,
     })
 
     revalidatePath("/obat")
     revalidatePath(`/obat/${drug.slug}`)
     revalidatePath("/admin/obat")
+    revalidatePath("/pharmacist/dashboard/tulis-obat")
     ok(path, "Informasi obat diterbitkan.")
+  }
+
+  if (action === "reject") {
+    if (!adminNote) fail(path, "Catatan penolakan wajib diisi.")
+
+    await db.drugInformation.update({
+      where: { id },
+      data: { status: "REJECTED", adminNote } as never,
+    })
+
+    revalidatePath("/obat")
+    revalidatePath(`/obat/${drug.slug}`)
+    revalidatePath("/admin/obat")
+    revalidatePath("/pharmacist/dashboard/tulis-obat")
+    ok(path, "Informasi obat ditolak.")
   }
 
   await db.drugInformation.update({
     where: { id },
-    data: { status: "DRAFT" },
+    data: { status: "DRAFT", adminNote: null } as never,
   })
 
   revalidatePath("/obat")
   revalidatePath(`/obat/${drug.slug}`)
   revalidatePath("/admin/obat")
+  revalidatePath("/pharmacist/dashboard/tulis-obat")
   ok(path, "Informasi obat dijadikan draft.")
 }

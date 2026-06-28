@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from "react"
 import type { LucideIcon } from "lucide-react"
 import {
   HeartPulseIcon,
+  FileTextIcon,
   HomeIcon,
   LogOutIcon,
   MessageCircleIcon,
@@ -56,6 +57,7 @@ const patientNavItems: NavItem[] = [
 const pharmacistNavItems: NavItem[] = [
   { href: "/pharmacist/dashboard", label: "Beranda", icon: HomeIcon, exact: true },
   { href: "/pharmacist/dashboard/obat", label: "Obat", icon: PillIcon },
+  { href: "/pharmacist/dashboard/tulis-obat", label: "Tulis Obat", icon: FileTextIcon },
   { href: "/pharmacist/dashboard/chat", label: "Chat", icon: MessageCircleIcon },
   { href: "/pharmacist/dashboard/profile", label: "Profil", icon: UserIcon },
 ]
@@ -237,6 +239,8 @@ function DashboardShell({
                   "grid gap-1",
                   navItems.length === 2
                     ? "grid-cols-2"
+                    : navItems.length === 6
+                      ? "grid-cols-3"
                     : navItems.length === 5
                       ? "grid-cols-5"
                       : "grid-cols-4"

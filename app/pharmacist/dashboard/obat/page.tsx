@@ -1,6 +1,7 @@
 import Link from "next/link"
-import { ArrowRightIcon, SearchIcon, XIcon } from "lucide-react"
+import { ArrowRightIcon, PlusIcon, SearchIcon, XIcon } from "lucide-react"
 
+import { AppMessage } from "@/components/app-message"
 import { AlphabetFilter, parseAlphabetLetter } from "@/components/drugs/alphabet-filter"
 import { Button } from "@/components/ui/button"
 import {
@@ -71,14 +72,23 @@ export default async function PharmacistDrugPage({ searchParams }: PageProps) {
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-5 md:px-6 md:py-8">
-      <header className="flex flex-col gap-1">
-        <p className="text-sm text-muted-foreground">Informasi Obat</p>
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Referensi Apoteker
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          {result.drugs.length} dari {result.total} informasi
-        </p>
+      <AppMessage error={params?.error} success={params?.success} />
+      <header className="flex flex-wrap items-start justify-between gap-3">
+        <div className="flex flex-col gap-1">
+          <p className="text-sm text-muted-foreground">Informasi Obat</p>
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Referensi Apoteker
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            {result.drugs.length} dari {result.total} informasi
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Button asChild variant="outline">
+            <Link href="/pharmacist/dashboard/tulis-obat">Tulis Obat</Link>
+          </Button>
+          
+        </div>
       </header>
 
       <form

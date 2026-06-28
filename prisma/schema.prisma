@@ -58,6 +58,7 @@ enum ConsultationFinalStatus {
 enum DrugPublicationStatus {
   DRAFT
   PUBLISHED
+  REJECTED
 }
 
 model User {
@@ -257,6 +258,7 @@ model DrugInformation {
   reviewer          User                  @relation("DrugReviewer", fields: [reviewerId], references: [id], onDelete: Restrict)
   reviewedAt        DateTime
   status            DrugPublicationStatus @default(DRAFT)
+  adminNote         String?
   isDemo            Boolean               @default(true)
   createdAt         DateTime              @default(now())
   updatedAt         DateTime              @updatedAt

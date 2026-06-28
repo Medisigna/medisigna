@@ -5,7 +5,7 @@ import { redirect } from "next/navigation"
 
 import { db } from "@/lib/db"
 import { requireRole } from "@/lib/session"
-import { fail, value } from "../shared"
+import { fail, uniqueDrugSlug, value } from "../shared"
 
 function listValue(formData: FormData, name: string) {
   return value(formData, name)
@@ -39,38 +39,53 @@ async function requireVerifiedReviewer(reviewerId: string, path: string) {
   if (!reviewer) fail(path, "Reviewer harus apoteker terverifikasi.")
 }
 
+async function verifiedReviewerId(path: string, reviewerId?: string) {
+  if (reviewerId) {
+    await requireVerifiedReviewer(reviewerId, path)
+    return reviewerId
+  }
+
+  const reviewer = await db.user.findFirst({
+    where: {
+      role: "PHARMACIST",
+      pharmacistProfile: { is: { verificationStatus: "VERIFIED" } },
+    },
+    select: { id: true },
+    orderBy: { name: "asc" },
+  })
+
+  if (!reviewer) fail(path, "Reviewer apoteker terverifikasi belum tersedia.")
+  return reviewer.id
+}
+
 export async function saveDrug(formData: FormData) {
   await requireRole("ADMIN")
 
   const id = value(formData, "id")
   const path = id ? `/admin/obat/${id}` : "/admin/obat/new"
   const genericName = value(formData, "genericName")
-  const slug = value(formData, "slug").toLowerCase()
   const uses = value(formData, "uses")
   const generalUsage = value(formData, "generalUsage")
-  const reviewerId = value(formData, "reviewerId")
+  const rawReviewerId = value(formData, "reviewerId")
   const reviewedAt = dateValue(formData, "reviewedAt")
-  const reviewDueAt = dateValue(formData, "reviewDueAt")
-  const status = value(formData, "status") === "PUBLISHED" ? "PUBLISHED" : "DRAFT"
+  const reviewDueAt = formData.has("reviewDueAt")
+    ? dateValue(formData, "reviewDueAt")
+    : undefined
+  const rawStatus = value(formData, "status")
+  const status =
+    rawStatus === "PUBLISHED" || rawStatus === "REJECTED" ? rawStatus : "DRAFT"
 
   if (!genericName) fail(path, "Nama generik wajib diisi.")
-  if (!slug) fail(path, "Slug wajib diisi.")
   if (!uses) fail(path, "Kegunaan umum wajib diisi.")
   if (!generalUsage) fail(path, "Cara pakai umum wajib diisi.")
-  if (!reviewerId) fail(path, "Reviewer wajib dipilih.")
   if (!reviewedAt) fail(path, "Tanggal review wajib diisi.")
-  await requireVerifiedReviewer(reviewerId, path)
+  const reviewerId = await verifiedReviewerId(path, rawReviewerId)
 
-  const duplicate = await db.drugInformation.findFirst({
-    where: { slug, ...(id ? { NOT: { id } } : {}) },
-    select: { id: true },
-  })
-
-  if (duplicate) fail(path, "Slug sudah digunakan.")
   if (status === "PUBLISHED") {
     await requireVerifiedReviewer(reviewerId, path)
   }
 
+  const slug = await uniqueDrugSlug(genericName, id || undefined)
   const data = {
     genericName,
     slug,
@@ -79,7 +94,7 @@ export async function saveDrug(formData: FormData) {
     drugClass: optionalText(formData, "drugClass"),
     dosageForm: optionalText(formData, "dosageForm"),
     isDemo: value(formData, "isDemo") === "true",
-    status,
+    status: status as "DRAFT",
     uses,
     generalUsage,
     foodGuidance: optionalText(formData, "foodGuidance"),
@@ -98,7 +113,7 @@ export async function saveDrug(formData: FormData) {
     references: listValue(formData, "references"),
     reviewerId,
     reviewedAt,
-    reviewDueAt,
+    ...(reviewDueAt !== undefined ? { reviewDueAt } : {}),
   }
 
   const drug = id

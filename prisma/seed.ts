@@ -6,6 +6,12 @@ import { hashPassword } from "better-auth/crypto"
 import { db } from "../lib/db"
 
 const pharmacistPassword = "Apoteker123!"
+const adminPassword = "Admin123!"
+
+const admin = {
+  name: "Admin Medisigna",
+  email: "admin@medisigna.local",
+} as const
 
 const pharmacists = [
   {
@@ -237,6 +243,45 @@ function getDemoPharmacistDrugData(genericName: string) {
 }
 
 async function main() {
+  const adminUser = await db.user.upsert({
+    where: { email: admin.email },
+    create: {
+      id: randomUUID(),
+      name: admin.name,
+      email: admin.email,
+      emailVerified: true,
+      role: "ADMIN",
+      status: "ACTIVE",
+    },
+    update: {
+      name: admin.name,
+      role: "ADMIN",
+      status: "ACTIVE",
+    },
+  })
+
+  const adminHashedPassword = await hashPassword(adminPassword)
+  const adminCredentialAccount = await db.account.findFirst({
+    where: { userId: adminUser.id, providerId: "credential" },
+  })
+
+  if (adminCredentialAccount) {
+    await db.account.update({
+      where: { id: adminCredentialAccount.id },
+      data: { accountId: adminUser.id, password: adminHashedPassword },
+    })
+  } else {
+    await db.account.create({
+      data: {
+        id: randomUUID(),
+        accountId: adminUser.id,
+        providerId: "credential",
+        userId: adminUser.id,
+        password: adminHashedPassword,
+      },
+    })
+  }
+
   for (const pharmacist of pharmacists) {
     const user = await db.user.upsert({
       where: { email: pharmacist.email },
@@ -346,7 +391,7 @@ async function main() {
   }
 
   console.log(
-    `Seeded ${pharmacists.length} verified pharmacists and ${demoDrugs.length} demo drugs with password: ${pharmacistPassword}`
+    `Seeded admin (${admin.email} / ${adminPassword}), ${pharmacists.length} verified pharmacists, and ${demoDrugs.length} demo drugs with pharmacist password: ${pharmacistPassword}`
   )
 }
 

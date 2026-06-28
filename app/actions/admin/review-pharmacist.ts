@@ -1,14 +1,16 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
+import { redirect } from "next/navigation"
 
 import { db } from "@/lib/db"
 import { requireRole } from "@/lib/session"
-import { fail, ok, requireText, value } from "../shared"
+import { fail, requireText, safeCallbackPath, value } from "../shared"
 
 export async function reviewPharmacist(formData: FormData) {
   await requireRole("ADMIN")
-  const profileId = requireText(formData, "profileId", "Pendaftaran", "/admin")
+  const path = safeCallbackPath(formData, "/admin")
+  const profileId = requireText(formData, "profileId", "Pendaftaran", path)
   const action = value(formData, "action")
   const adminNote = value(formData, "adminNote")
   const verificationStatus =
@@ -19,7 +21,7 @@ export async function reviewPharmacist(formData: FormData) {
         : "NEEDS_REVISION"
 
   if (verificationStatus !== "VERIFIED" && !adminNote) {
-    fail("/admin", "Catatan admin wajib diisi.")
+    fail(path, "Catatan admin wajib diisi.")
   }
 
   await db.pharmacistProfile.update({
@@ -28,5 +30,9 @@ export async function reviewPharmacist(formData: FormData) {
   })
 
   revalidatePath("/admin")
-  ok("/admin", "Status apoteker diperbarui.")
+  redirect(
+    `${path}${path.includes("?") ? "&" : "?"}success=${encodeURIComponent(
+      "Status apoteker diperbarui."
+    )}`
+  )
 }
