@@ -73,7 +73,7 @@ export default async function PharmacistChatSessionPage({ params }: PageProps) {
   if (!session || session.pharmacistId !== user.id) notFound()
 
   return (
-    <main className="mx-auto grid h-[calc(100svh-3.5rem)] max-w-6xl overflow-hidden lg:min-h-0 lg:grid-cols-[340px_minmax(0,1fr)] lg:gap-4 lg:px-6 lg:py-8">
+    <main className="mx-auto grid h-[100dvh] max-w-6xl overflow-hidden lg:h-[calc(100svh-3.5rem)] lg:min-h-0 lg:grid-cols-[340px_minmax(0,1fr)] lg:gap-4 lg:px-6 lg:py-8">
       <AppMessage />
       <section className="hidden min-h-0 flex-col gap-4 rounded-2xl border bg-card p-6 lg:flex">
         <h1 className="text-xl font-semibold">Riwayat Chat</h1>
