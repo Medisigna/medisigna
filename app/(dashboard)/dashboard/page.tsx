@@ -127,8 +127,6 @@ export default async function HomePage() {
                         profile.user.image ??
                         undefined
                       }
-                      bio={profile.bio}
-                      topics={profile.topics}
                       practiceLocation={profile.practiceLocation}
                       serviceHours={profile.serviceHours}
                     />

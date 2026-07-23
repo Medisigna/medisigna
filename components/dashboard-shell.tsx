@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import type { LucideIcon } from "lucide-react"
 import {
   HeartPulseIcon,
@@ -179,6 +179,9 @@ export function DashboardShell({
   const isChatRoom = chatHref ? pathname.startsWith(`${chatHref}/`) : false
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [unreadCount, setUnreadCount] = useState(initialUnreadCount)
+  const [mobileNavHidden, setMobileNavHidden] = useState(false)
+  const lastScrollYRef = useRef(0)
+  const scrollFrameRef = useRef<number | null>(null)
   const initials = getUserInitials(user.name)
   const mobileNavItems = navItems.filter((item) => !item.hideOnMobileNav)
 
@@ -196,6 +199,48 @@ export function DashboardShell({
     events.onmessage = fetchUnreadCount
     return () => events.close()
   }, [chatHref, fetchUnreadCount])
+
+  useEffect(() => {
+    if (mobileNavigation !== "bottom" || isChatRoom) {
+      setMobileNavHidden(false)
+      return
+    }
+
+    lastScrollYRef.current = window.scrollY
+
+    const handleScroll = () => {
+      if (scrollFrameRef.current !== null) return
+
+      scrollFrameRef.current = window.requestAnimationFrame(() => {
+        const currentScrollY = Math.max(window.scrollY, 0)
+        const delta = currentScrollY - lastScrollYRef.current
+
+        if (currentScrollY < 24) {
+          setMobileNavHidden(false)
+          lastScrollYRef.current = currentScrollY
+          scrollFrameRef.current = null
+          return
+        }
+
+        if (Math.abs(delta) > 8) {
+          setMobileNavHidden(delta > 0)
+          lastScrollYRef.current = currentScrollY
+        }
+
+        scrollFrameRef.current = null
+      })
+    }
+
+    window.addEventListener("scroll", handleScroll, { passive: true })
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll)
+      if (scrollFrameRef.current !== null) {
+        window.cancelAnimationFrame(scrollFrameRef.current)
+        scrollFrameRef.current = null
+      }
+    }
+  }, [isChatRoom, mobileNavigation])
 
   return (
     <div className="min-h-screen bg-background">
@@ -357,7 +402,13 @@ export function DashboardShell({
         </div>
       </div>
       {mobileNavigation === "bottom" && !isChatRoom ? (
-        <nav className="fixed bottom-[calc(env(safe-area-inset-bottom)+0.75rem)] left-1/2 z-20 w-[calc(100%-1rem)] max-w-md -translate-x-1/2 rounded-2xl border border-border/70 bg-background/85 p-2 shadow-[0_22px_48px_-32px_rgba(14,47,89,0.35)] backdrop-blur-xl lg:hidden">
+        <nav
+          className={cn(
+            "fixed bottom-[calc(env(safe-area-inset-bottom)+0.75rem)] left-1/2 z-20 w-[calc(100%-1rem)] max-w-md -translate-x-1/2 rounded-2xl border border-border/70 bg-background/85 p-2 shadow-[0_22px_48px_-32px_rgba(14,47,89,0.35)] backdrop-blur-xl transition-all duration-300 ease-out lg:hidden",
+            mobileNavHidden &&
+              "pointer-events-none translate-y-[calc(100%+1.25rem)] opacity-0"
+          )}
+        >
           <div
             className={cn(
               "grid gap-1",

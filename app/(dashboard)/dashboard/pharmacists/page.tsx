@@ -63,8 +63,6 @@ export default async function PharmacistListPage({ searchParams }: PageProps) {
                       name={profile.user.name}
                       title={profile.title}
                       image={profile.profilePhotoUrl ?? profile.user.image ?? undefined}
-                      bio={profile.bio}
-                      topics={profile.topics}
                       practiceLocation={profile.practiceLocation}
                       serviceHours={profile.serviceHours}
                     />

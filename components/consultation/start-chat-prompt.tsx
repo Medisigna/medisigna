@@ -31,8 +31,6 @@ type StartChatPromptProps = {
   name: string
   title: string
   image?: string
-  bio: string
-  topics: string[]
   practiceLocation: string
   serviceHours: string
   loginHref?: string
@@ -63,8 +61,6 @@ function PromptContent({
   name,
   title,
   image,
-  bio,
-  topics,
   practiceLocation,
   serviceHours,
   loginHref,
@@ -101,27 +97,6 @@ function PromptContent({
             <ClockIcon className="mt-0.5 size-4 shrink-0 text-primary" />
             <span>{serviceHours}</span>
           </div>
-        </div>
-
-        {/* {topics.length ? (
-          <div className="flex flex-col gap-2">
-          <p className="text-sm font-medium">Topik bantuan</p>
-          <div className="flex flex-wrap gap-2">
-            {topics.map((topic) => (
-              <span
-                key={topic}
-                className="rounded-full bg-secondary px-3 py-1 text-xs text-secondary-foreground"
-              >
-                {topic}
-              </span>
-            ))}
-          </div>
-          </div>
-        ) : null} */}
-
-        <div className="flex flex-col gap-2">
-          <p className="text-sm font-medium">Tentang apoteker</p>
-          <p className="line-clamp-4 text-sm leading-relaxed text-muted-foreground">{bio}</p>
         </div>
 
         {loginHref ? (
