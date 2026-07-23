@@ -33,10 +33,11 @@ const patientNavItems: DashboardNavItem[] = [
     label: "Apoteker",
     description: "Pilih apoteker konsultasi",
     icon: SearchIcon,
+    hideOnMobileNav: true,
   },
   {
     href: "/dashboard/chat",
-    label: "Chat",
+    label: "Konsultasi",
     description: "Percakapan aktif",
     icon: MessageCircleIcon,
   },

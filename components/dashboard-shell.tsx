@@ -31,6 +31,7 @@ export type DashboardNavItem = {
   description: string
   icon: LucideIcon
   exact?: boolean
+  hideOnMobileNav?: boolean
 }
 
 type DashboardShellProps = {
@@ -179,6 +180,7 @@ export function DashboardShell({
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [unreadCount, setUnreadCount] = useState(initialUnreadCount)
   const initials = getUserInitials(user.name)
+  const mobileNavItems = navItems.filter((item) => !item.hideOnMobileNav)
 
   const fetchUnreadCount = useCallback(async () => {
     const response = await fetch("/api/consultation/unread", { cache: "no-store" })
@@ -250,7 +252,7 @@ export function DashboardShell({
         >
           <header
             className={cn(
-              "sticky top-3 z-20 rounded-3xl border border-border/80 bg-background/90 px-3 py-2.5 shadow-[0_22px_48px_-44px_rgba(14,47,89,0.28)] backdrop-blur sm:px-4 sm:py-3",
+              "rounded-3xl border border-border/80 bg-background/90 px-3 py-2.5 shadow-[0_22px_48px_-44px_rgba(14,47,89,0.28)] backdrop-blur sm:px-4 sm:py-3 lg:sticky lg:top-3 lg:z-20",
               isChatRoom && "hidden lg:block"
             )}
           >
@@ -359,16 +361,16 @@ export function DashboardShell({
           <div
             className={cn(
               "grid gap-1",
-              navItems.length === 2
+              mobileNavItems.length === 2
                 ? "grid-cols-2"
-                : navItems.length === 5
+                : mobileNavItems.length === 5
                   ? "grid-cols-5"
-                  : navItems.length === 6
+                  : mobileNavItems.length === 6
                     ? "grid-cols-3"
                     : "grid-cols-4"
             )}
           >
-            {navItems.map((item) => {
+            {mobileNavItems.map((item) => {
               const Icon = item.icon
               const active = isActivePath(pathname, item)
               const showUnread = item.href === chatHref && unreadCount > 0

@@ -27,14 +27,20 @@ function SectionHeading({
   action,
 }: {
   title: string
-  description: string
+  description?: string
   action?: React.ReactNode
 }) {
   return (
-    <div className="flex items-start justify-between gap-3">
+    <div className="flex items-center justify-between gap-3">
       <div className="min-w-0">
-        <h2 className="text-base font-semibold tracking-tight">{title}</h2>
-        <p className="text-sm text-muted-foreground">{description}</p>
+        <h2 className="text-base font-semibold tracking-tight text-secondary-foreground">
+          {title}
+        </h2>
+        {description ? (
+          <p className="mt-0.5 text-sm text-muted-foreground">
+            {description}
+          </p>
+        ) : null}
       </div>
       {action ? <div className="shrink-0">{action}</div> : null}
     </div>
@@ -76,28 +82,26 @@ export default async function HomePage() {
     where: { verificationStatus: "VERIFIED" },
     include: { user: true },
     take: 3,
-    orderBy: { updatedAt: "desc" },
+    orderBy: [{ availabilityStatus: "asc" }, { updatedAt: "desc" }],
   })) as PharmacistCardData[]
 
   return (
-    <main className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-5 md:px-6 md:py-8">
-      <section className="grid gap-4 md:grid-cols-[1fr_auto] md:items-end">
-        <div className="flex min-w-0 flex-row gap-1">
-          <span className="text-sm text-foreground md:text-base">
-            {greeting()},{" "}
-            <span className="text-lg font-bold md:text-xl">{user.name}😇</span>
+    <main className="mx-auto flex max-w-6xl flex-col gap-5 px-4 py-4 md:gap-6 md:px-6 md:py-8">
+      <section className="flex min-w-0 flex-col gap-1">
+        <p className="text-sm font-medium text-muted-foreground">
+          {greeting()},  <span className="truncate text-xl font-semibold tracking-tight text-secondary-foreground md:text-3xl">
+            {user.name}
           </span>
-        </div>
+        </p>
       </section>
 
       <DashboardPromoCarousel />
 
       <section className="flex flex-col gap-3">
         <SectionHeading
-          title="Apoteker pilihan"
-          description="Apoteker terverifikasi terbaru."
+          title="Apoteker terbaik"
           action={
-            <Button asChild variant="outline" size="sm">
+            <Button asChild variant="outline" size="xs">
               <Link href="/dashboard/pharmacists">
                 Lihat Semua
                 <ArrowRightIcon data-icon="inline-end" />
