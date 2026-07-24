@@ -6,6 +6,7 @@ import { type CSSProperties, type ReactNode, useState } from "react"
 import { publishDrug } from "@/app/actions/admin/publish-drug"
 import { saveDrug } from "@/app/actions/admin/save-drug"
 import { DrugSubmitButton } from "@/components/admin/drug-submit-button"
+import { MarkdownEditorField } from "@/components/markdown-editor-field"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -35,6 +36,10 @@ type Reviewer = {
 
 function lines(items?: string[]) {
   return items?.join("\n") ?? ""
+}
+
+function markdownList(items?: string[]) {
+  return items?.length ? items.map((item) => `- ${item}`).join("\n") : ""
 }
 
 function dateInput(date?: Date | null) {
@@ -261,32 +266,37 @@ export function DrugForm({
                 <CardTitle>Publik</CardTitle>
               </CardHeader>
               <CardContent className="grid gap-4">
-                <TextAreaField name="uses" label="Kegunaan umum" defaultValue={drug?.uses} required />
-                <TextAreaField
+                <MarkdownEditorField
+                  name="uses"
+                  label="Kegunaan umum"
+                  defaultValue={drug?.uses}
+                  required
+                />
+                <MarkdownEditorField
                   name="generalUsage"
                   label="Cara pakai umum"
                   defaultValue={drug?.generalUsage}
                   required
                 />
-                <TextAreaField
+                <MarkdownEditorField
                   name="foodGuidance"
                   label="Hubungan makanan"
                   defaultValue={drug?.foodGuidance}
                 />
-                <TextAreaField
+                <MarkdownEditorField
                   name="commonSideEffects"
-                  label="Efek samping umum, satu per baris"
-                  defaultValue={lines(drug?.commonSideEffects)}
+                  label="Efek samping umum"
+                  defaultValue={drug?.commonSideEffects}
                 />
-                <TextAreaField
+                <MarkdownEditorField
                   name="warnings"
-                  label="Peringatan, satu per baris"
-                  defaultValue={lines(drug?.warnings)}
+                  label="Peringatan"
+                  defaultValue={drug?.warnings}
                 />
-                <TextAreaField
+                <MarkdownEditorField
                   name="seekHelpWhen"
-                  label="Kapan mencari bantuan, satu per baris"
-                  defaultValue={lines(drug?.seekHelpWhen)}
+                  label="Kapan mencari bantuan"
+                  defaultValue={drug?.seekHelpWhen}
                 />
               </CardContent>
             </Card>
@@ -295,58 +305,80 @@ export function DrugForm({
           <section className={cn(activeStep !== 2 && "hidden")}>
             <Card>
               <CardHeader>
-                <CardTitle>Apoteker</CardTitle>
+                <CardTitle>Informasi Obat untuk Apoteker</CardTitle>
               </CardHeader>
               <CardContent className="grid gap-4">
-                <TextAreaField
-                  name="pharmacistIndications"
-                  label="Indikasi apoteker"
-                  defaultValue={drug?.pharmacistIndications}
+                <MarkdownEditorField
+                  name="definition"
+                  label="Pengertian"
+                  defaultValue={drug?.definition}
                 />
-                <TextAreaField
-                  name="counselingPoints"
-                  label="Counseling points, satu per baris"
-                  defaultValue={lines(drug?.counselingPoints)}
+                <MarkdownEditorField
+                  name="pharmacology"
+                  label="Farmakologi"
+                  defaultValue={drug?.pharmacology}
                 />
-                <TextAreaField
-                  name="screeningQuestions"
-                  label="Pertanyaan skrining, satu per baris"
-                  defaultValue={lines(drug?.screeningQuestions)}
+                <MarkdownEditorField
+                  name="formulation"
+                  label="Formulasi"
+                  defaultValue={drug?.formulation}
                 />
-                <TextAreaField
-                  name="contraindications"
-                  label="Kontraindikasi/perhatian, satu per baris"
-                  defaultValue={lines(drug?.contraindications)}
+                <MarkdownEditorField
+                  name="indicationsAndDosage"
+                  label="Indikasi dan dosis"
+                  defaultValue={
+                    drug?.indicationsAndDosage ??
+                    drug?.pharmacistIndications
+                  }
                 />
-                <TextAreaField
-                  name="majorInteractions"
-                  label="Interaksi penting, satu per baris"
-                  defaultValue={lines(drug?.majorInteractions)}
+                <MarkdownEditorField
+                  name="sideEffectsAndInteractions"
+                  label="Efek samping dan interaksi"
+                  defaultValue={
+                    drug?.sideEffectsAndInteractions ??
+                    [
+                      markdownList(drug?.seriousSideEffects),
+                      markdownList(drug?.majorInteractions),
+                    ]
+                      .filter(Boolean)
+                      .join("\n\n")
+                  }
                 />
-                <TextAreaField
-                  name="seriousSideEffects"
-                  label="Efek samping serius, satu per baris"
-                  defaultValue={lines(drug?.seriousSideEffects)}
+                <MarkdownEditorField
+                  name="pregnancyUse"
+                  label="Penggunaan pada kehamilan"
+                  defaultValue={drug?.pregnancyUse}
                 />
-                <TextAreaField
-                  name="monitoringParameters"
-                  label="Monitoring, satu per baris"
-                  defaultValue={lines(drug?.monitoringParameters)}
+                <MarkdownEditorField
+                  name="contraindicationsAndWarnings"
+                  label="Kontraindikasi dan peringatan"
+                  defaultValue={
+                    drug?.contraindicationsAndWarnings ??
+                    markdownList(drug?.contraindications)
+                  }
                 />
-                <TextAreaField
-                  name="referralCriteria"
-                  label="Kriteria rujukan, satu per baris"
-                  defaultValue={lines(drug?.referralCriteria)}
+                <MarkdownEditorField
+                  name="clinicalMonitoring"
+                  label="Pengawasan klinis"
+                  defaultValue={
+                    drug?.clinicalMonitoring ??
+                    markdownList(drug?.monitoringParameters)
+                  }
                 />
-                <TextAreaField
-                  name="internalNotes"
-                  label="Catatan internal"
-                  defaultValue={drug?.internalNotes}
+                <MarkdownEditorField
+                  name="counselingPointsMarkdown"
+                  label="Poin konseling"
+                  defaultValue={
+                    drug?.counselingPointsMarkdown ??
+                    markdownList(drug?.counselingPoints)
+                  }
                 />
-                <TextAreaField
-                  name="references"
-                  label="Referensi, satu per baris"
-                  defaultValue={lines(drug?.references)}
+                <MarkdownEditorField
+                  name="referencesMarkdown"
+                  label="Referensi"
+                  defaultValue={
+                    drug?.referencesMarkdown ?? markdownList(drug?.references)
+                  }
                 />
               </CardContent>
             </Card>

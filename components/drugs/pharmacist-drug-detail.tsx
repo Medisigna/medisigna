@@ -16,6 +16,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { MarkdownPreview } from "@/components/markdown-preview"
 import type { PharmacistDrugDetailData } from "@/lib/drugs"
 
 function formatDate(date: Date | null) {
@@ -35,40 +36,27 @@ function Badge({ children }: { children: React.ReactNode }) {
   )
 }
 
-function TextSection({
+function listMarkdown(items: string[]) {
+  return items.map((item) => `- ${item}`).join("\n")
+}
+
+function MarkdownSection({
   title,
-  children,
+  source,
 }: {
   title: string
-  children: React.ReactNode
+  source: string | null
 }) {
   return (
     <section className="flex flex-col gap-2">
       <h2 className="text-base font-semibold">{title}</h2>
-      <div className="leading-7 text-muted-foreground">{children}</div>
-    </section>
-  )
-}
-
-function InformationList({ items }: { items: string[] }) {
-  if (!items.length) {
-    return <p className="text-muted-foreground">Belum ada data.</p>
-  }
-
-  return (
-    <ul className="flex list-disc flex-col gap-2 pl-5 leading-7 text-muted-foreground marker:text-primary">
-      {items.map((item) => (
-        <li key={item}>{item}</li>
-      ))}
-    </ul>
-  )
-}
-
-function ListSection({ title, items }: { title: string; items: string[] }) {
-  return (
-    <section className="flex flex-col gap-2">
-      <h2 className="text-base font-semibold">{title}</h2>
-      <InformationList items={items} />
+      {source ? (
+        <div className="leading-7 text-muted-foreground">
+          <MarkdownPreview source={source} />
+        </div>
+      ) : (
+        <p className="text-muted-foreground">Belum ada data.</p>
+      )}
     </section>
   )
 }
@@ -117,18 +105,19 @@ export function PharmacistDrugDetail({
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-6">
-              <TextSection title="Kegunaan umum">{drug.uses}</TextSection>
-              <TextSection title="Cara pakai umum">
-                {drug.generalUsage}
-              </TextSection>
-              <ListSection
+              <MarkdownSection title="Kegunaan umum" source={drug.uses} />
+              <MarkdownSection title="Cara pakai umum" source={drug.generalUsage} />
+              <MarkdownSection
                 title="Efek samping umum"
-                items={drug.commonSideEffects}
+                source={drug.commonSideEffects}
               />
-              <ListSection title="Peringatan" items={drug.warnings} />
-              <ListSection
+              <MarkdownSection
+                title="Peringatan"
+                source={drug.warnings}
+              />
+              <MarkdownSection
                 title="Kapan mencari bantuan"
-                items={drug.seekHelpWhen}
+                source={drug.seekHelpWhen}
               />
             </CardContent>
           </Card>
@@ -141,38 +130,54 @@ export function PharmacistDrugDetail({
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-6">
-              <TextSection title="Indikasi apoteker">
-                {drug.pharmacistIndications ?? "Belum ada data."}
-              </TextSection>
-              <ListSection title="Counseling points" items={drug.counselingPoints} />
-              <ListSection
-                title="Pertanyaan skrining"
-                items={drug.screeningQuestions}
+              <MarkdownSection title="Pengertian" source={drug.definition} />
+              <MarkdownSection title="Farmakologi" source={drug.pharmacology} />
+              <MarkdownSection title="Formulasi" source={drug.formulation} />
+              <MarkdownSection
+                title="Indikasi dan dosis"
+                source={drug.indicationsAndDosage ?? drug.pharmacistIndications}
               />
-              <ListSection
-                title="Kontraindikasi/perhatian"
-                items={drug.contraindications}
+              <MarkdownSection
+                title="Efek samping dan interaksi"
+                source={
+                  drug.sideEffectsAndInteractions ||
+                  [
+                    listMarkdown(drug.seriousSideEffects),
+                    listMarkdown(drug.majorInteractions),
+                  ]
+                    .filter(Boolean)
+                    .join("\n\n")
+                }
               />
-              <ListSection
-                title="Interaksi penting"
-                items={drug.majorInteractions}
+              <MarkdownSection
+                title="Penggunaan pada kehamilan"
+                source={drug.pregnancyUse}
               />
-              <ListSection
-                title="Efek samping serius"
-                items={drug.seriousSideEffects}
+              <MarkdownSection
+                title="Kontraindikasi dan peringatan"
+                source={
+                  drug.contraindicationsAndWarnings ||
+                  listMarkdown(drug.contraindications)
+                }
               />
-              <ListSection
-                title="Monitoring"
-                items={drug.monitoringParameters}
+              <MarkdownSection
+                title="Pengawasan klinis"
+                source={
+                  drug.clinicalMonitoring ||
+                  listMarkdown(drug.monitoringParameters)
+                }
               />
-              <ListSection
-                title="Kriteria rujukan"
-                items={drug.referralCriteria}
+              <MarkdownSection
+                title="Poin konseling"
+                source={
+                  drug.counselingPointsMarkdown ||
+                  listMarkdown(drug.counselingPoints)
+                }
               />
-              <TextSection title="Catatan internal">
-                {drug.internalNotes ?? "Belum ada data."}
-              </TextSection>
-              <ListSection title="Referensi" items={drug.references} />
+              <MarkdownSection
+                title="Referensi"
+                source={drug.referencesMarkdown || listMarkdown(drug.references)}
+              />
             </CardContent>
           </Card>
         </div>

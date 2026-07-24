@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { ArrowRightIcon, SearchIcon, XIcon } from "lucide-react"
 
+import { DebouncedSearchInput } from "@/components/debounced-search-input"
 import { AlphabetFilter } from "@/components/drugs/alphabet-filter"
 import { Button } from "@/components/ui/button"
 import {
@@ -11,12 +12,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupButton,
-  InputGroupInput,
-} from "@/components/ui/input-group"
 import type { DrugListResult } from "@/lib/drugs"
 import { cn } from "@/lib/utils"
 
@@ -81,22 +76,14 @@ export function DrugList({
         role="search"
         className="flex w-full max-w-xl items-center gap-2"
       >
-        <InputGroup className="h-11 rounded-2xl bg-background shadow-sm">
-          <InputGroupAddon>
-            <SearchIcon />
-          </InputGroupAddon>
-          <InputGroupInput
-            name="q"
-            type="search"
-            defaultValue={query}
-            placeholder="Cari nama obat, merek, atau alias"
-            aria-label="Cari obat"
-          />
-          {letter ? <input type="hidden" name="letter" value={letter} /> : null}
-          <InputGroupAddon align="inline-end">
-            <InputGroupButton type="submit">Cari</InputGroupButton>
-          </InputGroupAddon>
-        </InputGroup>
+        <DebouncedSearchInput
+          action={action}
+          query={query}
+          placeholder="Cari nama obat, merek, atau alias"
+          ariaLabel="Cari obat"
+          hiddenParams={{ letter }}
+          inputGroupClassName="h-11 rounded-2xl bg-background shadow-sm"
+        />
         {query || letter ? (
           <Button
             asChild

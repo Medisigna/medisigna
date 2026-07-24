@@ -1,15 +1,10 @@
 import Link from "next/link"
-import { EditIcon, ExternalLinkIcon, PlusIcon, SearchIcon, XIcon } from "lucide-react"
+import { EditIcon, ExternalLinkIcon, PlusIcon, XIcon } from "lucide-react"
 
 import { AppMessage } from "@/components/app-message"
+import { DebouncedSearchInput } from "@/components/debounced-search-input"
 import { AlphabetFilter, parseAlphabetLetter } from "@/components/drugs/alphabet-filter"
 import { Button } from "@/components/ui/button"
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupButton,
-  InputGroupInput,
-} from "@/components/ui/input-group"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { getAdminDrugs } from "@/lib/drugs"
 
@@ -117,22 +112,14 @@ export default async function AdminDrugsPage({ searchParams }: PageProps) {
       </header>
 
       <form action="/admin/obat" className="grid gap-3 lg:grid-cols-[1fr_180px_auto]">
-        <InputGroup className="h-11 bg-background shadow-sm">
-          <InputGroupAddon>
-            <SearchIcon />
-          </InputGroupAddon>
-          <InputGroupInput
-            name="q"
-            type="search"
-            defaultValue={query}
-            placeholder="Cari obat, merek, atau alias"
-            aria-label="Cari obat"
-          />
-          {letter ? <input type="hidden" name="letter" value={letter} /> : null}
-          <InputGroupAddon align="inline-end">
-            <InputGroupButton type="submit">Cari</InputGroupButton>
-          </InputGroupAddon>
-        </InputGroup>
+        <DebouncedSearchInput
+          action="/admin/obat"
+          query={query}
+          placeholder="Cari obat, merek, atau alias"
+          ariaLabel="Cari obat"
+          hiddenParams={{ letter, status: status !== "ALL" ? status : undefined }}
+          inputGroupClassName="h-11 bg-background shadow-sm"
+        />
         <select
           name="status"
           defaultValue={status}

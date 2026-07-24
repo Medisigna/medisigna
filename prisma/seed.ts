@@ -194,6 +194,10 @@ const demoDrugs = [
   },
 ] as const
 
+function markdownList(items: readonly string[]) {
+  return items.map((item) => `- ${item}`).join("\n")
+}
+
 function getDemoPharmacistDrugData(genericName: string) {
   return {
     drugClass: "Data demo: golongan obat perlu diverifikasi apoteker",
@@ -366,9 +370,9 @@ async function main() {
         ...pharmacistDrugData,
         brandNames: [...drug.brandNames],
         aliases: [...drug.aliases],
-        commonSideEffects: [...drug.commonSideEffects],
-        warnings: [...drug.warnings],
-        seekHelpWhen: [...drug.seekHelpWhen],
+        commonSideEffects: markdownList(drug.commonSideEffects),
+        warnings: markdownList(drug.warnings),
+        seekHelpWhen: markdownList(drug.seekHelpWhen),
         reviewerId: reviewer.id,
         reviewedAt,
         status: "PUBLISHED",
@@ -379,9 +383,9 @@ async function main() {
         ...pharmacistDrugData,
         brandNames: [...drug.brandNames],
         aliases: [...drug.aliases],
-        commonSideEffects: [...drug.commonSideEffects],
-        warnings: [...drug.warnings],
-        seekHelpWhen: [...drug.seekHelpWhen],
+        commonSideEffects: markdownList(drug.commonSideEffects),
+        warnings: markdownList(drug.warnings),
+        seekHelpWhen: markdownList(drug.seekHelpWhen),
         reviewerId: reviewer.id,
         reviewedAt,
         status: "PUBLISHED",

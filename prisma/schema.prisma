@@ -240,9 +240,9 @@ model DrugInformation {
   uses              String
   generalUsage      String
   foodGuidance      String?
-  commonSideEffects String[]              @default([])
-  warnings          String[]              @default([])
-  seekHelpWhen      String[]              @default([])
+  commonSideEffects String
+  warnings          String
+  seekHelpWhen      String
   pharmacistIndications String?
   counselingPoints      String[]          @default([])
   screeningQuestions    String[]          @default([])
@@ -253,6 +253,16 @@ model DrugInformation {
   referralCriteria      String[]          @default([])
   internalNotes         String?
   references            String[]          @default([])
+  definition                              String?
+  pharmacology                            String?
+  formulation                             String?
+  indicationsAndDosage                    String?
+  sideEffectsAndInteractions              String?
+  pregnancyUse                            String?
+  contraindicationsAndWarnings            String?
+  clinicalMonitoring                      String?
+  counselingPointsMarkdown                String?
+  referencesMarkdown                      String?
   reviewDueAt           DateTime?
   reviewerId        String
   reviewer          User                  @relation("DrugReviewer", fields: [reviewerId], references: [id], onDelete: Restrict)

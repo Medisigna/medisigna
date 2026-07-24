@@ -16,15 +16,25 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { MarkdownPreview } from "@/components/markdown-preview"
 import type { DrugDetailData } from "@/lib/drugs"
 
-function InformationList({ items }: { items: string[] }) {
+function MarkdownSection({
+  title,
+  source,
+}: {
+  title: string
+  source: string | null
+}) {
+  if (!source) return null
+
   return (
-    <ul className="flex list-disc flex-col gap-2 pl-5 leading-7 text-muted-foreground marker:text-primary">
-      {items.map((item) => (
-        <li key={item}>{item}</li>
-      ))}
-    </ul>
+    <section className="flex flex-col gap-2">
+      <h2 className="text-lg font-semibold">{title}</h2>
+      <div className="leading-7 text-muted-foreground">
+        <MarkdownPreview source={source} />
+      </div>
+    </section>
   )
 }
 
@@ -69,43 +79,28 @@ export function DrugDetail({
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-8 pt-2">
-              <section className="flex flex-col gap-2">
-                <h2 className="text-lg font-semibold">Kegunaan umum</h2>
-                <p className="leading-7 text-muted-foreground">{drug.uses}</p>
-              </section>
-
-              <section className="flex flex-col gap-2">
-                <h2 className="text-lg font-semibold">Cara pakai umum</h2>
-                <p className="leading-7 text-muted-foreground">
-                  {drug.generalUsage}
-                </p>
-              </section>
+              <MarkdownSection title="Kegunaan umum" source={drug.uses} />
+              <MarkdownSection title="Cara pakai umum" source={drug.generalUsage} />
 
               {drug.foodGuidance ? (
-                <section className="flex flex-col gap-2">
-                  <h2 className="text-lg font-semibold">
-                    Hubungan dengan makanan
-                  </h2>
-                  <p className="leading-7 text-muted-foreground">
-                    {drug.foodGuidance}
-                  </p>
-                </section>
+                <MarkdownSection
+                  title="Hubungan dengan makanan"
+                  source={drug.foodGuidance}
+                />
               ) : null}
 
-              <section className="flex flex-col gap-2">
-                <h2 className="text-lg font-semibold">Efek samping umum</h2>
-                <InformationList items={drug.commonSideEffects} />
-              </section>
-
-              <section className="flex flex-col gap-2">
-                <h2 className="text-lg font-semibold">Peringatan</h2>
-                <InformationList items={drug.warnings} />
-              </section>
-
-              <section className="flex flex-col gap-2">
-                <h2 className="text-lg font-semibold">Kapan mencari bantuan</h2>
-                <InformationList items={drug.seekHelpWhen} />
-              </section>
+              <MarkdownSection
+                title="Efek samping umum"
+                source={drug.commonSideEffects}
+              />
+              <MarkdownSection
+                title="Peringatan"
+                source={drug.warnings}
+              />
+              <MarkdownSection
+                title="Kapan mencari bantuan"
+                source={drug.seekHelpWhen}
+              />
 
               {drug.aliases.length ? (
                 <section className="flex flex-col gap-2 border-t pt-6">

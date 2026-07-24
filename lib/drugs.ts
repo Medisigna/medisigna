@@ -49,9 +49,9 @@ export type PublicDrugDetailData = {
   uses: string
   generalUsage: string
   foodGuidance: string | null
-  commonSideEffects: string[]
-  warnings: string[]
-  seekHelpWhen: string[]
+  commonSideEffects: string
+  warnings: string
+  seekHelpWhen: string
   reviewedAt: Date
   isDemo: boolean
   reviewer: {
@@ -79,6 +79,16 @@ export type PharmacistDrugDetailData = PublicDrugDetailData & {
   referralCriteria: string[]
   internalNotes: string | null
   references: string[]
+  definition: string | null
+  pharmacology: string | null
+  formulation: string | null
+  indicationsAndDosage: string | null
+  sideEffectsAndInteractions: string | null
+  pregnancyUse: string | null
+  contraindicationsAndWarnings: string | null
+  clinicalMonitoring: string | null
+  counselingPointsMarkdown: string | null
+  referencesMarkdown: string | null
   reviewDueAt: Date | null
 }
 
@@ -176,6 +186,16 @@ const pharmacistDrugDetailSelect = {
   referralCriteria: true,
   internalNotes: true,
   references: true,
+  definition: true,
+  pharmacology: true,
+  formulation: true,
+  indicationsAndDosage: true,
+  sideEffectsAndInteractions: true,
+  pregnancyUse: true,
+  contraindicationsAndWarnings: true,
+  clinicalMonitoring: true,
+  counselingPointsMarkdown: true,
+  referencesMarkdown: true,
   reviewDueAt: true,
 }
 
@@ -209,9 +229,6 @@ function normalizePublicDetail<TDrug extends PublicDrugDetailData | null>(
     ...drug,
     brandNames: normalizeTextList(drug.brandNames),
     aliases: normalizeTextList(drug.aliases),
-    commonSideEffects: normalizeTextList(drug.commonSideEffects),
-    warnings: normalizeTextList(drug.warnings),
-    seekHelpWhen: normalizeTextList(drug.seekHelpWhen),
   }
 }
 

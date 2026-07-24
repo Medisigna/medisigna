@@ -65,7 +65,7 @@ const pharmacistNavItems: DashboardNavItem[] = [
   },
   {
     href: "/pharmacist/dashboard/tulis-obat",
-    label: "Tulis Obat",
+    label: "Tulis",
     description: "Tambah artikel obat",
     icon: FileTextIcon,
   },

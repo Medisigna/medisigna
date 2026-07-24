@@ -2,13 +2,13 @@ import Link from "next/link"
 import {
   CheckIcon,
   PencilIcon,
-  SearchIcon,
   SlidersHorizontalIcon,
   XIcon,
 } from "lucide-react"
 
 import { reviewPharmacist } from "@/app/actions/admin/review-pharmacist"
 import { AppMessage } from "@/components/app-message"
+import { DebouncedSearchInput } from "@/components/debounced-search-input"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -19,12 +19,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupButton,
-  InputGroupInput,
-} from "@/components/ui/input-group"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Textarea } from "@/components/ui/textarea"
 import { db } from "@/lib/db"
@@ -142,22 +136,14 @@ export default async function AdminPage({ searchParams }: PageProps) {
 
       <div className="flex flex-col gap-3 lg:flex-row">
         <form action="/admin" className="min-w-0 flex-1">
-          <InputGroup className="h-11 bg-background shadow-sm">
-            <InputGroupAddon>
-              <SearchIcon />
-            </InputGroupAddon>
-            <InputGroupInput
-              name="q"
-              type="search"
-              defaultValue={query}
-              placeholder="Cari nama, email, STR, atau lokasi"
-              aria-label="Cari apoteker"
-            />
-            {status !== "PENDING" ? <input type="hidden" name="status" value={status} /> : null}
-            <InputGroupAddon align="inline-end">
-              <InputGroupButton type="submit">Cari</InputGroupButton>
-            </InputGroupAddon>
-          </InputGroup>
+          <DebouncedSearchInput
+            action="/admin"
+            query={query}
+            placeholder="Cari nama, email, STR, atau lokasi"
+            ariaLabel="Cari apoteker"
+            hiddenParams={{ status: status !== "PENDING" ? status : undefined }}
+            inputGroupClassName="h-11 bg-background shadow-sm"
+          />
         </form>
 
         <div className="flex gap-2">

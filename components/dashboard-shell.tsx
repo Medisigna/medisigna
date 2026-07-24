@@ -297,7 +297,7 @@ export function DashboardShell({
         >
           <header
             className={cn(
-              "rounded-3xl border border-border/80 bg-background/90 px-3 py-2.5 shadow-[0_22px_48px_-44px_rgba(14,47,89,0.28)] backdrop-blur sm:px-4 sm:py-3 lg:sticky lg:top-3 lg:z-20",
+              "rounded-xl border border-border/80 bg-background/90 px-3 py-2.5 shadow-[0_22px_48px_-44px_rgba(14,47,89,0.28)] backdrop-blur sm:px-4 sm:py-3 lg:sticky lg:top-3 lg:z-20",
               isChatRoom && "hidden lg:block"
             )}
           >
