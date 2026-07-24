@@ -51,7 +51,7 @@ function StartButton() {
 
   return (
     <Button type="submit" size="lg" className="w-full rounded-full" disabled={pending}>
-      {pending ? "Memulai..." : "Mulai Chat"}
+      {pending ? "Memulai..." : "Mulai Konsultasi"}
     </Button>
   )
 }
@@ -101,7 +101,7 @@ function PromptContent({
 
         {loginHref ? (
           <Button asChild size="lg" className="w-full rounded-full">
-            <Link href={loginHref}>Masuk untuk Mulai Chat</Link>
+            <Link href={loginHref}>Masuk untuk Mulai Konsultasi</Link>
           </Button>
         ) : (
           <form action={startConsultationSession.bind(null, pharmacistId)} className="w-full">
@@ -121,7 +121,7 @@ export function StartChatPrompt(props: StartChatPromptProps) {
     return (
       <Drawer open={open} onOpenChange={setOpen}>
         <DrawerTrigger asChild>
-          <Button className="w-full">Mulai Chat</Button>
+          <Button className="w-full">Mulai Konsultasi</Button>
         </DrawerTrigger>
         <DrawerContent
           className="
@@ -133,7 +133,7 @@ export function StartChatPrompt(props: StartChatPromptProps) {
   "
         >
           <DrawerHeader className="sr-only">
-            <DrawerTitle>Mulai chat dengan {props.name}</DrawerTitle>
+            <DrawerTitle>Mulai konsultasi dengan {props.name}</DrawerTitle>
             <DrawerDescription>Konfirmasi untuk memulai konsultasi.</DrawerDescription>
           </DrawerHeader>
           <PromptContent {...props} />
@@ -145,14 +145,14 @@ export function StartChatPrompt(props: StartChatPromptProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="w-full">Mulai Chat</Button>
+        <Button className="w-full">Mulai Konsultasi</Button>
       </DialogTrigger>
       <DialogContent
         showCloseButton
         className="h-[min(42rem,calc(100svh-2rem))] max-w-sm overflow-hidden rounded-[2rem] p-0"
       >
         <DialogHeader className="sr-only">
-          <DialogTitle>Mulai chat dengan {props.name}</DialogTitle>
+          <DialogTitle>Mulai konsultasi dengan {props.name}</DialogTitle>
           <DialogDescription>Konfirmasi untuk memulai konsultasi.</DialogDescription>
         </DialogHeader>
         <PromptContent {...props} />

@@ -20,6 +20,19 @@ import {
 import type { DrugListResult } from "@/lib/drugs"
 import { cn } from "@/lib/utils"
 
+function getDrugMeta({
+  brandNames,
+  aliases,
+}: {
+  brandNames: string[]
+  aliases: string[]
+}) {
+  const names = brandNames.length ? brandNames : aliases
+  if (!names.length) return "Nama generik"
+
+  return names.slice(0, 3).join(", ")
+}
+
 export function DrugList({
   result,
   query,
@@ -103,32 +116,40 @@ export function DrugList({
       {drugs.length ? (
         <div className="grid gap-4 md:grid-cols-2">
           {drugs.map((drug) => (
-            <Card
+            <Link
               key={drug.id}
-              className={cn(
-                "rounded-3xl bg-card py-5 shadow-none ring-0 transition-[transform,box-shadow] duration-200 hover:-translate-y-1 hover:shadow-lg",
-                bordered && "border border-border/70"
-              )}
+              href={`${detailBasePath}/${drug.slug}`}
+              className="group block rounded-xl focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
             >
-              <CardHeader>
-                <CardTitle className="text-left text-xl">
-                  {drug.genericName}
-                </CardTitle>
-                <CardDescription className="text-left">
-                  {drug.brandNames.length
-                    ? drug.brandNames.join(" - ")
-                    : "Nama generik"}
-                </CardDescription>
-              </CardHeader>
-              <CardFooter className="justify-end">
-                <Button asChild variant="ghost" size="sm">
-                  <Link href={`${detailBasePath}/${drug.slug}`}>
+              <Card
+                className={cn(
+                  "h-full rounded-xl bg-card py-4 shadow-none ring-0 transition-colors group-hover:bg-muted/40",
+                  bordered && "border border-border/70"
+                )}
+              >
+                <CardHeader className="gap-1.5">
+                  <div className="flex items-start justify-between gap-4">
+                    <CardTitle className="text-left text-lg leading-snug">
+                      {drug.genericName}
+                    </CardTitle>
+                    <ArrowRightIcon className="mt-1 size-4 shrink-0 text-muted-foreground transition-colors group-hover:text-foreground" />
+                  </div>
+                  <CardDescription className="line-clamp-1 text-left">
+                    {getDrugMeta(drug)}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="line-clamp-2 text-sm leading-6 text-muted-foreground">
+                    {drug.uses}
+                  </p>
+                </CardContent>
+                <CardFooter className="pt-1">
+                  <span className="text-sm font-medium text-primary">
                     Lihat detail
-                    <ArrowRightIcon data-icon="inline-end" />
-                  </Link>
-                </Button>
-              </CardFooter>
-            </Card>
+                  </span>
+                </CardFooter>
+              </Card>
+            </Link>
           ))}
         </div>
       ) : (
