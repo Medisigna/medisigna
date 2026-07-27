@@ -1,6 +1,7 @@
 "use client"
 
 import {
+  BookOpenIcon,
   FileTextIcon,
   HomeIcon,
   MessageCircleIcon,
@@ -36,6 +37,26 @@ const patientNavItems: DashboardNavItem[] = [
     description: "Pilih apoteker konsultasi",
     icon: SearchIcon,
     hideOnMobileNav: true,
+  },
+  {
+    href: "/dashboard/video",
+    label: "Edukasi",
+    description: "Artikel dan video kesehatan",
+    icon: BookOpenIcon,
+    children: [
+      {
+        href: "/dashboard/video",
+        label: "Video Kesehatan",
+        description: "Video edukasi",
+        icon: VideoIcon,
+      },
+      {
+        href: "/dashboard/artikel",
+        label: "Artikel",
+        description: "Bacaan kesehatan",
+        icon: NewspaperIcon,
+      },
+    ],
   },
   {
     href: "/dashboard/chat",

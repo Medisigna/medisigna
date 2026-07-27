@@ -7,9 +7,12 @@ import {
   PharmacistCard,
   type PharmacistCardData,
 } from "@/components/pharmacists/pharmacist-card"
+import { VideoCard } from "@/components/videos/video-card"
+import { videoListCard } from "@/components/videos/video-list-page"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { db } from "@/lib/db"
+import { getVideos } from "@/lib/educational-videos"
 import { requireRole } from "@/lib/session"
 
 function greeting() {
@@ -78,12 +81,15 @@ function EmptyState({
 
 export default async function HomePage() {
   const user = await requireRole("PATIENT")
-  const pharmacists = (await db.pharmacistProfile.findMany({
-    where: { verificationStatus: "VERIFIED" },
-    include: { user: true },
-    take: 3,
-    orderBy: [{ availabilityStatus: "asc" }, { updatedAt: "desc" }],
-  })) as PharmacistCardData[]
+  const [pharmacists, videos] = await Promise.all([
+    db.pharmacistProfile.findMany({
+      where: { verificationStatus: "VERIFIED" },
+      include: { user: true },
+      take: 3,
+      orderBy: [{ availabilityStatus: "asc" }, { updatedAt: "desc" }],
+    }) as Promise<PharmacistCardData[]>,
+    getVideos({ publishedOnly: true, limit: 3 }),
+  ])
 
   return (
     <main className="mx-auto flex max-w-6xl flex-col gap-5 px-4 py-4 md:gap-6 md:px-6 md:py-8">
@@ -147,6 +153,41 @@ export default async function HomePage() {
             action={
               <Button asChild variant="outline" size="sm">
                 <Link href="/dashboard/pharmacists">Cek Apoteker</Link>
+              </Button>
+            }
+          />
+        )}
+      </section>
+
+      <section className="flex flex-col gap-3">
+        <SectionHeading
+          title="Video edukasi populer"
+          action={
+            <Button asChild variant="outline" size="xs">
+              <Link href="/dashboard/video">
+                Lihat Semua
+                <ArrowRightIcon data-icon="inline-end" />
+              </Link>
+            </Button>
+          }
+        />
+        {videos.videos.length ? (
+          <div className="grid gap-4 xl:grid-cols-2">
+            {videos.videos.map((video) => (
+              <VideoCard
+                key={video.id}
+                video={videoListCard(video, "/dashboard/video")}
+              />
+            ))}
+          </div>
+        ) : (
+          <EmptyState
+            icon={ShieldCheckIcon}
+            title="Belum ada video"
+            description="Video edukasi terbit akan muncul di sini."
+            action={
+              <Button asChild variant="outline" size="sm">
+                <Link href="/dashboard/video">Cek Video</Link>
               </Button>
             }
           />

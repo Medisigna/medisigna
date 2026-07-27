@@ -3,7 +3,13 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { ArrowRightIcon, HeartPulseIcon, MenuIcon } from "lucide-react"
+import {
+  ArrowRightIcon,
+  FileTextIcon,
+  HeartPulseIcon,
+  MenuIcon,
+  PlayCircleIcon,
+} from "lucide-react"
 
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Button } from "@/components/ui/button"
@@ -16,11 +22,32 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer"
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu"
 import { cn } from "@/lib/utils"
 
+const educationItems = [
+  {
+    label: "Artikel",
+    href: "/artikel",
+    description: "Bacaan edukasi obat dari apoteker.",
+    icon: FileTextIcon,
+  },
+  {
+    label: "Video",
+    href: "/video",
+    description: "Video edukasi singkat dan mudah diikuti.",
+    icon: PlayCircleIcon,
+  },
+]
+
 const navItems = [
-  ["Artikel", "/artikel"],
-  ["Video", "/video"],
   ["Obat A-Z", "/obat"],
   ["Apoteker", "/pharmacists"],
   ["Tentang", "/about"],
@@ -94,6 +121,58 @@ export function SiteHeader() {
         </Link>
 
         <nav className="hidden items-center gap-1 lg:gap-2 xl:gap-6 md:flex">
+          <NavigationMenu viewport={false}>
+            <NavigationMenuList>
+              <NavigationMenuItem>
+                <NavigationMenuTrigger
+                  className={cn(
+                    isHeroSurface
+                      ? "text-white/85 hover:bg-white/15 hover:text-white data-open:bg-white data-open:text-[#0878ea] data-popup-open:bg-white data-popup-open:text-[#0878ea]"
+                      : "text-muted-foreground hover:bg-primary hover:text-primary-foreground data-open:bg-primary data-open:text-primary-foreground data-popup-open:bg-primary data-popup-open:text-primary-foreground",
+                    educationItems.some(
+                      (item) =>
+                        pathname === item.href ||
+                        pathname.startsWith(`${item.href}/`)
+                    ) &&
+                      (isHeroSurface
+                        ? "bg-white text-[#0878ea] hover:bg-white hover:text-[#0878ea]"
+                        : "bg-primary text-primary-foreground")
+                  )}
+                >
+                  Edukasi
+                </NavigationMenuTrigger>
+                <NavigationMenuContent className="min-w-72">
+                  <div className="grid gap-1">
+                    {educationItems.map((item) => {
+                      const Icon = item.icon
+                      const active =
+                        pathname === item.href ||
+                        pathname.startsWith(`${item.href}/`)
+
+                      return (
+                        <NavigationMenuLink
+                          key={item.href}
+                          asChild
+                          active={active}
+                          className="items-start gap-3 p-3"
+                        >
+                          <Link href={item.href}>
+                            <Icon className="mt-0.5 text-primary" />
+                            <span className="flex flex-col gap-1">
+                              <span className="font-medium">{item.label}</span>
+                              <span className="text-xs leading-5 text-muted-foreground">
+                                {item.description}
+                              </span>
+                            </span>
+                          </Link>
+                        </NavigationMenuLink>
+                      )
+                    })}
+                  </div>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+            </NavigationMenuList>
+          </NavigationMenu>
           {navItems.map(([label, href]) => {
             const active = pathname === href || pathname.startsWith(`${href}/`)
 
@@ -151,6 +230,33 @@ export function SiteHeader() {
                 </DrawerTitle>
                 <ThemeToggle />
               </DrawerHeader>
+              <div className="flex flex-col gap-2 px-4 pb-2">
+                <p className="px-3 text-xs font-medium text-muted-foreground">
+                  Edukasi
+                </p>
+                <nav className="flex flex-col text-base">
+                  {educationItems.map((item) => {
+                    const active =
+                      pathname === item.href ||
+                      pathname.startsWith(`${item.href}/`)
+
+                    return (
+                      <DrawerClose key={item.href} asChild>
+                        <Link
+                          href={item.href}
+                          aria-current={active ? "page" : undefined}
+                          className={cn(
+                            "rounded-md px-3 py-4 font-medium transition-colors hover:bg-primary hover:text-primary-foreground",
+                            active && "bg-primary text-primary-foreground"
+                          )}
+                        >
+                          {item.label}
+                        </Link>
+                      </DrawerClose>
+                    )
+                  })}
+                </nav>
+              </div>
               <nav className="flex flex-col px-4 text-base">
                 {navItems.map(([label, href]) => {
                   const active =

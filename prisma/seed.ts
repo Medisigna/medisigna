@@ -194,8 +194,170 @@ const demoDrugs = [
   },
 ] as const
 
+const demoArticles = [
+  {
+    slug: "cara-aman-membaca-label-obat",
+    title: "Cara Aman Membaca Label Obat",
+    category: "Edukasi Obat",
+    excerpt: "Panduan singkat memahami nama obat, aturan pakai, komposisi, dan peringatan pada kemasan.",
+    contentMarkdown: `## Kenali informasi utama
+
+Baca nama obat, kandungan aktif, kekuatan sediaan, aturan pakai, dan batas penggunaan sebelum meminum obat.
+
+## Perhatikan peringatan
+
+Cari informasi alergi, batas usia, kehamilan, menyusui, penyakit tertentu, dan obat lain yang sedang digunakan.
+
+## Kapan perlu bertanya
+
+Tanya apoteker jika aturan pakai tidak jelas, ada lebih dari satu obat dengan kandungan serupa, atau keluhan tidak membaik.`,
+    metaTitle: "Cara Aman Membaca Label Obat | Medisigna",
+    metaDescription: "Pelajari cara membaca label obat agar penggunaan obat harian lebih aman.",
+    coverImageUrl: "/landing-carousel/apoteker1.png",
+    publishedAt: new Date("2026-07-01T00:00:00.000Z"),
+  },
+  {
+    slug: "kenali-efek-samping-yang-perlu-diwaspadai",
+    title: "Kenali Efek Samping yang Perlu Diwaspadai",
+    category: "Keamanan Obat",
+    excerpt: "Tidak semua efek samping berbahaya, tetapi beberapa tanda perlu segera dikonsultasikan.",
+    contentMarkdown: `## Efek samping ringan
+
+Sebagian obat dapat menimbulkan mual, pusing, kantuk, atau tidak nyaman pada lambung.
+
+## Tanda bahaya
+
+Segera cari bantuan bila muncul sesak, bengkak wajah, ruam luas, pingsan, muntah darah, atau keluhan berat lain.
+
+## Catat riwayat obat
+
+Simpan daftar obat dan reaksi yang pernah dialami agar apoteker dan dokter dapat membantu menilai risikonya.`,
+    metaTitle: "Efek Samping Obat yang Perlu Diwaspadai | Medisigna",
+    metaDescription: "Kenali tanda efek samping obat yang membutuhkan bantuan tenaga kesehatan.",
+    coverImageUrl: "/landing-carousel/apoteker2.png",
+    publishedAt: new Date("2026-07-03T00:00:00.000Z"),
+  },
+  {
+    slug: "antibiotik-harus-digunakan-dengan-tepat",
+    title: "Antibiotik Harus Digunakan dengan Tepat",
+    category: "Antibiotik",
+    excerpt: "Antibiotik tidak selalu diperlukan dan harus digunakan sesuai arahan tenaga kesehatan.",
+    contentMarkdown: `## Bukan untuk semua keluhan
+
+Antibiotik digunakan untuk infeksi bakteri tertentu, bukan untuk semua demam, flu, batuk, atau sakit tenggorokan.
+
+## Ikuti arahan
+
+Gunakan sesuai resep. Jangan berbagi antibiotik, menyimpan sisa obat untuk keluhan berikutnya, atau menghentikan terapi tanpa arahan.
+
+## Konsultasikan
+
+Tanya apoteker bila lupa minum obat, muncul efek samping, atau sedang menggunakan obat lain.`,
+    metaTitle: "Penggunaan Antibiotik yang Tepat | Medisigna",
+    metaDescription: "Edukasi penggunaan antibiotik agar lebih aman dan bertanggung jawab.",
+    coverImageUrl: "/landing-carousel/apoteker3.png",
+    publishedAt: new Date("2026-07-05T00:00:00.000Z"),
+  },
+  {
+    slug: "tips-menyimpan-obat-di-rumah",
+    title: "Tips Menyimpan Obat di Rumah",
+    category: "Obat Rumahan",
+    excerpt: "Cara menyimpan obat agar kualitasnya terjaga dan tidak mudah tertukar.",
+    contentMarkdown: `## Simpan sesuai petunjuk
+
+Ikuti instruksi suhu, cahaya, dan kelembapan pada kemasan. Jangan memindahkan obat tanpa label yang jelas.
+
+## Pisahkan obat
+
+Pisahkan obat anak, obat dewasa, obat luar, dan obat yang sudah kedaluwarsa.
+
+## Cek berkala
+
+Periksa tanggal kedaluwarsa dan kondisi obat secara rutin. Buang obat rusak sesuai arahan fasilitas kesehatan setempat.`,
+    metaTitle: "Tips Menyimpan Obat di Rumah | Medisigna",
+    metaDescription: "Panduan ringkas menyimpan obat rumahan dengan aman.",
+    coverImageUrl: "/landing-carousel/apoteker1.png",
+    publishedAt: new Date("2026-07-07T00:00:00.000Z"),
+  },
+  {
+    slug: "kapan-harus-bertanya-ke-apoteker",
+    title: "Kapan Harus Bertanya ke Apoteker",
+    category: "Konsultasi",
+    excerpt: "Situasi umum ketika bantuan apoteker dapat membantu penggunaan obat lebih aman.",
+    contentMarkdown: `## Saat mulai obat baru
+
+Tanyakan cara pakai, waktu minum, efek samping yang umum, dan hal yang perlu dihindari.
+
+## Saat memakai banyak obat
+
+Apoteker dapat membantu mengecek duplikasi kandungan, interaksi, dan jadwal minum yang lebih mudah diikuti.
+
+## Saat ragu
+
+Konsultasikan bila label sulit dipahami, keluhan tidak membaik, atau ada kondisi khusus seperti hamil, menyusui, lansia, atau penyakit kronis.`,
+    metaTitle: "Kapan Harus Bertanya ke Apoteker | Medisigna",
+    metaDescription: "Kenali waktu yang tepat untuk berkonsultasi dengan apoteker.",
+    coverImageUrl: "/landing-carousel/apoteker2.png",
+    publishedAt: new Date("2026-07-09T00:00:00.000Z"),
+  },
+] as const
+
+const demoEducationalVideos = [
+  {
+    slug: "video-membaca-aturan-pakai-obat",
+    title: "Membaca Aturan Pakai Obat",
+    category: "Edukasi Obat",
+    excerpt: "Video singkat tentang bagian penting pada aturan pakai obat dan kapan perlu bertanya.",
+    youtubeVideoId: "dFhhLtAkP0E",
+    publishedAt: new Date("2026-07-02T00:00:00.000Z"),
+  },
+  {
+    slug: "video-mencegah-duplikasi-kandungan-obat",
+    title: "Mencegah Duplikasi Kandungan Obat",
+    category: "Keamanan Obat",
+    excerpt: "Kenali risiko memakai beberapa produk dengan kandungan aktif yang sama.",
+    youtubeVideoId: "dFhhLtAkP0E",
+    publishedAt: new Date("2026-07-04T00:00:00.000Z"),
+  },
+  {
+    slug: "video-antibiotik-bukan-obat-semua-penyakit",
+    title: "Antibiotik Bukan Obat Semua Penyakit",
+    category: "Antibiotik",
+    excerpt: "Edukasi ringkas tentang penggunaan antibiotik yang perlu mengikuti arahan tenaga kesehatan.",
+    youtubeVideoId: "dFhhLtAkP0E",
+    publishedAt: new Date("2026-07-06T00:00:00.000Z"),
+  },
+  {
+    slug: "video-menyimpan-obat-di-rumah",
+    title: "Menyimpan Obat di Rumah",
+    category: "Obat Rumahan",
+    excerpt: "Langkah sederhana menyimpan obat agar tetap aman dan mudah dikenali.",
+    youtubeVideoId: "dFhhLtAkP0E",
+    publishedAt: new Date("2026-07-08T00:00:00.000Z"),
+  },
+  {
+    slug: "video-persiapan-konsultasi-apoteker",
+    title: "Persiapan Konsultasi Apoteker",
+    category: "Konsultasi",
+    excerpt: "Apa saja yang sebaiknya disiapkan sebelum bertanya tentang obat kepada apoteker.",
+    youtubeVideoId: "dFhhLtAkP0E",
+    publishedAt: new Date("2026-07-10T00:00:00.000Z"),
+  },
+] as const
+
 function markdownList(items: readonly string[]) {
   return items.map((item) => `- ${item}`).join("\n")
+}
+
+function contentCategorySlug(name: string) {
+  return (
+    name
+      .normalize("NFKD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "") || "kategori"
+  )
 }
 
 function getDemoPharmacistDrugData(genericName: string) {
@@ -359,6 +521,71 @@ async function main() {
     where: { email: pharmacists[0].email },
   })
   const reviewedAt = new Date("2026-06-25T00:00:00.000Z")
+  const contentCategories = [
+    ...new Set([
+      ...demoArticles.map((article) => article.category),
+      ...demoEducationalVideos.map((video) => video.category),
+    ]),
+  ]
+
+  for (const category of contentCategories) {
+    await db.contentCategory.upsert({
+      where: { name: category },
+      create: {
+        name: category,
+        slug: contentCategorySlug(category),
+        isActive: true,
+      },
+      update: {
+        slug: contentCategorySlug(category),
+        isActive: true,
+      },
+    })
+  }
+
+  for (const article of demoArticles) {
+    await db.article.upsert({
+      where: { slug: article.slug },
+      create: {
+        ...article,
+        status: "PUBLISHED",
+        authorId: reviewer.id,
+        reviewedAt: article.publishedAt,
+      },
+      update: {
+        ...article,
+        status: "PUBLISHED",
+        authorId: reviewer.id,
+        reviewedAt: article.publishedAt,
+      },
+    })
+  }
+
+  for (const video of demoEducationalVideos) {
+    const youtubeUrl = `https://www.youtube.com/watch?v=${video.youtubeVideoId}`
+
+    await db.educationalVideo.upsert({
+      where: { slug: video.slug },
+      create: {
+        ...video,
+        youtubeUrl,
+        metaTitle: `${video.title} | Medisigna`,
+        metaDescription: video.excerpt,
+        status: "PUBLISHED",
+        authorId: reviewer.id,
+        reviewedAt: video.publishedAt,
+      },
+      update: {
+        ...video,
+        youtubeUrl,
+        metaTitle: `${video.title} | Medisigna`,
+        metaDescription: video.excerpt,
+        status: "PUBLISHED",
+        authorId: reviewer.id,
+        reviewedAt: video.publishedAt,
+      },
+    })
+  }
 
   for (const drug of demoDrugs) {
     const pharmacistDrugData = getDemoPharmacistDrugData(drug.genericName)
@@ -395,7 +622,7 @@ async function main() {
   }
 
   console.log(
-    `Seeded admin (${admin.email} / ${adminPassword}), ${pharmacists.length} verified pharmacists, and ${demoDrugs.length} demo drugs with pharmacist password: ${pharmacistPassword}`
+    `Seeded admin (${admin.email} / ${adminPassword}), ${pharmacists.length} verified pharmacists, ${demoDrugs.length} demo drugs, ${demoArticles.length} articles, and ${demoEducationalVideos.length} educational videos with pharmacist password: ${pharmacistPassword}`
   )
 }
 
