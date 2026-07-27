@@ -7,6 +7,7 @@ const footerLinks = [
     links: [
       ["Informasi Obat", "/obat"],
       ["Konsultasi Obat", "/pharmacists"],
+      ["Video Edukasi", "/video"],
       ["FAQ", "/faq"],
       ["Kontak", "/contact"],
     ],

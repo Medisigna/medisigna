@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils"
 
 const navItems = [
   ["Artikel", "/artikel"],
+  ["Video", "/video"],
   ["Obat A-Z", "/obat"],
   ["Apoteker", "/pharmacists"],
   ["Tentang", "/about"],
@@ -92,7 +93,7 @@ export function SiteHeader() {
           <span className="truncate">Medisigna</span>
         </Link>
 
-        <nav className="hidden items-center gap-6 md:flex">
+        <nav className="hidden items-center gap-1 lg:gap-2 xl:gap-6 md:flex">
           {navItems.map(([label, href]) => {
             const active = pathname === href || pathname.startsWith(`${href}/`)
 
@@ -102,7 +103,7 @@ export function SiteHeader() {
                 href={href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "rounded-md px-3 py-1.5 font-medium transition-colors",
+                  "rounded-md px-2 py-1.5 font-medium transition-colors lg:px-3",
                   isHeroSurface
                     ? "text-white/85 hover:bg-white/15 hover:text-white"
                     : "text-muted-foreground hover:bg-primary hover:text-primary-foreground",

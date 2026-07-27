@@ -1,6 +1,12 @@
 "use client"
 
-import { NewspaperIcon, PillIcon, UserCheckIcon } from "lucide-react"
+import {
+  NewspaperIcon,
+  PillIcon,
+  TagsIcon,
+  UserCheckIcon,
+  VideoIcon,
+} from "lucide-react"
 
 import {
   DashboardShell,
@@ -26,6 +32,18 @@ const adminNavItems: DashboardNavItem[] = [
     label: "Artikel",
     description: "Moderasi artikel",
     icon: NewspaperIcon,
+  },
+  {
+    href: "/admin/video",
+    label: "Video Edukasi",
+    description: "Moderasi video",
+    icon: VideoIcon,
+  },
+  {
+    href: "/admin/kategori",
+    label: "Kategori Konten",
+    description: "Kelola kategori",
+    icon: TagsIcon,
   },
 ]
 

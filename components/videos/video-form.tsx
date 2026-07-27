@@ -1,14 +1,12 @@
 import Link from "next/link"
 
-import { ArticleCoverUploadField } from "@/components/articles/article-cover-upload-field"
-import { MarkdownEditorField } from "@/components/markdown-editor-field"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import type { ArticleDetail } from "@/lib/articles"
+import type { VideoDetail } from "@/lib/educational-videos"
 
-type ArticleAction = (formData: FormData) => void | Promise<void>
+type VideoAction = (formData: FormData) => void | Promise<void>
 
 function Field({
   children,
@@ -30,33 +28,33 @@ function Field({
   )
 }
 
-export function ArticleForm({
-  article,
+export function VideoForm({
   cancelHref,
   categories = [],
   saveAction,
+  video,
 }: {
-  article?: ArticleDetail | null
   cancelHref: string
   categories?: string[]
-  saveAction: ArticleAction
+  saveAction: VideoAction
+  video?: VideoDetail | null
 }) {
   return (
     <form action={saveAction} className="flex flex-col gap-4">
-      {article ? <input type="hidden" name="id" value={article.id} /> : null}
+      {video ? <input type="hidden" name="id" value={video.id} /> : null}
       <Card>
         <CardHeader>
           <CardTitle>Dasar</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
           <Field label="Judul" required>
-            <Input name="title" defaultValue={article?.title ?? ""} aria-required />
+            <Input name="title" defaultValue={video?.title ?? ""} aria-required />
           </Field>
           <Field label="Kategori" required>
             {categories.length ? (
               <select
                 name="category"
-                defaultValue={article?.category ?? ""}
+                defaultValue={video?.category ?? ""}
                 required
                 aria-required
                 className="h-10 rounded-md border bg-background px-3 text-sm"
@@ -71,33 +69,20 @@ export function ArticleForm({
                 ))}
               </select>
             ) : (
-              <Input name="category" defaultValue={article?.category ?? ""} aria-required />
+              <Input name="category" defaultValue={video?.category ?? ""} aria-required />
             )}
           </Field>
-          <Field label="Ringkasan" required>
-            <Textarea
-              name="excerpt"
-              defaultValue={article?.excerpt ?? ""}
-              rows={4}
+          <Field label="Link YouTube" required>
+            <Input
+              name="youtubeUrl"
+              type="url"
+              defaultValue={video?.youtubeUrl ?? ""}
               aria-required
             />
           </Field>
-          <ArticleCoverUploadField defaultValue={article?.coverImageUrl} />
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Artikel</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <MarkdownEditorField
-            name="contentMarkdown"
-            label="Isi artikel"
-            defaultValue={article?.contentMarkdown}
-            required
-            height={420}
-          />
+          <Field label="Ringkasan" required>
+            <Textarea name="excerpt" defaultValue={video?.excerpt ?? ""} rows={4} aria-required />
+          </Field>
         </CardContent>
       </Card>
 
@@ -107,14 +92,10 @@ export function ArticleForm({
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
           <Field label="Meta title">
-            <Input name="metaTitle" defaultValue={article?.metaTitle ?? ""} />
+            <Input name="metaTitle" defaultValue={video?.metaTitle ?? ""} />
           </Field>
           <Field label="Meta description">
-            <Textarea
-              name="metaDescription"
-              defaultValue={article?.metaDescription ?? ""}
-              rows={3}
-            />
+            <Textarea name="metaDescription" defaultValue={video?.metaDescription ?? ""} rows={3} />
           </Field>
         </CardContent>
       </Card>

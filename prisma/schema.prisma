@@ -68,6 +68,12 @@ enum ArticlePublicationStatus {
   REJECTED
 }
 
+enum EducationalVideoPublicationStatus {
+  DRAFT
+  PUBLISHED
+  REJECTED
+}
+
 model User {
   id                 String                @id
   name               String
@@ -89,6 +95,7 @@ model User {
   createdSummaries   ConsultationSummary[] @relation("SummaryCreator")
   reviewedDrugs      DrugInformation[]     @relation("DrugReviewer")
   authoredArticles    Article[]             @relation("ArticleAuthor")
+  authoredVideos      EducationalVideo[]    @relation("EducationalVideoAuthor")
 
   @@map("user")
 }
@@ -312,4 +319,41 @@ model Article {
   @@index([category])
   @@index([authorId])
   @@index([publishedAt])
+}
+
+model EducationalVideo {
+  id               String                             @id @default(cuid())
+  title            String
+  slug             String                             @unique
+  category         String
+  excerpt          String
+  youtubeUrl       String
+  youtubeVideoId   String
+  metaTitle        String?
+  metaDescription  String?
+  status           EducationalVideoPublicationStatus  @default(DRAFT)
+  adminNote        String?
+  authorId         String
+  author           User                               @relation("EducationalVideoAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+  reviewedAt       DateTime?
+  publishedAt      DateTime?
+  createdAt        DateTime                           @default(now())
+  updatedAt        DateTime                           @updatedAt
+
+  @@index([status])
+  @@index([category])
+  @@index([authorId])
+  @@index([publishedAt])
+}
+
+model ContentCategory {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  slug      String   @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive])
+  @@index([name])
 }

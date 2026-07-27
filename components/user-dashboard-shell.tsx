@@ -8,6 +8,7 @@ import {
   PillIcon,
   SearchIcon,
   UserIcon,
+  VideoIcon,
 } from "lucide-react"
 
 import {
@@ -67,7 +68,7 @@ const pharmacistNavItems: DashboardNavItem[] = [
   {
     href: "/pharmacist/dashboard/tulis-obat",
     label: "Buat Konten",
-    description: "Tulis obat dan artikel",
+    description: "Tulis obat, artikel, video",
     icon: FileTextIcon,
     children: [
       {
@@ -81,6 +82,12 @@ const pharmacistNavItems: DashboardNavItem[] = [
         label: "Tulis Artikel",
         description: "Tambah artikel edukasi",
         icon: NewspaperIcon,
+      },
+      {
+        href: "/pharmacist/dashboard/tulis-video",
+        label: "Tulis Video",
+        description: "Tambah video edukasi",
+        icon: VideoIcon,
       },
     ],
   },

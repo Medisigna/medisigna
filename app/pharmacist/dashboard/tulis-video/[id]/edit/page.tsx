@@ -1,11 +1,11 @@
 import { notFound } from "next/navigation"
 
-import { savePharmacistArticle } from "@/app/actions/pharmacist/save-article"
+import { savePharmacistVideo } from "@/app/actions/pharmacist/save-video"
 import { AppMessage } from "@/components/app-message"
-import { ArticleForm } from "@/components/articles/article-form"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { getArticleById } from "@/lib/articles"
+import { VideoForm } from "@/components/videos/video-form"
 import { getCategoryNamesForForm } from "@/lib/content-categories"
+import { getVideoById } from "@/lib/educational-videos"
 import { requireRole } from "@/lib/session"
 
 type PageProps = {
@@ -13,7 +13,7 @@ type PageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>
 }
 
-export default async function EditPharmacistArticlePage({
+export default async function EditPharmacistVideoPage({
   params,
   searchParams,
 }: PageProps) {
@@ -22,31 +22,31 @@ export default async function EditPharmacistArticlePage({
     searchParams,
     requireRole("PHARMACIST"),
   ])
-  const article = await getArticleById(id)
-  if (!article || article.authorId !== user.id || article.status !== "REJECTED") notFound()
-  const categories = await getCategoryNamesForForm(article.category)
+  const video = await getVideoById(id)
+  if (!video || video.authorId !== user.id || video.status !== "REJECTED") notFound()
+  const categories = await getCategoryNamesForForm(video.category)
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-5 md:px-6 md:py-8">
       <AppMessage error={query?.error} success={query?.success} />
       <header>
-        <p className="text-sm text-muted-foreground">Tulis Artikel</p>
-        <h1 className="text-2xl font-semibold">Perbaiki Artikel</h1>
+        <p className="text-sm text-muted-foreground">Tulis Video</p>
+        <h1 className="text-2xl font-semibold">Perbaiki Video</h1>
       </header>
-      {article.adminNote ? (
+      {video.adminNote ? (
         <Card>
           <CardHeader>
             <CardTitle>Catatan admin</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">{article.adminNote}</p>
+            <p className="text-sm text-muted-foreground">{video.adminNote}</p>
           </CardContent>
         </Card>
       ) : null}
-      <ArticleForm
-        article={article}
-        saveAction={savePharmacistArticle}
-        cancelHref={`/pharmacist/dashboard/tulis-artikel/${article.id}`}
+      <VideoForm
+        video={video}
+        saveAction={savePharmacistVideo}
+        cancelHref={`/pharmacist/dashboard/tulis-video/${video.id}`}
         categories={categories}
       />
     </main>
