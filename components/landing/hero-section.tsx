@@ -54,7 +54,7 @@ export function HeroSection() {
   return (
     <section
       id="landing-hero"
-      className="relative z-10 bg-[#0878ea] px-6 pt-16 pb-12 text-white lg:pt-20"
+      className="relative z-10 bg-[#0878ea] px-6 pt-24 pb-12 text-white sm:pt-28 lg:pt-32"
     >
       <div className="mx-auto grid min-h-[70svh] max-w-6xl items-center gap-12 lg:grid-cols-[1fr_0.72fr]">
         <div className="flex max-w-2xl flex-col gap-7">

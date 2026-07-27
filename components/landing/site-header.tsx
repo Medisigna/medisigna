@@ -62,7 +62,7 @@ export function SiteHeader() {
   return (
     <header
       className={cn(
-        "top-3 z-30 px-4 sm:px-6",
+        "top-0 z-30 mt-4 px-4 sm:mt-5 sm:px-6",
         isHome ? "fixed inset-x-0" : "sticky"
       )}
     >
