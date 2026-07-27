@@ -151,12 +151,12 @@
 @keyframes hero-carousel-dot {
   0%,
   27% {
-    background: var(--primary);
+    background: currentColor;
     transform: scale(1.45);
   }
   33%,
   100% {
-    background: color-mix(in oklch, var(--primary), transparent 70%);
+    background: color-mix(in oklch, currentColor, transparent 70%);
     transform: scale(1);
   }
 }
