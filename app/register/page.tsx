@@ -2,6 +2,7 @@ import Link from "next/link"
 
 import { registerPatient } from "@/app/actions/patient/register"
 import { AppMessage } from "@/components/app-message"
+import { AuthBrandLink } from "@/components/auth-brand-link"
 import { PasswordInput } from "@/components/password-input"
 import { SubmitButton } from "@/components/submit-button"
 import {
@@ -23,7 +24,8 @@ export default async function RegisterPage({ searchParams }: PageProps) {
   const callbackUrl = Array.isArray(params?.callbackUrl) ? params.callbackUrl[0] : params?.callbackUrl
 
   return (
-    <main className="flex min-h-svh items-center justify-center bg-background bg-[linear-gradient(to_right,color-mix(in_oklch,var(--border)_30%,transparent)_1px,transparent_1px),linear-gradient(to_bottom,color-mix(in_oklch,var(--border)_30%,transparent)_1px,transparent_1px)] bg-[size:32px_32px] px-6 py-10">
+    <main className="flex min-h-svh flex-col items-center justify-center gap-4 bg-background bg-[linear-gradient(to_right,color-mix(in_oklch,var(--border)_30%,transparent)_1px,transparent_1px),linear-gradient(to_bottom,color-mix(in_oklch,var(--border)_30%,transparent)_1px,transparent_1px)] bg-[size:32px_32px] px-6 py-10">
+      <AuthBrandLink />
       <Card className="w-full max-w-md">
         <form action={registerPatient} className="flex flex-col gap-6">
           <input type="hidden" name="callbackUrl" value={callbackUrl ?? ""} />

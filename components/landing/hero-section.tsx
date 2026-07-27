@@ -123,7 +123,7 @@ export function HeroSection() {
 
       <nav
         aria-label="Menu layanan"
-        className="relative z-20 mx-auto mt-10 -mb-24 grid max-w-5xl grid-cols-4 gap-1 rounded-xl border border-border bg-card p-2 text-card-foreground sm:gap-2 sm:p-3 lg:gap-0 lg:px-8 lg:py-6"
+        className="relative z-20 mx-auto mt-10 -mb-24 grid max-w-5xl grid-cols-4 gap-1 rounded-xl border border-border bg-card p-2 text-card-foreground sm:-mb-26 sm:gap-2 sm:p-3 md:-mb-28 lg:-mb-30 lg:gap-0 lg:px-8 lg:py-6"
       >
         {serviceItems.map((item) => {
           const Icon = item.icon

@@ -2,6 +2,7 @@ import Link from "next/link"
 
 import { registerPharmacist } from "@/app/actions/pharmacist/register"
 import { AppMessage } from "@/components/app-message"
+import { AuthBrandLink } from "@/components/auth-brand-link"
 import { SubmitButton } from "@/components/submit-button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -14,9 +15,10 @@ export default async function RegisterPharmacistPage({ searchParams }: PageProps
   const params = await searchParams
 
   return (
-    <main className="mx-auto min-h-svh max-w-2xl px-6 py-10">
+    <main className="mx-auto flex min-h-svh max-w-2xl flex-col gap-5 px-6 py-10">
+      <AuthBrandLink />
       <form action={registerPharmacist} className="flex flex-col gap-5">
-        <div>
+        <div className="text-center">
           <h1 className="text-2xl font-semibold">Daftar sebagai Apoteker</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Akun perlu diverifikasi admin sebelum tampil di publik.
