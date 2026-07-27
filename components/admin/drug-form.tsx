@@ -7,6 +7,17 @@ import { publishDrug } from "@/app/actions/admin/publish-drug"
 import { saveDrug } from "@/app/actions/admin/save-drug"
 import { DrugSubmitButton } from "@/components/admin/drug-submit-button"
 import { MarkdownEditorField } from "@/components/markdown-editor-field"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -66,15 +77,22 @@ function TextField({
   label,
   defaultValue,
   required,
+  readOnly,
 }: {
   name: string
   label: string
   defaultValue?: string | null
   required?: boolean
+  readOnly?: boolean
 }) {
   return (
     <Field label={label}>
-      <Input name={name} defaultValue={defaultValue ?? ""} aria-required={required} />
+      <Input
+        name={name}
+        defaultValue={defaultValue ?? ""}
+        aria-required={required}
+        readOnly={readOnly}
+      />
     </Field>
   )
 }
@@ -110,12 +128,14 @@ export function DrugForm({
   saveAction = saveDrug,
   mode = "admin",
   cancelHref = "/admin/obat",
+  lockIdentity = false,
 }: {
   drug?: AdminDrugDetailData | null
   reviewers?: Reviewer[]
   saveAction?: SaveDrugAction
   mode?: "admin" | "pharmacist"
   cancelHref?: string
+  lockIdentity?: boolean
 }) {
   const isAdmin = mode === "admin"
   const steps = [
@@ -144,12 +164,37 @@ export function DrugForm({
               </Link>
             </Button>
           ) : (
-            <form action={publishDrug}>
-              <input type="hidden" name="id" value={drug.id} />
-              <Button type="submit" name="action" value="publish" size="sm">
-                Terbitkan
-              </Button>
-            </form>
+            <>
+              <form id={`publish-drug-${drug.id}`} action={publishDrug}>
+                <input type="hidden" name="id" value={drug.id} />
+              </form>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button type="button" size="sm">
+                    Terbitkan
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Terbitkan obat?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Informasi obat akan tampil di halaman publik setelah diterbitkan.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Batal</AlertDialogCancel>
+                    <AlertDialogAction
+                      type="submit"
+                      name="action"
+                      value="publish"
+                      form={`publish-drug-${drug.id}`}
+                    >
+                      Terbitkan
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </>
           )}
         </div>
       ) : null}
@@ -223,6 +268,7 @@ export function DrugForm({
                   label="Nama generik"
                   defaultValue={drug?.genericName}
                   required
+                  readOnly={lockIdentity}
                 />
                 <TextAreaField
                   name="brandNames"

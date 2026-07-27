@@ -30,6 +30,7 @@ export type DashboardNavItem = {
   label: string
   description: string
   icon: LucideIcon
+  children?: DashboardNavItem[]
   exact?: boolean
   hideOnMobileNav?: boolean
 }
@@ -57,12 +58,19 @@ function getUserInitials(name: string) {
 }
 
 function isActivePath(pathname: string, item: DashboardNavItem) {
+  if (item.children?.some((child) => isActivePath(pathname, child))) return true
   if (item.exact) return pathname === item.href
   return pathname === item.href || pathname.startsWith(`${item.href}/`)
 }
 
 function pageTitle(pathname: string, navItems: DashboardNavItem[]) {
-  return navItems.find((item) => isActivePath(pathname, item))?.label ?? "Dashboard"
+  for (const item of navItems) {
+    const child = item.children?.find((entry) => isActivePath(pathname, entry))
+    if (child) return child.label
+    if (isActivePath(pathname, item)) return item.label
+  }
+
+  return "Dashboard"
 }
 
 function ShellBrand({ subtitle }: { subtitle: string }) {
@@ -145,6 +153,50 @@ function DashboardNavLink({
         </span>
       ) : null}
     </Link>
+  )
+}
+
+function DashboardNavEntry({
+  item,
+  pathname,
+  unreadCount,
+  chatHref,
+  onClick,
+  drawer = false,
+}: {
+  item: DashboardNavItem
+  pathname: string
+  unreadCount: number
+  chatHref?: string
+  onClick?: () => void
+  drawer?: boolean
+}) {
+  return (
+    <div className="flex flex-col gap-1">
+      <DashboardNavLink
+        item={item}
+        pathname={pathname}
+        unreadCount={unreadCount}
+        chatHref={chatHref}
+        onClick={onClick}
+        drawer={drawer}
+      />
+      {item.children?.length ? (
+        <div className="ml-6 flex flex-col gap-1 border-l border-sidebar-border/70 pl-3">
+          {item.children.map((child) => (
+            <DashboardNavLink
+              key={child.href}
+              item={child}
+              pathname={pathname}
+              unreadCount={unreadCount}
+              chatHref={chatHref}
+              onClick={onClick}
+              drawer={drawer}
+            />
+          ))}
+        </div>
+      ) : null}
+    </div>
   )
 }
 
@@ -259,7 +311,7 @@ export function DashboardShell({
             <nav className="mt-5 min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1">
               <div className="flex flex-col gap-2">
                 {navItems.map((item) => (
-                  <DashboardNavLink
+                  <DashboardNavEntry
                     key={item.href}
                     item={item}
                     pathname={pathname}
@@ -344,7 +396,7 @@ export function DashboardShell({
                       <div className="mt-4 min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1">
                         <div className="flex flex-col gap-2">
                           {navItems.map((item) => (
-                            <DashboardNavLink
+                            <DashboardNavEntry
                               key={item.href}
                               item={item}
                               pathname={pathname}

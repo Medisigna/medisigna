@@ -1,6 +1,6 @@
 "use client"
 
-import { PillIcon, UserCheckIcon } from "lucide-react"
+import { NewspaperIcon, PillIcon, UserCheckIcon } from "lucide-react"
 
 import {
   DashboardShell,
@@ -20,6 +20,12 @@ const adminNavItems: DashboardNavItem[] = [
     label: "Informasi Obat",
     description: "Moderasi konten obat",
     icon: PillIcon,
+  },
+  {
+    href: "/admin/artikel",
+    label: "Artikel",
+    description: "Moderasi artikel",
+    icon: NewspaperIcon,
   },
 ]
 

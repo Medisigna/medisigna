@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { ArrowRightIcon, PlusIcon, SearchIcon, XIcon } from "lucide-react"
+import { ArrowRightIcon, SearchIcon, XIcon } from "lucide-react"
 
 import { AppMessage } from "@/components/app-message"
 import { DebouncedSearchInput } from "@/components/debounced-search-input"
@@ -77,12 +77,6 @@ export default async function PharmacistDrugPage({ searchParams }: PageProps) {
           <p className="text-sm text-muted-foreground">
             {result.drugs.length} dari {result.total} informasi
           </p>
-        </div>
-        <div className="flex gap-2">
-          <Button asChild variant="outline">
-            <Link href="/pharmacist/dashboard/tulis-obat">Tulis Obat</Link>
-          </Button>
-          
         </div>
       </header>
 

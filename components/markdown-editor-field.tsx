@@ -32,7 +32,10 @@ export function MarkdownEditorField({
 
   return (
     <div className="flex flex-col gap-2 text-sm font-medium">
-      <label htmlFor={id}>{label}</label>
+      <label htmlFor={id}>
+        {label}
+        {required ? <span className="text-destructive"> *</span> : null}
+      </label>
       <input ref={inputRef} type="hidden" name={name} value={value} readOnly />
       <div data-color-mode="light">
         <MDEditor

@@ -19,6 +19,7 @@ import {
 import { cn } from "@/lib/utils"
 
 const navItems = [
+  ["Artikel", "/artikel"],
   ["Obat A-Z", "/obat"],
   ["Apoteker", "/pharmacists"],
   ["Tentang", "/about"],

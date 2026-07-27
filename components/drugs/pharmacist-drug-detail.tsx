@@ -62,8 +62,12 @@ function MarkdownSection({
 }
 
 export function PharmacistDrugDetail({
+  backHref = "/pharmacist/dashboard/obat",
+  backLabel = "Kembali ke Informasi Obat",
   drug,
 }: {
+  backHref?: string
+  backLabel?: string
   drug: PharmacistDrugDetailData
 }) {
   const reviewerTitle = drug.reviewer.pharmacistProfile?.title
@@ -71,9 +75,9 @@ export function PharmacistDrugDetail({
   return (
     <div className="flex flex-col gap-6">
       <Button asChild variant="ghost" className="w-fit">
-        <Link href="/pharmacist/dashboard/obat">
+        <Link href={backHref}>
           <ArrowLeftIcon data-icon="inline-start" />
-          Kembali ke Informasi Obat
+          {backLabel}
         </Link>
       </Button>
 

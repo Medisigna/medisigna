@@ -1,7 +1,12 @@
 import Link from "next/link"
-import { ExternalLinkIcon, PlusIcon } from "lucide-react"
+import type { ReactNode } from "react"
+import { Prisma } from "@prisma/client"
+import { ExternalLinkIcon, EyeIcon, PencilIcon, PlusIcon, RefreshCwIcon, XIcon } from "lucide-react"
 
+import { requestDrugRevision } from "@/app/actions/pharmacist/save-drug"
 import { AppMessage } from "@/components/app-message"
+import { DebouncedSearchInput } from "@/components/debounced-search-input"
+import { SubmissionStatusFilter } from "@/components/pharmacist/submission-status-filter"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -26,6 +31,7 @@ type Submission = {
   genericName: string
   status: DrugStatus
   adminNote: string | null
+  revisesDrugId: string | null
   createdAt: Date
   updatedAt: Date
 }
@@ -34,7 +40,40 @@ const statusLabels = {
   DRAFT: "Menunggu",
   PUBLISHED: "Diterima",
   REJECTED: "Ditolak",
+  ARCHIVED: "Diarsipkan",
 } satisfies Record<DrugStatus, string>
+
+const statusOptions = [
+  "ALL",
+  "DRAFT",
+  "PUBLISHED",
+  "REJECTED",
+  "REVISION_DRAFT",
+  "REVISION_REJECTED",
+] as const
+
+type StatusFilter = (typeof statusOptions)[number]
+
+const filterLabels = {
+  ALL: "Semua",
+  DRAFT: "Menunggu",
+  PUBLISHED: "Diterima",
+  REJECTED: "Ditolak",
+  REVISION_DRAFT: "Revisi menunggu",
+  REVISION_REJECTED: "Revisi ditolak",
+} satisfies Record<StatusFilter, string>
+
+function submissionStatusLabel(submission: Submission) {
+  if (submission.revisesDrugId && submission.status === "DRAFT") return "Revisi menunggu"
+  if (submission.revisesDrugId && submission.status === "REJECTED") return "Revisi ditolak"
+  return statusLabels[submission.status]
+}
+
+function parseStatusFilter(value: string | string[] | undefined): StatusFilter {
+  return typeof value === "string" && statusOptions.includes(value as StatusFilter)
+    ? (value as StatusFilter)
+    : "ALL"
+}
 
 function formatDate(date: Date) {
   return new Intl.DateTimeFormat("id-ID", {
@@ -43,7 +82,7 @@ function formatDate(date: Date) {
   }).format(date)
 }
 
-function StatusPill({ status }: { status: DrugStatus }) {
+function StatusPill({ children, status }: { children: ReactNode; status: DrugStatus }) {
   return (
     <span
       className={cn(
@@ -55,13 +94,45 @@ function StatusPill({ status }: { status: DrugStatus }) {
             : "bg-secondary text-secondary-foreground"
       )}
     >
-      {statusLabels[status]}
+      {children}
     </span>
   )
 }
 
 export default async function PharmacistDrugSubmissionsPage({ searchParams }: PageProps) {
   const [user, params] = await Promise.all([requireRole("PHARMACIST"), searchParams])
+  const query = typeof params?.q === "string" ? params.q.trim() : ""
+  const status = parseStatusFilter(params?.status)
+  const likeQuery = `%${query}%`
+  const searchCondition = query
+    ? Prisma.sql`
+      AND (
+        "genericName" ILIKE ${likeQuery}
+        OR EXISTS (
+          SELECT 1
+          FROM unnest("brandNames") AS brand_name(name)
+          WHERE brand_name.name ILIKE ${likeQuery}
+        )
+        OR EXISTS (
+          SELECT 1
+          FROM unnest(aliases) AS alias_name(name)
+          WHERE alias_name.name ILIKE ${likeQuery}
+        )
+      )
+    `
+    : Prisma.empty
+  const statusCondition =
+    status === "DRAFT"
+      ? Prisma.sql`AND status::text = 'DRAFT' AND "revisesDrugId" IS NULL`
+      : status === "PUBLISHED"
+        ? Prisma.sql`AND status::text = 'PUBLISHED'`
+        : status === "REJECTED"
+          ? Prisma.sql`AND status::text = 'REJECTED' AND "revisesDrugId" IS NULL`
+          : status === "REVISION_DRAFT"
+            ? Prisma.sql`AND status::text = 'DRAFT' AND "revisesDrugId" IS NOT NULL`
+            : status === "REVISION_REJECTED"
+              ? Prisma.sql`AND status::text = 'REJECTED' AND "revisesDrugId" IS NOT NULL`
+              : Prisma.empty
   const submissions: Submission[] = await db.$queryRaw`
     SELECT
       id,
@@ -69,10 +140,14 @@ export default async function PharmacistDrugSubmissionsPage({ searchParams }: Pa
       "genericName",
       status::text AS status,
       "adminNote",
+      "revisesDrugId",
       "createdAt",
       "updatedAt"
     FROM "DrugInformation"
     WHERE "reviewerId" = ${user.id}
+      AND status::text <> 'ARCHIVED'
+      ${searchCondition}
+      ${statusCondition}
     ORDER BY "updatedAt" DESC
   `
 
@@ -100,7 +175,25 @@ export default async function PharmacistDrugSubmissionsPage({ searchParams }: Pa
           <CardTitle>Status Verifikasi</CardTitle>
           <CardDescription>Obat yang pernah Anda submit ke admin.</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex flex-col gap-4">
+          <div className="grid gap-3 lg:grid-cols-[1fr_190px_auto]">
+            <DebouncedSearchInput
+              action="/pharmacist/dashboard/tulis-obat"
+              query={query}
+              placeholder="Cari obat, merek, atau alias"
+              ariaLabel="Cari tulisan obat"
+              hiddenParams={{ status: status !== "ALL" ? status : undefined }}
+              inputGroupClassName="h-11 bg-background shadow-sm"
+            />
+            <SubmissionStatusFilter labels={filterLabels} options={statusOptions} status={status} />
+            {query || status !== "ALL" ? (
+              <Button asChild variant="ghost" size="icon" aria-label="Hapus filter">
+                <Link href="/pharmacist/dashboard/tulis-obat">
+                  <XIcon />
+                </Link>
+              </Button>
+            ) : null}
+          </div>
           <Table>
             <TableHeader>
               <TableRow>
@@ -118,7 +211,7 @@ export default async function PharmacistDrugSubmissionsPage({ searchParams }: Pa
                   <TableRow key={drug.id}>
                     <TableCell className="font-medium">{drug.genericName}</TableCell>
                     <TableCell>
-                      <StatusPill status={drug.status} />
+                      <StatusPill status={drug.status}>{submissionStatusLabel(drug)}</StatusPill>
                     </TableCell>
                     <TableCell className="max-w-sm text-muted-foreground">
                       {drug.adminNote || "-"}
@@ -126,22 +219,46 @@ export default async function PharmacistDrugSubmissionsPage({ searchParams }: Pa
                     <TableCell>{formatDate(drug.createdAt)}</TableCell>
                     <TableCell>{formatDate(drug.updatedAt)}</TableCell>
                     <TableCell>
-                      {drug.status === "PUBLISHED" ? (
-                        <Button asChild variant="ghost" size="icon-sm" aria-label="Buka">
-                          <Link href={`/pharmacist/dashboard/obat/${drug.slug}`}>
-                            <ExternalLinkIcon />
-                          </Link>
-                        </Button>
-                      ) : (
-                        "-"
-                      )}
+                      <div className="flex flex-wrap gap-1">
+                        {drug.status === "PUBLISHED" ? (
+                          <>
+                            <Button asChild variant="secondary" size="icon-sm" aria-label="Lihat obat">
+                              <Link href={`/pharmacist/dashboard/obat/${drug.slug}`}>
+                                <ExternalLinkIcon />
+                              </Link>
+                            </Button>
+                            <form action={requestDrugRevision}>
+                              <input type="hidden" name="id" value={drug.id} />
+                              <Button type="submit" size="sm">
+                                <RefreshCwIcon data-icon="inline-start" />
+                                Ajukan Revisi
+                              </Button>
+                            </form>
+                          </>
+                        ) : (
+                          <Button asChild variant="outline" size="icon-sm" aria-label="Preview">
+                            <Link href={`/pharmacist/dashboard/tulis-obat/${drug.id}`}>
+                              <EyeIcon />
+                            </Link>
+                          </Button>
+                        )}
+                        {drug.status === "REJECTED" ? (
+                          <Button asChild variant="destructive" size="icon-sm" aria-label="Perbaiki">
+                            <Link href={`/pharmacist/dashboard/tulis-obat/${drug.id}/edit`}>
+                              <PencilIcon />
+                            </Link>
+                          </Button>
+                        ) : null}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
                   <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
-                    Belum ada tulisan obat.
+                    {query || status !== "ALL"
+                      ? "Tulisan obat tidak ditemukan."
+                      : "Belum ada tulisan obat."}
                   </TableCell>
                 </TableRow>
               )}

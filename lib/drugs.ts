@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client"
 
 import { db } from "@/lib/db"
 
-export type DrugStatus = "DRAFT" | "PUBLISHED" | "REJECTED"
+export type DrugStatus = "DRAFT" | "PUBLISHED" | "REJECTED" | "ARCHIVED"
 
 export type DrugListItem = {
   id: string
@@ -290,7 +290,7 @@ function getPublishedDrugWhere() {
 }
 
 function getAdminDrugWhere(status: "ALL" | DrugStatus = "ALL") {
-  return status === "ALL" ? {} : { status }
+  return status === "ALL" ? ({ status: { not: "ARCHIVED" } } as never) : { status }
 }
 
 async function countDrugSearch({

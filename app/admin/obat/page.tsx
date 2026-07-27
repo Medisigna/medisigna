@@ -19,6 +19,7 @@ const statusLabels = {
   DRAFT: "Menunggu",
   PUBLISHED: "Terbit",
   REJECTED: "Ditolak",
+  ARCHIVED: "Diarsipkan",
 }
 
 function parsePage(value: string | string[] | undefined) {

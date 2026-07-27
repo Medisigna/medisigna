@@ -4,6 +4,7 @@ import {
   FileTextIcon,
   HomeIcon,
   MessageCircleIcon,
+  NewspaperIcon,
   PillIcon,
   SearchIcon,
   UserIcon,
@@ -65,9 +66,23 @@ const pharmacistNavItems: DashboardNavItem[] = [
   },
   {
     href: "/pharmacist/dashboard/tulis-obat",
-    label: "Tulis",
-    description: "Tambah artikel obat",
+    label: "Buat Konten",
+    description: "Tulis obat dan artikel",
     icon: FileTextIcon,
+    children: [
+      {
+        href: "/pharmacist/dashboard/tulis-obat",
+        label: "Tulis Obat",
+        description: "Tambah informasi obat",
+        icon: PillIcon,
+      },
+      {
+        href: "/pharmacist/dashboard/tulis-artikel",
+        label: "Tulis Artikel",
+        description: "Tambah artikel edukasi",
+        icon: NewspaperIcon,
+      },
+    ],
   },
   {
     href: "/pharmacist/dashboard/chat",

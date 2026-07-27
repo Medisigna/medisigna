@@ -59,6 +59,13 @@ enum DrugPublicationStatus {
   DRAFT
   PUBLISHED
   REJECTED
+  ARCHIVED
+}
+
+enum ArticlePublicationStatus {
+  DRAFT
+  PUBLISHED
+  REJECTED
 }
 
 model User {
@@ -81,6 +88,7 @@ model User {
   sentMessages       ConsultationMessage[] @relation("MessageSender")
   createdSummaries   ConsultationSummary[] @relation("SummaryCreator")
   reviewedDrugs      DrugInformation[]     @relation("DrugReviewer")
+  authoredArticles    Article[]             @relation("ArticleAuthor")
 
   @@map("user")
 }
@@ -269,10 +277,39 @@ model DrugInformation {
   reviewedAt        DateTime
   status            DrugPublicationStatus @default(DRAFT)
   adminNote         String?
+  revisesDrugId     String?
+  revisesDrug       DrugInformation?      @relation("DrugRevision", fields: [revisesDrugId], references: [id], onDelete: SetNull)
+  revisionDrafts    DrugInformation[]     @relation("DrugRevision")
   isDemo            Boolean               @default(true)
   createdAt         DateTime              @default(now())
   updatedAt         DateTime              @updatedAt
 
   @@index([status])
   @@index([genericName])
+  @@index([revisesDrugId])
+}
+
+model Article {
+  id              String                   @id @default(cuid())
+  title           String
+  slug            String                   @unique
+  category        String
+  excerpt         String
+  contentMarkdown String
+  metaTitle       String?
+  metaDescription String?
+  coverImageUrl   String?
+  status          ArticlePublicationStatus @default(DRAFT)
+  adminNote       String?
+  authorId        String
+  author          User                     @relation("ArticleAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+  reviewedAt      DateTime?
+  publishedAt     DateTime?
+  createdAt       DateTime                 @default(now())
+  updatedAt       DateTime                 @updatedAt
+
+  @@index([status])
+  @@index([category])
+  @@index([authorId])
+  @@index([publishedAt])
 }
