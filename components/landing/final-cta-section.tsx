@@ -9,7 +9,7 @@ export function FinalCtaSection() {
       <div className="flex flex-col items-start justify-between gap-5 rounded-xl border bg-card p-6 md:flex-row md:items-center">
         <div className="flex flex-col gap-2">
           <h2 className="text-2xl font-semibold tracking-tight">
-            Mulai konsultasi obat pertama Anda.
+            Mulai konsultasi pertama Anda.
           </h2>
           <p className="text-sm text-muted-foreground">
             Buat akun pasien dan mulai konsultasi dengan apoteker.

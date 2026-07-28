@@ -3,7 +3,6 @@ import { ArrowRightIcon } from "lucide-react"
 
 import {
   ArticleCard,
-  articleCardDate,
   type ArticleCardData,
 } from "@/components/articles/article-card"
 import { Button } from "@/components/ui/button"
@@ -15,10 +14,6 @@ const fallbackArticles: ArticleCardData[] = [
     category: "Edukasi Obat",
     excerpt:
       "Kenali aturan pakai, dosis, dan tanda bahaya sebelum memilih obat tanpa resep.",
-    date: {
-      day: "15",
-      month: "Mei",
-    },
     image: "/landing-carousel/apoteker1.png",
     href: "/artikel",
   },
@@ -27,10 +22,6 @@ const fallbackArticles: ArticleCardData[] = [
     category: "Konsultasi",
     excerpt:
       "Beberapa keluhan terlihat ringan, tetapi tetap perlu arahan agar terapi lebih aman.",
-    date: {
-      day: "18",
-      month: "Mei",
-    },
     image: "/landing-carousel/apoteker2.png",
     href: "/artikel",
   },
@@ -43,7 +34,6 @@ function articleCards(articles: ArticleListItem[]) {
     title: article.title,
     category: article.category,
     excerpt: article.excerpt,
-    date: articleCardDate(article.publishedAt),
     image: article.coverImageUrl || "/landing-carousel/apoteker1.png",
     href: `/artikel/${article.slug}`,
   }))
@@ -54,7 +44,7 @@ export async function ArticlesSection() {
   const articles = articleCards(result.articles)
 
   return (
-    <section className="bg-background px-6 pt-24 pb-16 md:pt-28 md:pb-20 lg:pt-52">
+    <section className="bg-background px-6 pt-12 pb-16 md:pt-16 md:pb-20 lg:pt-20">
       <div className="mx-auto flex max-w-6xl flex-col items-center gap-8 md:gap-10">
         <h2 className="max-w-3xl text-center text-2xl font-semibold tracking-tight text-foreground md:text-5xl">
           Tetap Update Dengan{" "}

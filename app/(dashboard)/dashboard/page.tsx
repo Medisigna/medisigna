@@ -1,6 +1,13 @@
 import Link from "next/link"
-import { ArrowRightIcon, ShieldCheckIcon } from "lucide-react"
+import {
+  ArrowRightIcon,
+  NewspaperIcon,
+  PlayCircleIcon,
+  ShieldCheckIcon,
+} from "lucide-react"
 
+import { ArticleCard } from "@/components/articles/article-card"
+import { articleListCard } from "@/components/articles/article-list-page"
 import { StartChatPrompt } from "@/components/consultation/start-chat-prompt"
 import { DashboardPromoCarousel } from "@/components/dashboard-promo-carousel"
 import {
@@ -11,6 +18,7 @@ import { VideoCard } from "@/components/videos/video-card"
 import { videoListCard } from "@/components/videos/video-list-page"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import { getArticles } from "@/lib/articles"
 import { db } from "@/lib/db"
 import { getVideos } from "@/lib/educational-videos"
 import { requireRole } from "@/lib/session"
@@ -81,7 +89,7 @@ function EmptyState({
 
 export default async function HomePage() {
   const user = await requireRole("PATIENT")
-  const [pharmacists, videos] = await Promise.all([
+  const [pharmacists, videos, articles] = await Promise.all([
     db.pharmacistProfile.findMany({
       where: { verificationStatus: "VERIFIED" },
       include: { user: true },
@@ -89,10 +97,11 @@ export default async function HomePage() {
       orderBy: [{ availabilityStatus: "asc" }, { updatedAt: "desc" }],
     }) as Promise<PharmacistCardData[]>,
     getVideos({ publishedOnly: true, limit: 3 }),
+    getArticles({ publishedOnly: true, limit: 3 }),
   ])
 
   return (
-    <main className="mx-auto flex max-w-6xl flex-col gap-5 px-4 py-4 md:gap-6 md:px-6 md:py-8">
+    <main className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-4 md:gap-10 md:px-6 md:py-8">
       <section className="flex min-w-0 flex-col gap-1">
         <p className="text-sm font-medium text-muted-foreground">
           {greeting()},  <span className="truncate text-xl font-semibold tracking-tight text-secondary-foreground md:text-3xl">
@@ -182,12 +191,47 @@ export default async function HomePage() {
           </div>
         ) : (
           <EmptyState
-            icon={ShieldCheckIcon}
+            icon={PlayCircleIcon}
             title="Belum ada video"
             description="Video edukasi terbit akan muncul di sini."
             action={
               <Button asChild variant="outline" size="sm">
                 <Link href="/dashboard/video">Cek Video</Link>
+              </Button>
+            }
+          />
+        )}
+      </section>
+
+      <section className="flex flex-col gap-3">
+        <SectionHeading
+          title="Artikel kesehatan terbaru"
+          action={
+            <Button asChild variant="outline" size="xs">
+              <Link href="/dashboard/artikel">
+                Lihat Semua
+                <ArrowRightIcon data-icon="inline-end" />
+              </Link>
+            </Button>
+          }
+        />
+        {articles.articles.length ? (
+          <div className="grid gap-4 xl:grid-cols-2">
+            {articles.articles.map((article) => (
+              <ArticleCard
+                key={article.id}
+                article={articleListCard(article, "/dashboard/artikel")}
+              />
+            ))}
+          </div>
+        ) : (
+          <EmptyState
+            icon={NewspaperIcon}
+            title="Belum ada artikel"
+            description="Artikel kesehatan terbit akan muncul di sini."
+            action={
+              <Button asChild variant="outline" size="sm">
+                <Link href="/dashboard/artikel">Cek Artikel</Link>
               </Button>
             }
           />

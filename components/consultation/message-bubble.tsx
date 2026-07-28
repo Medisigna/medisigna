@@ -1,11 +1,11 @@
 import {
   CheckCheckIcon,
   ClipboardCheckIcon,
-  HeartPulseIcon,
   LoaderCircleIcon,
   SparklesIcon,
 } from "lucide-react"
 
+import { BrandLogo } from "@/components/brand-logo"
 import { cn } from "@/lib/utils"
 
 export type ChatMessage = {
@@ -153,9 +153,7 @@ function SummaryCard({ body }: { body: string | null }) {
           </p>
         </div>
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span className="flex size-7 items-center justify-center rounded-full bg-primary/10 text-primary">
-            <HeartPulseIcon className="size-3.5" aria-hidden="true" />
-          </span>
+          <BrandLogo className="size-7 rounded-full shadow-none ring-1 ring-primary/10" />
           <span>
             {isReferred
               ? "Lanjutkan pemeriksaan ke fasilitas kesehatan."

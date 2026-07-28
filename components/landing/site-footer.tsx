@@ -1,5 +1,6 @@
 import Link from "next/link"
-import { HeartPulseIcon } from "lucide-react"
+
+import { BrandLogo } from "@/components/brand-logo"
 
 const footerLinks = [
   {
@@ -29,9 +30,7 @@ export function SiteFooter() {
         <div className="grid gap-8 md:grid-cols-[1.2fr_1fr_auto]">
           <div className="flex max-w-sm flex-col gap-3">
             <Link href="/" className="flex w-fit items-center gap-2 font-semibold">
-              <span className="flex size-9 items-center justify-center rounded-md bg-primary-foreground/15 shadow-xs">
-                <HeartPulseIcon className="size-4" />
-              </span>
+              <BrandLogo className="size-9" />
               <span>Medisigna</span>
             </Link>
             <p className="text-sm leading-6 text-primary-foreground/75">

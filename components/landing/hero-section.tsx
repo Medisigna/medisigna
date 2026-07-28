@@ -1,5 +1,4 @@
 import Link from "next/link"
-import Image from "next/image"
 import {
   ArrowRightIcon,
   BotIcon,
@@ -8,6 +7,7 @@ import {
   ShoppingBagIcon,
 } from "lucide-react"
 
+import { HeroImageCarousel } from "@/components/landing/hero-image-carousel"
 import { Button } from "@/components/ui/button"
 
 const carouselItems = [
@@ -89,36 +89,7 @@ export function HeroSection() {
           </div>
         </div>
 
-        <div
-          className="relative isolate mx-auto w-full max-w-sm overflow-hidden rounded-2xl lg:max-w-none"
-          aria-label="Sorotan layanan Medisigna"
-        >
-          <div className="flex [animation:hero-carousel_18s_ease-in-out_infinite] motion-reduce:animate-none">
-            {carouselItems.map((item) => (
-              <div key={item.title} className="min-w-full">
-                <Image
-                  src={item.image}
-                  alt={item.title}
-                  width={900}
-                  height={1100}
-                  sizes="(min-width: 1024px) 400px, 100vw"
-                  priority={item === carouselItems[0]}
-                  className="aspect-[5/6] max-h-[28rem] w-full rounded-2xl object-cover"
-                />
-              </div>
-            ))}
-          </div>
-          <div className="absolute inset-x-0 bottom-4 flex justify-center gap-2">
-            {carouselItems.map((item, index) => (
-              <span
-                key={item.title}
-                aria-hidden="true"
-                className="size-1.5 [animation:hero-carousel-dot_18s_ease-in-out_infinite] rounded-full bg-white/45 text-white"
-                style={{ animationDelay: `${index * 6}s` }}
-              />
-            ))}
-          </div>
-        </div>
+        <HeroImageCarousel items={carouselItems} />
       </div>
 
       <nav

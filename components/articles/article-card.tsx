@@ -12,28 +12,8 @@ export type ArticleCardData = {
   title: string
   category: string
   excerpt: string
-  date: {
-    day: string
-    month: string
-  }
   image: string
   href: string
-}
-
-export function articleCardDate(date: Date | null) {
-  if (!date) return { day: "-", month: "" }
-
-  const formatter = new Intl.DateTimeFormat("id-ID", {
-    day: "2-digit",
-    month: "short",
-    timeZone: "Asia/Makassar",
-  })
-  const parts = formatter.formatToParts(date)
-
-  return {
-    day: parts.find((part) => part.type === "day")?.value ?? "-",
-    month: parts.find((part) => part.type === "month")?.value ?? "",
-  }
 }
 
 export function ArticleCard({ article }: { article: ArticleCardData }) {
@@ -46,14 +26,6 @@ export function ArticleCard({ article }: { article: ArticleCardData }) {
             alt={article.title}
             className="size-full object-cover"
           />
-          <div className="absolute top-4 left-4 flex min-w-14 flex-col items-center rounded-lg bg-background/90 px-3 py-2 text-center shadow-sm backdrop-blur">
-            <span className="text-xl leading-none font-semibold text-foreground">
-              {article.date.day}
-            </span>
-            <span className="text-xs font-medium text-muted-foreground">
-              {article.date.month}
-            </span>
-          </div>
         </div>
 
         <div className="flex min-w-0 flex-col py-4 md:py-5">

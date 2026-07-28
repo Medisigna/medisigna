@@ -129,34 +129,3 @@
     @apply font-sans;
     }
 }
-
-@keyframes hero-carousel {
-  0%,
-  27% {
-    transform: translateX(0);
-  }
-  33%,
-  60% {
-    transform: translateX(-100%);
-  }
-  66%,
-  93% {
-    transform: translateX(-200%);
-  }
-  100% {
-    transform: translateX(0);
-  }
-}
-
-@keyframes hero-carousel-dot {
-  0%,
-  27% {
-    background: currentColor;
-    transform: scale(1.45);
-  }
-  33%,
-  100% {
-    background: color-mix(in oklch, currentColor, transparent 70%);
-    transform: scale(1);
-  }
-}

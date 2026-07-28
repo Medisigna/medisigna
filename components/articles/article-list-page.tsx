@@ -1,6 +1,5 @@
 import {
   ArticleCard,
-  articleCardDate,
   type ArticleCardData,
 } from "@/components/articles/article-card"
 import { DebouncedSearchInput } from "@/components/debounced-search-input"
@@ -22,7 +21,6 @@ export function articleListCard(
     title: article.title,
     category: article.category,
     excerpt: article.excerpt,
-    date: articleCardDate(article.publishedAt),
     image: article.coverImageUrl || "/landing-carousel/apoteker1.png",
     href: `${hrefPrefix}/${article.slug}`,
   }

@@ -6,11 +6,11 @@ import { usePathname } from "next/navigation"
 import {
   ArrowRightIcon,
   FileTextIcon,
-  HeartPulseIcon,
   MenuIcon,
   PlayCircleIcon,
 } from "lucide-react"
 
+import { BrandLogo } from "@/components/brand-logo"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Button } from "@/components/ui/button"
 import {
@@ -49,10 +49,32 @@ const educationItems = [
 
 const navItems = [
   ["Obat A-Z", "/obat"],
-  ["Apoteker", "/pharmacists"],
+  ["Konsultasi", "/pharmacists"],
   ["Tentang", "/about"],
   ["FAQ", "/faq"],
   ["Kontak", "/contact"],
+]
+
+const mobileNavSections = [
+  {
+    label: "Layanan",
+    items: [
+      ["Konsultasi", "/pharmacists"],
+      ["Obat A-Z", "/obat"],
+    ],
+  },
+  {
+    label: "Edukasi",
+    items: educationItems.map((item) => [item.label, item.href]),
+  },
+  {
+    label: "Informasi",
+    items: [
+      ["Tentang", "/about"],
+      ["FAQ", "/faq"],
+      ["Kontak", "/contact"],
+    ],
+  },
 ]
 
 export function SiteHeader() {
@@ -107,16 +129,7 @@ export function SiteHeader() {
           href="/"
           className="flex min-w-0 items-center gap-2 font-semibold"
         >
-          <span
-            className={cn(
-              "flex size-9 items-center justify-center rounded-md shadow-xs transition-colors",
-              isHeroSurface
-                ? "bg-white text-[#0878ea]"
-                : "bg-primary text-primary-foreground"
-            )}
-          >
-            <HeartPulseIcon className="size-4" />
-          </span>
+          <BrandLogo className="size-9" />
           <span className="truncate">Medisigna</span>
         </Link>
 
@@ -223,61 +236,41 @@ export function SiteHeader() {
             <DrawerContent>
               <DrawerHeader className="flex flex-row items-center justify-between">
                 <DrawerTitle className="flex items-center gap-2">
-                  <span className="flex size-9 items-center justify-center rounded-md bg-primary text-primary-foreground shadow-xs">
-                    <HeartPulseIcon className="size-4" />
-                  </span>
+                  <BrandLogo className="size-9" />
                   <span>Medisigna</span>
                 </DrawerTitle>
                 <ThemeToggle />
               </DrawerHeader>
-              <div className="flex flex-col gap-2 px-4 pb-2">
-                <p className="px-3 text-xs font-medium text-muted-foreground">
-                  Edukasi
-                </p>
-                <nav className="flex flex-col text-base">
-                  {educationItems.map((item) => {
-                    const active =
-                      pathname === item.href ||
-                      pathname.startsWith(`${item.href}/`)
+              <div className="flex flex-col gap-5 px-4 pb-2">
+                {mobileNavSections.map((section) => (
+                  <div key={section.label} className="flex flex-col gap-2">
+                    <p className="px-3 text-xs font-medium text-muted-foreground">
+                      {section.label}
+                    </p>
+                    <nav className="flex flex-col text-base">
+                      {section.items.map(([label, href]) => {
+                        const active =
+                          pathname === href || pathname.startsWith(`${href}/`)
 
-                    return (
-                      <DrawerClose key={item.href} asChild>
-                        <Link
-                          href={item.href}
-                          aria-current={active ? "page" : undefined}
-                          className={cn(
-                            "rounded-md px-3 py-4 font-medium transition-colors hover:bg-primary hover:text-primary-foreground",
-                            active && "bg-primary text-primary-foreground"
-                          )}
-                        >
-                          {item.label}
-                        </Link>
-                      </DrawerClose>
-                    )
-                  })}
-                </nav>
+                        return (
+                          <DrawerClose key={href} asChild>
+                            <Link
+                              href={href}
+                              aria-current={active ? "page" : undefined}
+                              className={cn(
+                                "rounded-md px-3 py-3 font-medium transition-colors hover:bg-primary hover:text-primary-foreground",
+                                active && "bg-primary text-primary-foreground"
+                              )}
+                            >
+                              {label}
+                            </Link>
+                          </DrawerClose>
+                        )
+                      })}
+                    </nav>
+                  </div>
+                ))}
               </div>
-              <nav className="flex flex-col px-4 text-base">
-                {navItems.map(([label, href]) => {
-                  const active =
-                    pathname === href || pathname.startsWith(`${href}/`)
-
-                  return (
-                    <DrawerClose key={href} asChild>
-                      <Link
-                        href={href}
-                        aria-current={active ? "page" : undefined}
-                        className={cn(
-                          "rounded-md px-3 py-4 font-medium transition-colors hover:bg-primary hover:text-primary-foreground",
-                          active && "bg-primary text-primary-foreground"
-                        )}
-                      >
-                        {label}
-                      </Link>
-                    </DrawerClose>
-                  )
-                })}
-              </nav>
               <DrawerFooter>
                 <DrawerClose asChild>
                   <Button asChild variant="outline">

@@ -3,14 +3,13 @@ import { Card, CardContent } from "@/components/ui/card"
 import { UrlSelectFilter } from "@/components/url-select-filter"
 import {
   VideoCard,
-  videoCardDate,
   type VideoCardData,
 } from "@/components/videos/video-card"
 import {
   getVideoCategories,
   getVideos,
   type VideoListItem,
-  youtubeThumbnailUrl,
+  youtubeEmbedUrl,
 } from "@/lib/educational-videos"
 
 type SearchParams = Record<string, string | string[] | undefined>
@@ -23,8 +22,7 @@ export function videoListCard(
     title: video.title,
     category: video.category,
     excerpt: video.excerpt,
-    date: videoCardDate(video.publishedAt),
-    image: youtubeThumbnailUrl(video.youtubeVideoId),
+    embedUrl: youtubeEmbedUrl(video.youtubeVideoId),
     href: `${hrefPrefix}/${video.slug}`,
   }
 }

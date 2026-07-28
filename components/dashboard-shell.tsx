@@ -5,13 +5,14 @@ import { usePathname } from "next/navigation"
 import { useCallback, useEffect, useRef, useState } from "react"
 import type { LucideIcon } from "lucide-react"
 import {
-  HeartPulseIcon,
+  ChevronDownIcon,
   LogOutIcon,
   MenuIcon,
   XIcon,
 } from "lucide-react"
 
 import { logout } from "@/app/actions/auth/logout"
+import { BrandLogo } from "@/components/brand-logo"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Button } from "@/components/ui/button"
 import {
@@ -73,6 +74,10 @@ function pageTitle(pathname: string, navItems: DashboardNavItem[]) {
   return "Dashboard"
 }
 
+function hasActiveChild(pathname: string, item: DashboardNavItem) {
+  return item.children?.some((child) => isActivePath(pathname, child)) ?? false
+}
+
 function ShellBrand({ subtitle }: { subtitle: string }) {
   return (
     <Link
@@ -81,9 +86,7 @@ function ShellBrand({ subtitle }: { subtitle: string }) {
       aria-label="Medisigna"
     >
       <div className="flex items-center gap-3">
-        <div className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-xs">
-          <HeartPulseIcon className="size-5" />
-        </div>
+        <BrandLogo className="size-10 rounded-xl" />
         <div className="min-w-0">
           <div className="truncate text-sm font-semibold text-secondary-foreground">
             Medisigna
@@ -94,6 +97,58 @@ function ShellBrand({ subtitle }: { subtitle: string }) {
         </div>
       </div>
     </Link>
+  )
+}
+
+function DashboardNavBody({
+  item,
+  active,
+  showUnread,
+  unreadCount,
+}: {
+  item: DashboardNavItem
+  active: boolean
+  showUnread: boolean
+  unreadCount: number
+}) {
+  const Icon = item.icon
+
+  return (
+    <>
+      <span
+        className={cn(
+          "flex size-10 shrink-0 items-center justify-center rounded-xl transition-colors",
+          active
+            ? "bg-primary text-primary-foreground"
+            : "bg-background/85 text-primary"
+        )}
+      >
+        <Icon className="size-4" />
+      </span>
+      <span className="min-w-0 flex-1 text-left">
+        <span className="block truncate text-sm font-semibold">
+          {item.label}
+        </span>
+        <span className="mt-0.5 block truncate text-xs text-muted-foreground">
+          {item.description}
+        </span>
+      </span>
+      {showUnread ? (
+        <span className="flex min-w-6 shrink-0 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-bold text-primary-foreground">
+          {unreadCount > 99 ? "99+" : unreadCount}
+        </span>
+      ) : null}
+    </>
+  )
+}
+
+function navLinkClass(active: boolean, drawer: boolean) {
+  return cn(
+    "group flex w-full items-center gap-3 rounded-2xl border px-3 py-3 transition-all",
+    active
+      ? "border-sidebar-border bg-background text-secondary-foreground shadow-[0_16px_34px_-28px_rgba(14,47,89,0.55)]"
+      : "border-transparent text-muted-foreground hover:border-border/80 hover:bg-sidebar-accent/80 hover:text-secondary-foreground",
+    drawer && "rounded-xl py-2.5"
   )
 }
 
@@ -112,7 +167,6 @@ function DashboardNavLink({
   onClick?: () => void
   drawer?: boolean
 }) {
-  const Icon = item.icon
   const active = isActivePath(pathname, item)
   const showUnread = item.href === chatHref && unreadCount > 0
 
@@ -121,38 +175,59 @@ function DashboardNavLink({
       href={item.href}
       onClick={onClick}
       aria-current={active ? "page" : undefined}
+      className={navLinkClass(active, drawer)}
+    >
+      <DashboardNavBody
+        item={item}
+        active={active}
+        showUnread={showUnread}
+        unreadCount={unreadCount}
+      />
+    </Link>
+  )
+}
+
+function DashboardNavToggle({
+  item,
+  open,
+  pathname,
+  unreadCount,
+  drawer = false,
+  onToggle,
+}: {
+  item: DashboardNavItem
+  open: boolean
+  pathname: string
+  unreadCount: number
+  drawer?: boolean
+  onToggle: () => void
+}) {
+  const active = isActivePath(pathname, item)
+
+  return (
+    <button
+      type="button"
+      aria-expanded={open}
+      onClick={onToggle}
       className={cn(
-        "group flex items-center gap-3 rounded-2xl border px-3 py-3 transition-all",
-        active
-          ? "border-sidebar-border bg-background text-secondary-foreground shadow-[0_16px_34px_-28px_rgba(14,47,89,0.55)]"
-          : "border-transparent text-muted-foreground hover:border-border/80 hover:bg-sidebar-accent/80 hover:text-secondary-foreground",
-        drawer && "rounded-xl py-2.5"
+        navLinkClass(active, drawer),
+        "cursor-pointer"
       )}
     >
-      <span
+      <DashboardNavBody
+        item={item}
+        active={active}
+        showUnread={false}
+        unreadCount={unreadCount}
+      />
+      <ChevronDownIcon
         className={cn(
-          "flex size-10 shrink-0 items-center justify-center rounded-xl transition-colors",
-          active
-            ? "bg-primary text-primary-foreground"
-            : "bg-background/85 text-primary"
+          "size-4 shrink-0 transition-transform",
+          open && "rotate-180"
         )}
-      >
-        <Icon className="size-4" />
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className="block truncate text-sm font-semibold">
-          {item.label}
-        </span>
-        <span className="mt-0.5 block truncate text-xs text-muted-foreground">
-          {item.description}
-        </span>
-      </span>
-      {showUnread ? (
-        <span className="flex min-w-6 shrink-0 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-bold text-primary-foreground">
-          {unreadCount > 99 ? "99+" : unreadCount}
-        </span>
-      ) : null}
-    </Link>
+        aria-hidden="true"
+      />
+    </button>
   )
 }
 
@@ -162,6 +237,8 @@ function DashboardNavEntry({
   unreadCount,
   chatHref,
   onClick,
+  open,
+  onToggle,
   drawer = false,
 }: {
   item: DashboardNavItem
@@ -169,21 +246,36 @@ function DashboardNavEntry({
   unreadCount: number
   chatHref?: string
   onClick?: () => void
+  open?: boolean
+  onToggle?: () => void
   drawer?: boolean
 }) {
+  const hasChildren = Boolean(item.children?.length)
+
   return (
     <div className="flex flex-col gap-1">
-      <DashboardNavLink
-        item={item}
-        pathname={pathname}
-        unreadCount={unreadCount}
-        chatHref={chatHref}
-        onClick={onClick}
-        drawer={drawer}
-      />
-      {item.children?.length ? (
+      {hasChildren ? (
+        <DashboardNavToggle
+          item={item}
+          open={Boolean(open)}
+          pathname={pathname}
+          unreadCount={unreadCount}
+          drawer={drawer}
+          onToggle={onToggle ?? (() => {})}
+        />
+      ) : (
+        <DashboardNavLink
+          item={item}
+          pathname={pathname}
+          unreadCount={unreadCount}
+          chatHref={chatHref}
+          onClick={onClick}
+          drawer={drawer}
+        />
+      )}
+      {hasChildren && open ? (
         <div className="ml-6 flex flex-col gap-1 border-l border-sidebar-border/70 pl-3">
-          {item.children.map((child) => (
+          {item.children?.map((child) => (
             <DashboardNavLink
               key={child.href}
               item={child}
@@ -230,12 +322,20 @@ export function DashboardShell({
   const title = pageTitle(pathname, navItems)
   const isChatRoom = chatHref ? pathname.startsWith(`${chatHref}/`) : false
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [openNavItems, setOpenNavItems] = useState<Record<string, boolean>>({})
   const [unreadCount, setUnreadCount] = useState(initialUnreadCount)
   const [mobileNavHidden, setMobileNavHidden] = useState(false)
   const lastScrollYRef = useRef(0)
   const scrollFrameRef = useRef<number | null>(null)
   const initials = getUserInitials(user.name)
   const mobileNavItems = navItems.filter((item) => !item.hideOnMobileNav)
+
+  const toggleNavItem = useCallback((href: string) => {
+    setOpenNavItems((current) => ({
+      ...current,
+      [href]: !current[href],
+    }))
+  }, [])
 
   const fetchUnreadCount = useCallback(async () => {
     const response = await fetch("/api/consultation/unread", { cache: "no-store" })
@@ -251,6 +351,22 @@ export function DashboardShell({
     events.onmessage = fetchUnreadCount
     return () => events.close()
   }, [chatHref, fetchUnreadCount])
+
+  useEffect(() => {
+    setOpenNavItems((current) => {
+      let changed = false
+      const next = { ...current }
+
+      for (const item of navItems) {
+        if (hasActiveChild(pathname, item) && !next[item.href]) {
+          next[item.href] = true
+          changed = true
+        }
+      }
+
+      return changed ? next : current
+    })
+  }, [navItems, pathname])
 
   useEffect(() => {
     if (mobileNavigation !== "bottom" || isChatRoom) {
@@ -317,6 +433,8 @@ export function DashboardShell({
                     pathname={pathname}
                     unreadCount={unreadCount}
                     chatHref={chatHref}
+                    open={openNavItems[item.href] ?? hasActiveChild(pathname, item)}
+                    onToggle={() => toggleNavItem(item.href)}
                   />
                 ))}
               </div>
@@ -403,6 +521,8 @@ export function DashboardShell({
                               unreadCount={unreadCount}
                               chatHref={chatHref}
                               onClick={() => setDrawerOpen(false)}
+                              open={openNavItems[item.href] ?? hasActiveChild(pathname, item)}
+                              onToggle={() => toggleNavItem(item.href)}
                               drawer
                             />
                           ))}
