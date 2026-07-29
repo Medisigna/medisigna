@@ -5,6 +5,7 @@ import {
   FileTextIcon,
   HomeIcon,
   MessageCircleIcon,
+  MessagesSquareIcon,
   NewspaperIcon,
   PillIcon,
   SearchIcon,
@@ -39,6 +40,18 @@ const patientNavItems: DashboardNavItem[] = [
     hideOnMobileNav: true,
   },
   {
+    href: "/dashboard/chat",
+    label: "Konsultasi",
+    description: "Percakapan aktif",
+    icon: MessageCircleIcon,
+  },
+  {
+    href: "/dashboard/forum",
+    label: "Forum",
+    description: "Diskusi kesehatan",
+    icon: MessagesSquareIcon,
+  },
+  {
     href: "/dashboard/video",
     label: "Edukasi",
     description: "Artikel dan video kesehatan",
@@ -59,16 +72,11 @@ const patientNavItems: DashboardNavItem[] = [
     ],
   },
   {
-    href: "/dashboard/chat",
-    label: "Konsultasi",
-    description: "Percakapan aktif",
-    icon: MessageCircleIcon,
-  },
-  {
     href: "/dashboard/profile",
     label: "Profil",
     description: "Data akun pasien",
     icon: UserIcon,
+    hideOnMobileNav: true,
   },
 ]
 
@@ -87,8 +95,20 @@ const pharmacistNavItems: DashboardNavItem[] = [
     icon: PillIcon,
   },
   {
-    href: "/pharmacist/dashboard/tulis-obat",
-    label: "Buat Konten",
+    href: "/pharmacist/dashboard/chat",
+    label: "Chat",
+    description: "Konseling pasien",
+    icon: MessageCircleIcon,
+  },
+  {
+    href: "/pharmacist/dashboard/forum",
+    label: "Forum",
+    description: "Diskusi apoteker",
+    icon: MessagesSquareIcon,
+  },
+  {
+    href: "/pharmacist/dashboard/konten",
+    label: "Konten",
     description: "Tulis obat, artikel, video",
     icon: FileTextIcon,
     children: [
@@ -113,16 +133,11 @@ const pharmacistNavItems: DashboardNavItem[] = [
     ],
   },
   {
-    href: "/pharmacist/dashboard/chat",
-    label: "Chat",
-    description: "Konseling pasien",
-    icon: MessageCircleIcon,
-  },
-  {
     href: "/pharmacist/dashboard/profile",
     label: "Profil",
     description: "Data apoteker",
     icon: UserIcon,
+    hideOnMobileNav: true,
   },
 ]
 
@@ -137,6 +152,7 @@ export function UserDashboardShell(props: UserShellProps) {
       {...props}
       navItems={patientNavItems}
       chatHref="/dashboard/chat"
+      profileHref="/dashboard/profile"
       subtitle="Konseling obat"
       mobileNavigation="bottom"
     />
@@ -149,6 +165,7 @@ export function PharmacistDashboardShell(props: UserShellProps) {
       {...props}
       navItems={pharmacistNavItems}
       chatHref="/pharmacist/dashboard/chat"
+      profileHref="/pharmacist/dashboard/profile"
       subtitle="Konseling pasien"
       mobileNavigation="bottom"
     />

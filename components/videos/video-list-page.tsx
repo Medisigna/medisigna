@@ -9,7 +9,7 @@ import {
   getVideoCategories,
   getVideos,
   type VideoListItem,
-  youtubeEmbedUrl,
+  youtubeThumbnailUrl,
 } from "@/lib/educational-videos"
 
 type SearchParams = Record<string, string | string[] | undefined>
@@ -22,7 +22,7 @@ export function videoListCard(
     title: video.title,
     category: video.category,
     excerpt: video.excerpt,
-    embedUrl: youtubeEmbedUrl(video.youtubeVideoId),
+    thumbnailUrl: youtubeThumbnailUrl(video.youtubeVideoId),
     href: `${hrefPrefix}/${video.slug}`,
   }
 }

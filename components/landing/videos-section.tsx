@@ -9,7 +9,7 @@ import {
 import {
   getVideos,
   type VideoListItem,
-  youtubeEmbedUrl,
+  youtubeThumbnailUrl,
 } from "@/lib/educational-videos"
 
 const fallbackVideos: VideoCardData[] = [
@@ -18,7 +18,7 @@ const fallbackVideos: VideoCardData[] = [
     category: "Edukasi Obat",
     excerpt:
       "Pahami dosis, frekuensi, dan waktu minum obat agar terapi berjalan aman.",
-    embedUrl: youtubeEmbedUrl("dFhhLtAkP0E"),
+    thumbnailUrl: youtubeThumbnailUrl("dFhhLtAkP0E"),
     href: "/video",
   },
   {
@@ -26,7 +26,7 @@ const fallbackVideos: VideoCardData[] = [
     category: "Konsultasi",
     excerpt:
       "Kenali kondisi yang perlu ditanyakan sebelum memakai atau mengganti obat.",
-    embedUrl: youtubeEmbedUrl("dFhhLtAkP0E"),
+    thumbnailUrl: youtubeThumbnailUrl("dFhhLtAkP0E"),
     href: "/video",
   },
 ]
@@ -38,7 +38,7 @@ function videoCards(videos: VideoListItem[]) {
     title: video.title,
     category: video.category,
     excerpt: video.excerpt,
-    embedUrl: youtubeEmbedUrl(video.youtubeVideoId),
+    thumbnailUrl: youtubeThumbnailUrl(video.youtubeVideoId),
     href: `/video/${video.slug}`,
   }))
 }

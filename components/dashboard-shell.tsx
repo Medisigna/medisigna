@@ -43,6 +43,7 @@ type DashboardShellProps = {
   subtitle: string
   initialUnreadCount?: number
   chatHref?: string
+  profileHref?: string
   mobileNavigation?: "drawer" | "bottom"
 }
 
@@ -316,6 +317,7 @@ export function DashboardShell({
   subtitle,
   initialUnreadCount = 0,
   chatHref,
+  profileHref,
   mobileNavigation = "drawer",
 }: DashboardShellProps) {
   const pathname = usePathname()
@@ -329,6 +331,8 @@ export function DashboardShell({
   const scrollFrameRef = useRef<number | null>(null)
   const initials = getUserInitials(user.name)
   const mobileNavItems = navItems.filter((item) => !item.hideOnMobileNav)
+  const shouldHideMobileNav =
+    mobileNavigation === "bottom" && !isChatRoom && mobileNavHidden
 
   const toggleNavItem = useCallback((href: string) => {
     setOpenNavItems((current) => ({
@@ -353,24 +357,7 @@ export function DashboardShell({
   }, [chatHref, fetchUnreadCount])
 
   useEffect(() => {
-    setOpenNavItems((current) => {
-      let changed = false
-      const next = { ...current }
-
-      for (const item of navItems) {
-        if (hasActiveChild(pathname, item) && !next[item.href]) {
-          next[item.href] = true
-          changed = true
-        }
-      }
-
-      return changed ? next : current
-    })
-  }, [navItems, pathname])
-
-  useEffect(() => {
     if (mobileNavigation !== "bottom" || isChatRoom) {
-      setMobileNavHidden(false)
       return
     }
 
@@ -433,7 +420,7 @@ export function DashboardShell({
                     pathname={pathname}
                     unreadCount={unreadCount}
                     chatHref={chatHref}
-                    open={openNavItems[item.href] ?? hasActiveChild(pathname, item)}
+                    open={Boolean(openNavItems[item.href] || hasActiveChild(pathname, item))}
                     onToggle={() => toggleNavItem(item.href)}
                   />
                 ))}
@@ -521,7 +508,7 @@ export function DashboardShell({
                               unreadCount={unreadCount}
                               chatHref={chatHref}
                               onClick={() => setDrawerOpen(false)}
-                              open={openNavItems[item.href] ?? hasActiveChild(pathname, item)}
+                              open={Boolean(openNavItems[item.href] || hasActiveChild(pathname, item))}
                               onToggle={() => toggleNavItem(item.href)}
                               drawer
                             />
@@ -548,16 +535,19 @@ export function DashboardShell({
 
               <div className="flex shrink-0 items-center gap-2">
                 <ThemeToggle />
-                <div className="flex size-10 items-center justify-center rounded-full border border-border bg-background text-sm font-semibold">
-                  {initials}
-                </div>
-                <div className="hidden min-w-0 text-right text-xs md:block">
-                  <p className="truncate font-medium">{user.name}</p>
-                  <p className="truncate text-muted-foreground">{user.email}</p>
-                </div>
-                <div className="lg:hidden">
-                  <LogoutForm compact />
-                </div>
+                <Link
+                  href={profileHref ?? "#"}
+                  aria-label="Buka profil"
+                  className="flex min-w-0 items-center gap-2 rounded-full transition-colors hover:bg-muted/70"
+                >
+                  <span className="flex size-10 items-center justify-center rounded-full border border-border bg-background text-sm font-semibold">
+                    {initials}
+                  </span>
+                  <span className="hidden min-w-0 text-right text-xs md:block">
+                    <span className="block truncate font-medium">{user.name}</span>
+                    <span className="block truncate text-muted-foreground">{user.email}</span>
+                  </span>
+                </Link>
               </div>
             </div>
           </header>
@@ -577,7 +567,7 @@ export function DashboardShell({
         <nav
           className={cn(
             "fixed bottom-[calc(env(safe-area-inset-bottom)+0.75rem)] left-1/2 z-20 w-[calc(100%-1rem)] max-w-md -translate-x-1/2 rounded-2xl border border-border/70 bg-background/85 p-2 shadow-[0_22px_48px_-32px_rgba(14,47,89,0.35)] backdrop-blur-xl transition-all duration-300 ease-out lg:hidden",
-            mobileNavHidden &&
+            shouldHideMobileNav &&
               "pointer-events-none translate-y-[calc(100%+1.25rem)] opacity-0"
           )}
         >

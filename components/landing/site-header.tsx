@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useCallback, useSyncExternalStore } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
@@ -80,35 +80,44 @@ const mobileNavSections = [
 export function SiteHeader() {
   const pathname = usePathname()
   const isHome = pathname === "/"
-  const [isHeroSurface, setIsHeroSurface] = useState(false)
 
-  useEffect(() => {
-    if (!isHome) {
-      setIsHeroSurface(false)
-      return
-    }
-
-    function updateSurface() {
-      const hero = document.getElementById("landing-hero")
-
-      if (!hero) {
-        setIsHeroSurface(false)
-        return
+  const subscribeToSurface = useCallback(
+    (onStoreChange: () => void) => {
+      if (!isHome) {
+        return () => {}
       }
 
-      const rect = hero.getBoundingClientRect()
-      setIsHeroSurface(rect.top < 80 && rect.bottom > 72)
+      window.addEventListener("scroll", onStoreChange, { passive: true })
+      window.addEventListener("resize", onStoreChange)
+
+      return () => {
+        window.removeEventListener("scroll", onStoreChange)
+        window.removeEventListener("resize", onStoreChange)
+      }
+    },
+    [isHome]
+  )
+
+  const getHeroSurfaceSnapshot = useCallback(() => {
+    if (!isHome) {
+      return false
     }
 
-    updateSurface()
-    window.addEventListener("scroll", updateSurface, { passive: true })
-    window.addEventListener("resize", updateSurface)
+    const hero = document.getElementById("landing-hero")
 
-    return () => {
-      window.removeEventListener("scroll", updateSurface)
-      window.removeEventListener("resize", updateSurface)
+    if (!hero) {
+      return false
     }
+
+    const rect = hero.getBoundingClientRect()
+    return rect.top < 80 && rect.bottom > 72
   }, [isHome])
+
+  const isHeroSurface = useSyncExternalStore(
+    subscribeToSurface,
+    getHeroSurfaceSnapshot,
+    () => false
+  )
 
   return (
     <header
