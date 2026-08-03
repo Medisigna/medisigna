@@ -1,30 +1,56 @@
-import { MessagesSquareIcon } from "lucide-react"
-
+import { ForumThreadComposer } from "@/components/forum/forum-composer"
+import { ForumThreadList } from "@/components/forum/forum-thread-list"
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+  canWriteForum,
+  getForumCategories,
+  getForumThreads,
+  getForumUnreadCount,
+} from "@/lib/forum"
+import { requireRole } from "@/lib/session"
 
-export default function PharmacistForumPage() {
+type PageProps = {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>
+}
+
+export const metadata = {
+  title: "Forum Diskusi | Medisigna",
+}
+
+function param(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value
+}
+
+export default async function PharmacistForumPage({ searchParams }: PageProps) {
+  const emptyParams: Record<string, string | string[] | undefined> = {}
+  const [user, params, categories] = await Promise.all([
+    requireRole("PHARMACIST"),
+    searchParams ?? Promise.resolve(emptyParams),
+    getForumCategories(),
+  ])
+  const category = param(params.category)
+  const query = param(params.q)
+  const [{ threads, total }, unreadTotal] = await Promise.all([
+    getForumThreads({ category, query, userId: user.id }),
+    getForumUnreadCount(user.id),
+  ])
+  const canWrite = canWriteForum(user)
+
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-5 md:px-6 md:py-8">
-      <Card>
-        <CardHeader className="flex flex-col items-center gap-3 text-center">
-          <div className="flex size-12 items-center justify-center rounded-lg bg-muted text-primary">
-            <MessagesSquareIcon className="size-5" aria-hidden="true" />
-          </div>
-          <div className="flex flex-col gap-1">
-            <CardTitle>Forum Diskusi</CardTitle>
-            <CardDescription>Fitur diskusi apoteker sedang disiapkan.</CardDescription>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <p className="text-center text-sm text-muted-foreground">Segera hadir.</p>
-        </CardContent>
-      </Card>
+      <ForumThreadComposer
+        href="/pharmacist/dashboard/forum/new"
+        disabled={!canWrite}
+        disabledMessage="Akun apoteker harus terverifikasi untuk membuat diskusi."
+      />
+      <ForumThreadList
+        basePath="/pharmacist/dashboard/forum"
+        categories={categories}
+        category={category}
+        query={query}
+        threads={threads}
+        total={total}
+        unreadTotal={unreadTotal}
+      />
     </main>
   )
 }

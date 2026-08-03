@@ -3,6 +3,7 @@
 import {
   NewspaperIcon,
   PillIcon,
+  MessagesSquareIcon,
   TagsIcon,
   UserCheckIcon,
   VideoIcon,
@@ -38,6 +39,12 @@ const adminNavItems: DashboardNavItem[] = [
     label: "Video Edukasi",
     description: "Moderasi video",
     icon: VideoIcon,
+  },
+  {
+    href: "/admin/forum",
+    label: "Forum",
+    description: "Moderasi diskusi",
+    icon: MessagesSquareIcon,
   },
   {
     href: "/admin/kategori",

@@ -74,6 +74,28 @@ enum EducationalVideoPublicationStatus {
   REJECTED
 }
 
+enum ForumThreadStatus {
+  ACTIVE
+  LOCKED
+  HIDDEN
+}
+
+enum ForumPostStatus {
+  VISIBLE
+  HIDDEN
+}
+
+enum ForumReportStatus {
+  OPEN
+  RESOLVED
+  DISMISSED
+}
+
+enum ForumReportTargetType {
+  THREAD
+  POST
+}
+
 model User {
   id                 String                @id
   name               String
@@ -96,6 +118,15 @@ model User {
   reviewedDrugs      DrugInformation[]     @relation("DrugReviewer")
   authoredArticles    Article[]             @relation("ArticleAuthor")
   authoredVideos      EducationalVideo[]    @relation("EducationalVideoAuthor")
+  forumThreads        ForumThread[]         @relation("ForumThreadAuthor")
+  lockedForumThreads  ForumThread[]         @relation("ForumThreadLocker")
+  hiddenForumThreads  ForumThread[]         @relation("ForumThreadHider")
+  forumPosts          ForumPost[]           @relation("ForumPostAuthor")
+  hiddenForumPosts    ForumPost[]           @relation("ForumPostHider")
+  forumPostAttachments ForumPostAttachment[] @relation("ForumPostAttachmentUploader")
+  forumReports        ForumReport[]         @relation("ForumReportReporter")
+  resolvedForumReports ForumReport[]        @relation("ForumReportResolver")
+  forumSubscriptions  ForumSubscription[]
 
   @@map("user")
 }
@@ -356,4 +387,138 @@ model ContentCategory {
 
   @@index([isActive])
   @@index([name])
+}
+
+model ForumCategory {
+  id          String        @id @default(cuid())
+  name        String        @unique
+  slug        String        @unique
+  description String?
+  isActive    Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  threads     ForumThread[]
+
+  @@index([isActive])
+  @@index([name])
+}
+
+model ForumThread {
+  id            String              @id @default(cuid())
+  title         String
+  slug          String              @unique
+  categoryId    String
+  category      ForumCategory       @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  authorId      String
+  author        User                @relation("ForumThreadAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+  status        ForumThreadStatus   @default(ACTIVE)
+  isPinned      Boolean             @default(false)
+  lockedAt      DateTime?
+  lockedById    String?
+  lockedBy      User?               @relation("ForumThreadLocker", fields: [lockedById], references: [id], onDelete: SetNull)
+  hiddenAt      DateTime?
+  hiddenById    String?
+  hiddenBy      User?               @relation("ForumThreadHider", fields: [hiddenById], references: [id], onDelete: SetNull)
+  hiddenReason  String?
+  lastPostAt    DateTime            @default(now())
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  posts         ForumPost[]
+  reports       ForumReport[]
+  subscriptions ForumSubscription[]
+
+  @@index([categoryId])
+  @@index([authorId])
+  @@index([status])
+  @@index([isPinned, lastPostAt])
+  @@index([lastPostAt])
+  @@index([lockedById])
+  @@index([hiddenById])
+}
+
+model ForumPost {
+  id           String            @id @default(cuid())
+  threadId     String
+  thread       ForumThread       @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  parentPostId String?
+  parentPost   ForumPost?        @relation("ForumPostReplies", fields: [parentPostId], references: [id], onDelete: Cascade)
+  replies      ForumPost[]       @relation("ForumPostReplies")
+  authorId     String
+  author       User              @relation("ForumPostAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+  bodyMarkdown String
+  status       ForumPostStatus   @default(VISIBLE)
+  hiddenAt     DateTime?
+  hiddenById   String?
+  hiddenBy     User?             @relation("ForumPostHider", fields: [hiddenById], references: [id], onDelete: SetNull)
+  hiddenReason String?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  reports      ForumReport[]
+  attachments  ForumPostAttachment[]
+
+  @@index([threadId])
+  @@index([parentPostId])
+  @@index([authorId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([hiddenById])
+}
+
+model ForumPostAttachment {
+  id        String    @id @default(cuid())
+  postId    String
+  post      ForumPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  uploadedById String
+  uploadedBy User      @relation("ForumPostAttachmentUploader", fields: [uploadedById], references: [id], onDelete: Restrict)
+  fileUrl   String
+  fileName  String
+  altText   String?
+  isInline  Boolean   @default(false)
+  sortOrder Int       @default(0)
+  createdAt DateTime  @default(now())
+
+  @@index([postId])
+  @@index([uploadedById])
+  @@index([isInline])
+}
+
+model ForumReport {
+  id             String                @id @default(cuid())
+  targetType     ForumReportTargetType
+  threadId       String?
+  thread         ForumThread?          @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  postId         String?
+  post           ForumPost?            @relation(fields: [postId], references: [id], onDelete: Cascade)
+  reporterId     String
+  reporter       User                  @relation("ForumReportReporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  reason         String
+  status         ForumReportStatus     @default(OPEN)
+  resolvedAt     DateTime?
+  resolvedById   String?
+  resolvedBy     User?                 @relation("ForumReportResolver", fields: [resolvedById], references: [id], onDelete: SetNull)
+  resolutionNote String?
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+
+  @@index([targetType])
+  @@index([threadId])
+  @@index([postId])
+  @@index([reporterId])
+  @@index([status])
+  @@index([resolvedById])
+}
+
+model ForumSubscription {
+  id         String      @id @default(cuid())
+  threadId   String
+  thread     ForumThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lastReadAt DateTime    @default(now())
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  @@unique([threadId, userId])
+  @@index([userId])
+  @@index([threadId])
 }
