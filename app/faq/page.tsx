@@ -21,7 +21,7 @@ const faqs = [
 
 export default function FaqPage() {
   return (
-    <main className="flex min-h-svh flex-col bg-background">
+    <main className="flex min-h-svh flex-col bg-secondary">
       <SiteHeader />
       <section className="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center gap-4 px-6 py-16">
         <h1 className="text-3xl font-semibold tracking-tight md:text-5xl">

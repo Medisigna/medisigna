@@ -13,7 +13,7 @@ export default async function DashboardVideoDetailPage({ params }: PageProps) {
   if (!video) notFound()
 
   return (
-    <div className="px-4 py-4 md:px-6 md:py-8">
+    <div className="py-4 md:py-8">
       <VideoDetailView
         video={video}
         backHref="/dashboard/video"

@@ -27,7 +27,7 @@ export default async function PharmacistDetailPage({ params, searchParams }: Pag
   if (!profile) notFound()
 
   return (
-    <main className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-6 md:px-6 md:py-8">
+    <main className="mx-auto flex max-w-3xl flex-col gap-6 py-6 md:py-8">
       <AppMessage error={query?.error} success={query?.success} />
       <section className="rounded-md border bg-card p-5">
         <div className="flex flex-wrap items-start justify-between gap-4">

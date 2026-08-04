@@ -13,8 +13,13 @@ import { ForumShareDialog } from "@/components/forum/forum-share-dialog"
 import { ForumThreadFilters } from "@/components/forum/forum-thread-filters"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent } from "@/components/ui/card"
-import type { ForumCategoryItem, ForumPostAttachmentItem, ForumThreadListItem } from "@/lib/forum"
+import type {
+  ForumCategoryItem,
+  ForumPostAttachmentItem,
+  ForumThreadListItem,
+} from "@/lib/forum"
 import { forumAuthorName } from "@/lib/forum"
+import { cn } from "@/lib/utils"
 
 function initials(name: string) {
   return name
@@ -52,7 +57,9 @@ function ForumThreadAttachmentStrip({
         : "max-w-2xl grid-cols-3"
 
   return (
-    <div className={`pointer-events-auto relative z-10 mx-auto mt-4 grid w-full gap-2 ${gridClass}`}>
+    <div
+      className={`pointer-events-auto relative z-10 mx-auto mt-4 grid w-full gap-2 ${gridClass}`}
+    >
       {visibleAttachments.map((attachment, index) => (
         <ForumImagePreviewDialog
           key={attachment.id}
@@ -62,7 +69,7 @@ function ForumThreadAttachmentStrip({
         >
           <button
             type="button"
-            className="group/preview relative overflow-hidden rounded-md border bg-muted/20 text-left transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+            className="group/preview relative overflow-hidden rounded-md border bg-muted/20 text-left transition-opacity hover:opacity-90 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
           >
             <img
               src={attachment.fileUrl}
@@ -89,6 +96,7 @@ export function ForumThreadList({
   threads,
   total,
   unreadTotal,
+  variant = "default",
 }: {
   basePath: string
   categories: ForumCategoryItem[]
@@ -97,12 +105,15 @@ export function ForumThreadList({
   threads: ForumThreadListItem[]
   total: number
   unreadTotal: number
+  variant?: "default" | "soft"
 }) {
+  const isSoft = variant === "soft"
+
   return (
     <div className="flex flex-col gap-4">
       <div>
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+          <h1 className="text-2xl font-semibold tracking-tight text-secondary-foreground">
             Forum Diskusi
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -112,7 +123,12 @@ export function ForumThreadList({
         </div>
       </div>
 
-      <ForumThreadFilters categories={categories} category={category} query={query} />
+      <ForumThreadFilters
+        categories={categories}
+        category={category}
+        query={query}
+        variant={variant}
+      />
 
       {threads.length ? (
         <div className="flex flex-col gap-4">
@@ -127,18 +143,29 @@ export function ForumThreadList({
             return (
               <Card
                 key={thread.id}
-                className="relative rounded-xl border-0 bg-background shadow-sm transition-shadow hover:shadow-md"
+                className={cn(
+                  "relative border-0 transition-shadow",
+                  isSoft
+                    ? "rounded-[1.75rem] bg-card shadow-none ring-0 hover:shadow-none"
+                    : "rounded-xl bg-background shadow-sm hover:shadow-md"
+                )}
               >
                 <Link
                   href={detailHref}
-                  className="absolute inset-0 z-0 rounded-xl focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+                  className={cn(
+                    "absolute inset-0 z-0 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none",
+                    isSoft ? "rounded-[1.75rem]" : "rounded-xl"
+                  )}
                   aria-label={`Buka diskusi ${thread.title}`}
                 />
-                <CardContent className="pointer-events-none relative z-10 p-5 sm:p-6">
+                <CardContent className="pointer-events-none relative z-10 px-4 py-4 sm:px-5 sm:py-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex min-w-0 items-center gap-4">
                       <Avatar className="size-9 shrink-0 sm:size-10">
-                        <AvatarImage src={thread.authorImage ?? undefined} alt={authorName} />
+                        <AvatarImage
+                          src={thread.authorImage ?? undefined}
+                          alt={authorName}
+                        />
                         <AvatarFallback>{initials(authorName)}</AvatarFallback>
                       </Avatar>
                       <div className="min-w-0">
@@ -152,32 +179,45 @@ export function ForumThreadList({
                               aria-label="Apoteker terverifikasi"
                               title="Apoteker terverifikasi"
                             >
-                              <BadgeCheckIcon className="size-3.5" aria-hidden="true" />
+                              <BadgeCheckIcon
+                                className="size-3.5"
+                                aria-hidden="true"
+                              />
                             </span>
                           ) : null}
                         </div>
                         <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-                          <ForumBadge>{thread.categoryName}</ForumBadge>
+                          <ForumBadge tone="category">
+                            {thread.categoryName}
+                          </ForumBadge>
                           <span>{formatDate(thread.lastPostAt)}</span>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <h2 className="mt-6 line-clamp-3 text-xl font-semibold leading-snug tracking-tight text-foreground group-hover/card:underline">
+                  <h2 className="mt-4 line-clamp-3 text-xl leading-snug font-semibold tracking-tight text-foreground group-hover/card:underline">
                     {thread.title}
                   </h2>
 
-                  <ForumThreadAttachmentStrip attachments={thread.attachments} />
+                  <ForumThreadAttachmentStrip
+                    attachments={thread.attachments}
+                  />
 
-                  <div className="mt-6 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+                  <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
                     <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
                       <span className="inline-flex items-center gap-1.5">
                         <MessageSquareTextIcon aria-hidden="true" />
-                        <span className="font-medium text-primary">{replyCount}</span>
+                        <span className="font-medium text-primary">
+                          {replyCount}
+                        </span>
                       </span>
                       <div className="pointer-events-auto relative z-10">
-                        <ForumShareDialog href={detailHref} title={thread.title} label="Share" />
+                        <ForumShareDialog
+                          href={detailHref}
+                          title={thread.title}
+                          label="Share"
+                        />
                       </div>
                       {thread.isPinned ? (
                         <ForumBadge tone="primary">
@@ -192,7 +232,9 @@ export function ForumThreadList({
                         </ForumBadge>
                       ) : null}
                       {thread.unreadCount > 0 ? (
-                        <ForumBadge tone="primary">{thread.unreadCount} baru</ForumBadge>
+                        <ForumBadge tone="primary">
+                          {thread.unreadCount} baru
+                        </ForumBadge>
                       ) : null}
                     </div>
                   </div>

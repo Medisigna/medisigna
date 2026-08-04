@@ -29,7 +29,7 @@ export default async function PublicArticleDetailPage({ params }: PageProps) {
   if (!article) notFound()
 
   return (
-    <main className="flex min-h-svh flex-col bg-muted-foreground/5">
+    <main className="flex min-h-svh flex-col bg-secondary">
       <SiteHeader />
       <div className="flex-1 px-4 py-8 md:px-6 md:py-12">
         <ArticleDetailView

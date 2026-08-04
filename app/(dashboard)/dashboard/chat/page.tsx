@@ -10,8 +10,10 @@ function toSessionListItem(session: any) {
     lastMessage:
       session.messages[0]?.type === "SUMMARY"
         ? "Ringkasan konseling"
-        : session.messages[0]?.body ??
-          (session.messages[0]?.type === "IMAGE" ? "Gambar" : "Belum ada pesan."),
+        : (session.messages[0]?.body ??
+          (session.messages[0]?.type === "IMAGE"
+            ? "Gambar"
+            : "Belum ada pesan.")),
     updatedAt: session.updatedAt.toISOString(),
     unreadCount: session.patientUnreadCount,
   }
@@ -30,17 +32,23 @@ export default async function ChatPage() {
   })
 
   return (
-    <main className="mx-auto grid h-[calc(100svh-9.5rem)] w-full min-w-0 max-w-6xl overflow-hidden gap-4 px-3 py-4 sm:px-4 md:h-[calc(100svh-3.5rem)] md:px-6 md:py-8 lg:grid-cols-[340px_minmax(0,1fr)]">
-      <section className="flex min-h-0 min-w-0 flex-col gap-4 rounded-xl border bg-card p-3 sm:p-4 lg:rounded-2xl lg:p-6">
-        <div>
-          <h1 className="text-xl font-semibold">Riwayat Chat</h1>
-        </div>
-        <SessionList filterable sessions={sessions.map(toSessionListItem)} />
-      </section>
+    <main className="min-h-[calc(100dvh-7rem)] rounded-[2rem] bg-secondary py-4 md:rounded-[2.25rem] md:py-6">
+      <div className="mx-auto grid h-[calc(100svh-9.5rem)] w-full max-w-6xl min-w-0 gap-4 overflow-hidden md:h-[calc(100svh-3.5rem)] lg:grid-cols-[340px_minmax(0,1fr)]">
+        <section className="flex min-h-0 min-w-0 flex-col gap-4 rounded-[1.75rem] border-0 bg-card p-3 shadow-none ring-0 sm:p-4 lg:p-6">
+          <div>
+            <h1 className="text-xl font-semibold">Riwayat Chat</h1>
+          </div>
+          <SessionList
+            filterable
+            sessions={sessions.map(toSessionListItem)}
+            variant="soft"
+          />
+        </section>
 
-      <section className="hidden min-h-0 items-center justify-center rounded-md border bg-card p-6 text-center text-sm text-muted-foreground lg:flex">
-        Pilih chat untuk membuka percakapan.
-      </section>
+        <section className="hidden min-h-0 items-center justify-center rounded-[1.75rem] border-0 bg-card p-6 text-center text-sm text-muted-foreground shadow-none ring-0 lg:flex">
+          Pilih chat untuk membuka percakapan.
+        </section>
+      </div>
     </main>
   )
 }

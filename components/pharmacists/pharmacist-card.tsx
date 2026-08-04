@@ -36,15 +36,22 @@ export function PharmacistCard({
   profile,
   href,
   action,
+  className,
 }: {
   profile: PharmacistCardData
   href?: string
   action: React.ReactNode
+  className?: string
 }) {
   const isOnline = profile.availabilityStatus === "ONLINE"
 
   return (
-    <Card className="rounded-2xl bg-card py-4 shadow-xs ring-1 ring-foreground/10 transition-shadow duration-200 hover:shadow-md">
+    <Card
+      className={cn(
+        "rounded-2xl bg-card py-4 shadow-xs ring-1 ring-foreground/10 transition-shadow duration-200 hover:shadow-md",
+        className
+      )}
+    >
       <CardHeader className="items-center px-4">
         <CardTitle className="text-sm font-medium text-muted-foreground">
           Apoteker

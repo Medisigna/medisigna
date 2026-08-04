@@ -8,7 +8,7 @@ import { VideosSection } from "@/components/landing/videos-section"
 
 export default function Page() {
   return (
-    <main className="min-h-svh bg-background">
+    <main className="min-h-svh bg-secondary">
       <SiteHeader />
       <HeroSection />
       <VideosSection />

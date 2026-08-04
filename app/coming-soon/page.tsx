@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function ComingSoonPage() {
   return (
-    <main className="flex min-h-svh flex-col bg-background">
+    <main className="flex min-h-svh flex-col bg-secondary">
       <SiteHeader />
       <ComingSoonContent />
       <SiteFooter />

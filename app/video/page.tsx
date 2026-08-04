@@ -13,7 +13,7 @@ export const metadata = {
 
 export default function VideosPage({ searchParams }: PageProps) {
   return (
-    <main className="flex min-h-svh flex-col bg-muted-foreground/5">
+    <main className="flex min-h-svh flex-col bg-secondary">
       <SiteHeader />
       <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 md:py-12">
         <VideoListPage

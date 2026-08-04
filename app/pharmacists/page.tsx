@@ -18,7 +18,9 @@ type PageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>
 }
 
-export default async function PublicPharmacistsPage({ searchParams }: PageProps) {
+export default async function PublicPharmacistsPage({
+  searchParams,
+}: PageProps) {
   const params = await searchParams
   const query = typeof params?.q === "string" ? params.q.trim() : ""
   const selectedPharmacist =
@@ -47,11 +49,13 @@ export default async function PublicPharmacistsPage({ searchParams }: PageProps)
   ])
 
   return (
-    <main className="min-h-svh bg-muted-foreground/5">
+    <main className="min-h-svh bg-secondary">
       <SiteHeader />
       <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-5 md:px-6 md:py-8">
         <section className="flex flex-col items-start gap-4">
-          <h1 className="text-2xl font-semibold tracking-tight">Pilih Apoteker</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Pilih Apoteker
+          </h1>
           <PharmacistSearch action="/pharmacists" query={query} />
         </section>
 
@@ -68,14 +72,20 @@ export default async function PublicPharmacistsPage({ searchParams }: PageProps)
                     </Button>
                   ) : user && user.role !== "PATIENT" ? (
                     <Button asChild className="w-full">
-                      <Link href={homeForRole(user.role)}>Kembali ke Dashboard</Link>
+                      <Link href={homeForRole(user.role)}>
+                        Kembali ke Dashboard
+                      </Link>
                     </Button>
                   ) : (
                     <StartChatPrompt
                       pharmacistId={profile.id}
                       name={profile.user.name}
                       title={profile.title}
-                      image={profile.profilePhotoUrl ?? profile.user.image ?? undefined}
+                      image={
+                        profile.profilePhotoUrl ??
+                        profile.user.image ??
+                        undefined
+                      }
                       practiceLocation={profile.practiceLocation}
                       serviceHours={profile.serviceHours}
                       loginHref={

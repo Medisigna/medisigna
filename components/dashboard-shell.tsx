@@ -4,12 +4,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useCallback, useEffect, useRef, useState } from "react"
 import type { LucideIcon } from "lucide-react"
-import {
-  ChevronDownIcon,
-  LogOutIcon,
-  MenuIcon,
-  XIcon,
-} from "lucide-react"
+import { ChevronDownIcon, LogOutIcon, MenuIcon, XIcon } from "lucide-react"
 
 import { logout } from "@/app/actions/auth/logout"
 import { BrandLogo } from "@/components/brand-logo"
@@ -31,6 +26,7 @@ export type DashboardNavItem = {
   label: string
   description: string
   icon: LucideIcon
+  iconSrc?: string
   children?: DashboardNavItem[]
   exact?: boolean
   hideOnMobileNav?: boolean
@@ -83,7 +79,7 @@ function ShellBrand({ subtitle }: { subtitle: string }) {
   return (
     <Link
       href="/"
-      className="rounded-2xl border border-sidebar-border/70 bg-background/80 px-4 py-4 transition-colors hover:bg-background"
+      className="rounded-2xl bg-card px-4 py-4 transition-colors hover:bg-muted/60"
       aria-label="Medisigna"
     >
       <div className="flex items-center gap-3">
@@ -120,8 +116,8 @@ function DashboardNavBody({
         className={cn(
           "flex size-10 shrink-0 items-center justify-center rounded-xl transition-colors",
           active
-            ? "bg-primary text-primary-foreground"
-            : "bg-background/85 text-primary"
+            ? "bg-primary/10 text-primary"
+            : "bg-secondary text-primary"
         )}
       >
         <Icon className="size-4" />
@@ -145,10 +141,10 @@ function DashboardNavBody({
 
 function navLinkClass(active: boolean, drawer: boolean) {
   return cn(
-    "group flex w-full items-center gap-3 rounded-2xl border px-3 py-3 transition-all",
+    "group flex w-full items-center gap-3 rounded-2xl px-3 py-3 transition-all",
     active
-      ? "border-sidebar-border bg-background text-secondary-foreground shadow-[0_16px_34px_-28px_rgba(14,47,89,0.55)]"
-      : "border-transparent text-muted-foreground hover:border-border/80 hover:bg-sidebar-accent/80 hover:text-secondary-foreground",
+      ? "bg-secondary text-secondary-foreground"
+      : "text-muted-foreground hover:bg-secondary/80 hover:text-secondary-foreground",
     drawer && "rounded-xl py-2.5"
   )
 }
@@ -210,10 +206,7 @@ function DashboardNavToggle({
       type="button"
       aria-expanded={open}
       onClick={onToggle}
-      className={cn(
-        navLinkClass(active, drawer),
-        "cursor-pointer"
-      )}
+      className={cn(navLinkClass(active, drawer), "cursor-pointer")}
     >
       <DashboardNavBody
         item={item}
@@ -342,7 +335,9 @@ export function DashboardShell({
   }, [])
 
   const fetchUnreadCount = useCallback(async () => {
-    const response = await fetch("/api/consultation/unread", { cache: "no-store" })
+    const response = await fetch("/api/consultation/unread", {
+      cache: "no-store",
+    })
     if (!response.ok) return
     const data = await response.json()
     setUnreadCount(data.unreadCount)
@@ -398,7 +393,7 @@ export function DashboardShell({
   }, [isChatRoom, mobileNavigation])
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-secondary">
       <div
         className={cn(
           "mx-auto flex min-h-screen w-full max-w-[1540px]",
@@ -408,7 +403,7 @@ export function DashboardShell({
         )}
       >
         <aside className="hidden lg:flex lg:w-[280px] lg:shrink-0">
-          <div className="sticky top-6 flex h-[calc(100vh-3rem)] min-h-0 w-full flex-col overflow-hidden rounded-3xl border border-sidebar-border/80 bg-sidebar/92 p-4 shadow-[0_28px_60px_-42px_rgba(14,47,89,0.42)] backdrop-blur">
+          <div className="sticky top-6 flex h-[calc(100vh-3rem)] min-h-0 w-full flex-col overflow-hidden rounded-3xl bg-card p-4 shadow-none">
             <ShellBrand subtitle={subtitle} />
 
             <nav className="mt-5 min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1">
@@ -420,16 +415,18 @@ export function DashboardShell({
                     pathname={pathname}
                     unreadCount={unreadCount}
                     chatHref={chatHref}
-                    open={Boolean(openNavItems[item.href] || hasActiveChild(pathname, item))}
+                    open={Boolean(
+                      openNavItems[item.href] || hasActiveChild(pathname, item)
+                    )}
                     onToggle={() => toggleNavItem(item.href)}
                   />
                 ))}
               </div>
             </nav>
 
-            <div className="mt-5 flex shrink-0 flex-col gap-3 border-t border-sidebar-border/70 pt-4">
+            <div className="mt-5 flex shrink-0 flex-col gap-3 pt-4">
               <div className="flex items-center gap-3">
-                <div className="flex size-10 items-center justify-center rounded-full border border-border bg-background text-sm font-semibold">
+                <div className="flex size-10 items-center justify-center rounded-full bg-secondary text-sm font-semibold">
                   {initials}
                 </div>
                 <div className="min-w-0 flex-1">
@@ -454,7 +451,7 @@ export function DashboardShell({
         >
           <header
             className={cn(
-              "rounded-xl border border-border/80 bg-background/90 px-3 py-2.5 shadow-[0_22px_48px_-44px_rgba(14,47,89,0.28)] backdrop-blur sm:px-4 sm:py-3 lg:sticky lg:top-3 lg:z-20",
+              "rounded-xl bg-card px-3 py-2.5 shadow-none sm:px-4 sm:py-3 lg:sticky lg:top-3 lg:z-20",
               isChatRoom && "hidden lg:block"
             )}
           >
@@ -508,7 +505,10 @@ export function DashboardShell({
                               unreadCount={unreadCount}
                               chatHref={chatHref}
                               onClick={() => setDrawerOpen(false)}
-                              open={Boolean(openNavItems[item.href] || hasActiveChild(pathname, item))}
+                              open={Boolean(
+                                openNavItems[item.href] ||
+                                hasActiveChild(pathname, item)
+                              )}
                               onToggle={() => toggleNavItem(item.href)}
                               drawer
                             />
@@ -540,12 +540,16 @@ export function DashboardShell({
                   aria-label="Buka profil"
                   className="flex min-w-0 items-center gap-2 rounded-full transition-colors hover:bg-muted/70"
                 >
-                  <span className="flex size-10 items-center justify-center rounded-full border border-border bg-background text-sm font-semibold">
+                  <span className="flex size-10 items-center justify-center rounded-full bg-secondary text-sm font-semibold">
                     {initials}
                   </span>
                   <span className="hidden min-w-0 text-right text-xs md:block">
-                    <span className="block truncate font-medium">{user.name}</span>
-                    <span className="block truncate text-muted-foreground">{user.email}</span>
+                    <span className="block truncate font-medium">
+                      {user.name}
+                    </span>
+                    <span className="block truncate text-muted-foreground">
+                      {user.email}
+                    </span>
                   </span>
                 </Link>
               </div>
@@ -595,10 +599,19 @@ export function DashboardShell({
                   aria-current={active ? "page" : undefined}
                   className={cn(
                     "relative flex h-14 min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 text-xs font-medium text-muted-foreground transition-colors",
-                    active && "bg-primary text-primary-foreground"
+                    active && "bg-primary/10 text-primary"
                   )}
                 >
-                  <Icon className="size-4" />
+                  {item.iconSrc ? (
+                    <img
+                      src={item.iconSrc}
+                      alt=""
+                      aria-hidden="true"
+                      className="size-5 object-contain"
+                    />
+                  ) : (
+                    <Icon className="size-4" />
+                  )}
                   <span className="max-w-full truncate">{item.label}</span>
                   {showUnread ? (
                     <span className="absolute top-1.5 right-3 flex min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-bold text-primary-foreground ring-2 ring-background">

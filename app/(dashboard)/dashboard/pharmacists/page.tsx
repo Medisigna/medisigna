@@ -40,13 +40,19 @@ export default async function PharmacistListPage({ searchParams }: PageProps) {
   })) as PharmacistCardData[]
 
   return (
-    <main className="min-h-full bg-muted-foreground/5">
-      <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-5 md:px-6 md:py-8">
+    <main className="min-h-[calc(100dvh-7rem)] rounded-[2rem] bg-secondary py-4 md:rounded-[2.25rem] md:py-6">
+      <div className="mx-auto flex max-w-6xl flex-col gap-6">
         <AppMessage error={params?.error} success={params?.success} />
 
         <section className="flex flex-col items-start gap-4">
-          <h1 className="text-2xl font-semibold tracking-tight">Pilih Apoteker</h1>
-          <PharmacistSearch action="/dashboard/pharmacists" query={query} />
+          <h1 className="text-2xl font-semibold tracking-tight text-secondary-foreground">
+            Pilih Apoteker
+          </h1>
+          <PharmacistSearch
+            action="/dashboard/pharmacists"
+            query={query}
+            variant="soft"
+          />
         </section>
 
         <div className="grid gap-4 xl:grid-cols-2">
@@ -56,13 +62,18 @@ export default async function PharmacistListPage({ searchParams }: PageProps) {
                 key={profile.id}
                 profile={profile}
                 href={`/dashboard/pharmacists/${profile.id}`}
+                className="rounded-[1.75rem] border-0 bg-card shadow-none ring-0 hover:shadow-none"
                 action={
                   profile.availabilityStatus === "ONLINE" ? (
                     <StartChatPrompt
                       pharmacistId={profile.id}
                       name={profile.user.name}
                       title={profile.title}
-                      image={profile.profilePhotoUrl ?? profile.user.image ?? undefined}
+                      image={
+                        profile.profilePhotoUrl ??
+                        profile.user.image ??
+                        undefined
+                      }
                       practiceLocation={profile.practiceLocation}
                       serviceHours={profile.serviceHours}
                     />
@@ -75,7 +86,7 @@ export default async function PharmacistListPage({ searchParams }: PageProps) {
               />
             ))
           ) : (
-            <Card className="bg-card shadow-none ring-0 md:col-span-2 xl:col-span-3">
+            <Card className="rounded-[1.75rem] border border-dashed border-border/70 bg-card shadow-none ring-0 md:col-span-2 xl:col-span-3">
               <CardContent className="flex flex-col items-center gap-4 py-8 text-center">
                 <div className="flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
                   <SearchIcon className="size-6" />

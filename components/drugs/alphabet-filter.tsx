@@ -14,10 +14,14 @@ export function parseAlphabetLetter(value: string | string[] | undefined) {
 export function AlphabetFilter({
   activeLetter,
   hrefForLetter,
+  variant = "default",
 }: {
   activeLetter: string
   hrefForLetter: (letter: string) => string
+  variant?: "default" | "soft"
 }) {
+  const isSoft = variant === "soft"
+
   return (
     <section className="flex flex-col gap-3">
       <h2 className="text-2xl font-semibold tracking-tight">Cari berdasarkan abjad</h2>
@@ -27,7 +31,8 @@ export function AlphabetFilter({
             key={letter}
             href={hrefForLetter(letter)}
             className={cn(
-              "flex size-11 items-center justify-center bg-muted text-sm font-medium text-foreground transition-colors hover:bg-primary hover:text-primary-foreground",
+              "flex size-11 items-center justify-center rounded-md text-sm font-medium text-foreground transition-colors hover:bg-primary hover:text-primary-foreground",
+              isSoft ? "bg-card" : "bg-muted",
               activeLetter === letter && "bg-primary text-primary-foreground"
             )}
           >

@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import type { ForumCategoryItem } from "@/lib/forum"
+import { cn } from "@/lib/utils"
 
 function categoryLabel(categories: ForumCategoryItem[], category?: string) {
   if (!category) return "Kategori"
@@ -24,10 +25,12 @@ export function ForumThreadFilters({
   categories,
   category,
   query,
+  variant = "default",
 }: {
   categories: ForumCategoryItem[]
   category?: string
   query?: string
+  variant?: "default" | "soft"
 }) {
   const pathname = usePathname()
   const router = useRouter()
@@ -37,6 +40,7 @@ export function ForumThreadFilters({
     () => categoryLabel(categories, category),
     [categories, category]
   )
+  const isSoft = variant === "soft"
 
   function replaceParams(next: { category?: string; query?: string }) {
     const params = new URLSearchParams()
@@ -47,7 +51,9 @@ export function ForumThreadFilters({
 
     const suffix = params.toString()
     startTransition(() => {
-      router.replace(suffix ? `${pathname}?${suffix}` : pathname, { scroll: false })
+      router.replace(suffix ? `${pathname}?${suffix}` : pathname, {
+        scroll: false,
+      })
     })
   }
 
@@ -63,7 +69,7 @@ export function ForumThreadFilters({
     <div className="flex gap-2">
       <div className="relative min-w-0 flex-1">
         <SearchIcon
-          className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+          className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
           aria-hidden="true"
         />
         <Input
@@ -71,12 +77,22 @@ export function ForumThreadFilters({
           onChange={(event) => setSearch(event.target.value)}
           placeholder="Cari diskusi..."
           aria-label="Cari diskusi"
-          className="bg-muted/35 pl-9"
+          className={cn(
+            "pl-9",
+            isSoft
+              ? "rounded-2xl border-0 bg-card shadow-none ring-0"
+              : "bg-muted/35"
+          )}
         />
       </div>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button type="button" variant="outline" disabled={isPending}>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={isPending}
+            className={cn(isSoft && "rounded-2xl border-0 bg-card shadow-none")}
+          >
             <SlidersHorizontalIcon data-icon="inline-start" />
             {selectedCategoryLabel}
           </Button>
@@ -90,9 +106,13 @@ export function ForumThreadFilters({
             {categories.map((item) => (
               <DropdownMenuItem
                 key={item.id}
-                onSelect={() => replaceParams({ category: item.slug, query: search })}
+                onSelect={() =>
+                  replaceParams({ category: item.slug, query: search })
+                }
               >
-                {category === item.slug ? <CheckIcon data-icon="inline-start" /> : null}
+                {category === item.slug ? (
+                  <CheckIcon data-icon="inline-start" />
+                ) : null}
                 {item.name}
               </DropdownMenuItem>
             ))}

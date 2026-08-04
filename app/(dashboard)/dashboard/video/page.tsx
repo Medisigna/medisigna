@@ -10,14 +10,17 @@ export const metadata = {
 
 export default function DashboardVideosPage({ searchParams }: PageProps) {
   return (
-    <div className="mx-auto flex max-w-6xl flex-col px-4 py-4 md:px-6 md:py-8">
-      <VideoListPage
-        action="/dashboard/video"
-        detailHrefPrefix="/dashboard/video"
-        eyebrow="Edukasi"
-        searchParams={searchParams}
-        title="Video Kesehatan"
-      />
-    </div>
+    <main className="min-h-[calc(100dvh-7rem)] rounded-[2rem] bg-secondary py-4 md:rounded-[2.25rem] md:py-6">
+      <div className="mx-auto flex max-w-6xl flex-col">
+        <VideoListPage
+          action="/dashboard/video"
+          detailHrefPrefix="/dashboard/video"
+          eyebrow="Edukasi"
+          searchParams={searchParams}
+          title="Video Kesehatan"
+          variant="soft"
+        />
+      </div>
+    </main>
   )
 }

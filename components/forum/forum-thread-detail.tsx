@@ -280,7 +280,7 @@ export function ForumThreadDetailView({
             </div>
 
             <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-              <ForumBadge>{thread.categoryName}</ForumBadge>
+              <ForumBadge tone="category">{thread.categoryName}</ForumBadge>
               <span className="inline-flex items-center gap-1.5">
                 <CalendarIcon aria-hidden="true" />
                 {formatDate(thread.createdAt)}

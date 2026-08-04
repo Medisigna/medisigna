@@ -2,10 +2,7 @@ import Link from "next/link"
 import { ArrowRightIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import {
-  VideoCard,
-  type VideoCardData,
-} from "@/components/videos/video-card"
+import { VideoCard, type VideoCardData } from "@/components/videos/video-card"
 import {
   getVideos,
   type VideoListItem,
@@ -48,11 +45,10 @@ export async function VideosSection() {
   const videos = videoCards(result.videos)
 
   return (
-    <section className="bg-background px-6 pt-24 pb-16 md:pt-28 md:pb-20 lg:pt-52">
+    <section className="bg-secondary px-6 pt-24 pb-16 md:pt-28 md:pb-20 lg:pt-52">
       <div className="mx-auto flex max-w-6xl flex-col items-center gap-8 md:gap-10">
         <h2 className="max-w-3xl text-center text-2xl font-semibold tracking-tight text-foreground md:text-5xl">
-          Tonton{" "}
-          <span className="text-primary">Video Populer</span>
+          Tonton <span className="text-primary">Video Populer</span>
         </h2>
 
         <div className="mt-4 grid w-full gap-5 md:mt-6 lg:grid-cols-2">

@@ -34,17 +34,20 @@ export default async function PatientForumPage({ searchParams }: PageProps) {
   ])
 
   return (
-    <main className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-5 md:px-6 md:py-8">
-      <ForumThreadComposer href="/dashboard/forum/new" />
-      <ForumThreadList
-        basePath="/dashboard/forum"
-        categories={categories}
-        category={category}
-        query={query}
-        threads={threads}
-        total={total}
-        unreadTotal={unreadTotal}
-      />
+    <main className="min-h-[calc(100dvh-7rem)] rounded-[2rem] bg-secondary py-4 md:rounded-[2.25rem] md:py-6">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
+        <ForumThreadComposer href="/dashboard/forum/new" />
+        <ForumThreadList
+          basePath="/dashboard/forum"
+          categories={categories}
+          category={category}
+          query={query}
+          threads={threads}
+          total={total}
+          unreadTotal={unreadTotal}
+          variant="soft"
+        />
+      </div>
     </main>
   )
 }

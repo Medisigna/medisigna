@@ -12,7 +12,7 @@ export default async function DashboardDrugDetailPage({ params }: PageProps) {
   if (!drug) notFound()
 
   return (
-    <main className="mx-auto w-full max-w-5xl px-4 py-5 md:px-6 md:py-8">
+    <main className="mx-auto w-full max-w-5xl py-5 md:py-8">
       <DrugDetail
         drug={drug}
         backHref="/dashboard/obat"

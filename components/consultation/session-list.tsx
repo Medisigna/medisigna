@@ -29,21 +29,30 @@ export function SessionList({
   activeSessionId,
   statuses,
   filterable = false,
+  variant = "default",
 }: {
   sessions: SessionListItem[]
   basePath?: string
   activeSessionId?: string
   statuses?: string[]
   filterable?: boolean
+  variant?: "default" | "soft"
 }) {
   const [currentSessions, setCurrentSessions] = useState(sessions)
   const [query, setQuery] = useState("")
   const [tab, setTab] = useState("active")
-  const [typingSessionIds, setTypingSessionIds] = useState<Set<string>>(new Set())
-  const typingTimersRef = useRef(new Map<string, ReturnType<typeof setTimeout>>())
+  const [typingSessionIds, setTypingSessionIds] = useState<Set<string>>(
+    new Set()
+  )
+  const typingTimersRef = useRef(
+    new Map<string, ReturnType<typeof setTimeout>>()
+  )
+  const isSoft = variant === "soft"
 
   const fetchSessions = useCallback(async () => {
-    const response = await fetch("/api/consultation/sessions", { cache: "no-store" })
+    const response = await fetch("/api/consultation/sessions", {
+      cache: "no-store",
+    })
     if (!response.ok) return
     const data = await response.json()
     setCurrentSessions(
@@ -86,7 +95,9 @@ export function SessionList({
       clearTimeout(typingTimersRef.current.get(event.sessionId))
       setTypingSessionIds((current) => {
         const next = new Set(current)
-        event.isTyping ? next.add(event.sessionId) : next.delete(event.sessionId)
+        event.isTyping
+          ? next.add(event.sessionId)
+          : next.delete(event.sessionId)
         return next
       })
 
@@ -111,7 +122,9 @@ export function SessionList({
 
   const normalizedQuery = query.trim().toLocaleLowerCase("id-ID")
   const visibleSessions = currentSessions.filter((session) => {
-    const isDone = ["COMPLETED", "REFERRED", "CANCELED"].includes(session.status)
+    const isDone = ["COMPLETED", "REFERRED", "CANCELED"].includes(
+      session.status
+    )
     const matchesTab = tab === "all" || (tab === "done" ? isDone : !isDone)
     const matchesQuery =
       !normalizedQuery ||
@@ -125,7 +138,11 @@ export function SessionList({
     <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-3">
       {filterable ? (
         <div className="flex shrink-0 flex-col gap-3">
-          <InputGroup>
+          <InputGroup
+            className={cn(
+              isSoft && "h-11 rounded-2xl border-0 bg-card shadow-none ring-0"
+            )}
+          >
             <InputGroupAddon>
               <SearchIcon aria-hidden="true" />
             </InputGroupAddon>
@@ -161,6 +178,7 @@ export function SessionList({
                 href={`${basePath}/${session.id}`}
                 className={cn(
                   "group relative block min-w-0 shrink-0 overflow-hidden rounded-lg bg-muted/35 p-3 transition-colors hover:bg-muted/70 sm:p-4",
+                  isSoft && "rounded-[1.35rem] bg-card hover:bg-card/80",
                   isActive && "bg-primary/10"
                 )}
               >
@@ -172,19 +190,24 @@ export function SessionList({
                   )}
                 />
                 <div className="flex min-w-0 items-start gap-3">
-                  <Avatar className="shrink-0 bg-primary/10 text-primary" size="lg">
+                  <Avatar
+                    className="shrink-0 bg-primary/10 text-primary"
+                    size="lg"
+                  >
                     <AvatarFallback className="bg-primary/10 font-semibold text-primary">
                       {getInitials(session.name)}
                     </AvatarFallback>
                   </Avatar>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <h2 className="min-w-0 flex-1 truncate font-semibold leading-6">
+                      <h2 className="min-w-0 flex-1 truncate leading-6 font-semibold">
                         {session.name}
                       </h2>
                       {session.unreadCount > 0 ? (
                         <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary text-[11px] font-semibold text-primary-foreground shadow-xs">
-                          {session.unreadCount > 99 ? "99+" : session.unreadCount}
+                          {session.unreadCount > 99
+                            ? "99+"
+                            : session.unreadCount}
                         </span>
                       ) : null}
                     </div>
@@ -207,7 +230,9 @@ export function SessionList({
                             />
                           ) : null}
                           <span className="truncate">
-                            {isDone ? "Konsultasi selesai" : session.lastMessage}
+                            {isDone
+                              ? "Konsultasi selesai"
+                              : session.lastMessage}
                           </span>
                         </p>
                       )}
@@ -221,12 +246,19 @@ export function SessionList({
             )
           })
         ) : (
-          <div className="flex min-h-40 flex-1 flex-col items-center justify-center gap-3 rounded-lg border border-dashed bg-card/70 p-6 text-center">
+          <div
+            className={cn(
+              "flex min-h-40 flex-1 flex-col items-center justify-center gap-3 border border-dashed bg-card/70 p-6 text-center",
+              isSoft ? "rounded-[1.75rem]" : "rounded-lg"
+            )}
+          >
             <div className="flex size-10 items-center justify-center rounded-full bg-primary/10 text-primary">
               <MessageCircleIcon className="size-5" aria-hidden="true" />
             </div>
             <p className="text-sm font-medium">
-              {currentSessions.length ? "Chat tidak ditemukan." : "Belum ada chat."}
+              {currentSessions.length
+                ? "Chat tidak ditemukan."
+                : "Belum ada chat."}
             </p>
           </div>
         )}

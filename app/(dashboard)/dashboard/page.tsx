@@ -23,6 +23,52 @@ import { db } from "@/lib/db"
 import { getVideos } from "@/lib/educational-videos"
 import { requireRole } from "@/lib/session"
 
+const softCardClass =
+  "rounded-[1.75rem] border-0 bg-card shadow-none ring-0 hover:shadow-none"
+
+const quickMenuItems = [
+  {
+    href: "/dashboard/pharmacists",
+    label: "Konsultasi",
+    iconSrc: "/menu-icons/consult.png",
+  },
+  {
+    href: "/dashboard/obat",
+    label: "Obat A-Z",
+    iconSrc: "/menu-icons/medicines.png",
+  },
+  {
+    href: "/dashboard/artikel",
+    label: "Artikel",
+    iconSrc: "/menu-icons/article.png",
+  },
+  {
+    href: "/dashboard/video",
+    label: "Video Edukasi",
+    iconSrc: "/menu-icons/education.png",
+  },
+  {
+    href: "/dashboard/forum",
+    label: "Forum Diskusi",
+    iconSrc: "/menu-icons/Forum.png",
+  },
+  {
+    label: "Beli Obat",
+    iconSrc: "/menu-icons/Shop.png",
+    comingSoon: true,
+  },
+  {
+    label: "AI Apoteker",
+    iconSrc: "/menu-icons/AI.png",
+    comingSoon: true,
+  },
+  {
+    label: "Lainnya",
+    iconSrc: "/menu-icons/etc.png",
+    href: "/dashboard/profile",
+  },
+]
+
 function greeting() {
   const hour = new Date().getHours()
 
@@ -48,9 +94,7 @@ function SectionHeading({
           {title}
         </h2>
         {description ? (
-          <p className="mt-0.5 text-sm text-muted-foreground">
-            {description}
-          </p>
+          <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>
         ) : null}
       </div>
       {action ? <div className="shrink-0">{action}</div> : null}
@@ -70,10 +114,13 @@ function EmptyState({
   action: React.ReactNode
 }) {
   return (
-    <Card size="sm" className="border-dashed">
+    <Card
+      size="sm"
+      className="rounded-[1.75rem] border border-dashed border-border/70 bg-card shadow-none ring-0"
+    >
       <CardContent className="flex flex-col items-start gap-4 py-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex min-w-0 items-start gap-3">
-          <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
             <Icon className="size-4" />
           </div>
           <div className="min-w-0">
@@ -84,6 +131,64 @@ function EmptyState({
         {action}
       </CardContent>
     </Card>
+  )
+}
+
+function QuickMenu() {
+  return (
+    <nav
+      aria-label="Menu cepat"
+      className="grid grid-cols-4 gap-2 sm:gap-3 md:hidden"
+    >
+      {quickMenuItems.map((item) => {
+        const content = (
+          <>
+            <span className="flex size-10 items-center justify-center">
+              <img
+                src={item.iconSrc}
+                alt=""
+                aria-hidden="true"
+                className="size-7 object-contain"
+                loading="lazy"
+              />
+            </span>
+            <span className="max-w-full px-1 text-[11px] leading-tight font-semibold text-secondary-foreground">
+              {item.label}
+            </span>
+            {item.comingSoon ? (
+              <span className="max-w-full truncate rounded-full bg-yellow-100 px-1.5 py-0.5 text-[9px] font-semibold text-yellow-700">
+                Segera
+              </span>
+            ) : null}
+          </>
+        )
+
+        const className =
+          "group flex h-20 min-w-0 flex-col items-center justify-center gap-1 rounded-[1.25rem] bg-card text-center shadow-none ring-0 transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+
+        if (!item.href) {
+          return (
+            <div
+              key={item.label}
+              aria-disabled="true"
+              className={`${className} opacity-85`}
+            >
+              {content}
+            </div>
+          )
+        }
+
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={`${className} hover:bg-card/80`}
+          >
+            {content}
+          </Link>
+        )
+      })}
+    </nav>
   )
 }
 
@@ -101,142 +206,154 @@ export default async function HomePage() {
   ])
 
   return (
-    <main className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-4 md:gap-10 md:px-6 md:py-8">
-      <section className="flex min-w-0 flex-col gap-1">
-        <p className="text-sm font-medium text-muted-foreground">
-          {greeting()},  <span className="truncate text-xl font-semibold tracking-tight text-secondary-foreground md:text-3xl">
-            {user.name}
-          </span>
-        </p>
-      </section>
+    <main className="min-h-[calc(100dvh-7rem)] rounded-[2rem] bg-secondary py-4 md:rounded-[2.25rem] md:py-6">
+      <div className="mx-auto flex max-w-6xl flex-col gap-6 md:gap-8">
+        <section className="flex min-w-0 items-center gap-4 py-2">
+          <div className="min-w-0">
+            <p className="text-sm font-medium text-muted-foreground">
+              {greeting()}
+            </p>
+            <h2 className="truncate text-xl font-semibold tracking-tight text-secondary-foreground md:text-3xl">
+              {user.name}
+            </h2>
+          </div>
+        </section>
 
-      <DashboardPromoCarousel />
+        <DashboardPromoCarousel variant="soft" />
 
-      <section className="flex flex-col gap-3">
-        <SectionHeading
-          title="Apoteker terbaik"
-          action={
-            <Button asChild variant="outline" size="xs">
-              <Link href="/dashboard/pharmacists">
-                Lihat Semua
-                <ArrowRightIcon data-icon="inline-end" />
-              </Link>
-            </Button>
-          }
-        />
-        {pharmacists.length ? (
-          <div className="grid gap-4 xl:grid-cols-2">
-            {pharmacists.map((profile) => (
-              <PharmacistCard
-                key={profile.id}
-                profile={profile}
-                href={`/dashboard/pharmacists/${profile.id}`}
+        <div className="flex flex-col gap-8 md:gap-10">
+          <QuickMenu />
+
+          <section className="flex flex-col gap-3">
+            <SectionHeading
+              title="Apoteker terbaik"
+              action={
+                <Button asChild variant="outline" size="xs">
+                  <Link href="/dashboard/pharmacists">
+                    Lihat Semua
+                    <ArrowRightIcon data-icon="inline-end" />
+                  </Link>
+                </Button>
+              }
+            />
+            {pharmacists.length ? (
+              <div className="grid gap-4 xl:grid-cols-2">
+                {pharmacists.map((profile) => (
+                  <PharmacistCard
+                    key={profile.id}
+                    profile={profile}
+                    href={`/dashboard/pharmacists/${profile.id}`}
+                    className={softCardClass}
+                    action={
+                      profile.availabilityStatus === "ONLINE" ? (
+                        <StartChatPrompt
+                          pharmacistId={profile.id}
+                          name={profile.user.name}
+                          title={profile.title}
+                          image={
+                            profile.profilePhotoUrl ??
+                            profile.user.image ??
+                            undefined
+                          }
+                          practiceLocation={profile.practiceLocation}
+                          serviceHours={profile.serviceHours}
+                        />
+                      ) : (
+                        <Button disabled className="w-full">
+                          Apoteker Offline
+                        </Button>
+                      )
+                    }
+                  />
+                ))}
+              </div>
+            ) : (
+              <EmptyState
+                icon={ShieldCheckIcon}
+                title="Belum ada apoteker"
+                description="Apoteker terverifikasi akan muncul di sini."
                 action={
-                  profile.availabilityStatus === "ONLINE" ? (
-                    <StartChatPrompt
-                      pharmacistId={profile.id}
-                      name={profile.user.name}
-                      title={profile.title}
-                      image={
-                        profile.profilePhotoUrl ??
-                        profile.user.image ??
-                        undefined
-                      }
-                      practiceLocation={profile.practiceLocation}
-                      serviceHours={profile.serviceHours}
-                    />
-                  ) : (
-                    <Button disabled className="w-full">
-                      Apoteker Offline
-                    </Button>
-                  )
+                  <Button asChild variant="outline" size="sm">
+                    <Link href="/dashboard/pharmacists">Cek Apoteker</Link>
+                  </Button>
                 }
               />
-            ))}
-          </div>
-        ) : (
-          <EmptyState
-            icon={ShieldCheckIcon}
-            title="Belum ada apoteker"
-            description="Apoteker terverifikasi akan muncul di sini."
-            action={
-              <Button asChild variant="outline" size="sm">
-                <Link href="/dashboard/pharmacists">Cek Apoteker</Link>
-              </Button>
-            }
-          />
-        )}
-      </section>
+            )}
+          </section>
 
-      <section className="flex flex-col gap-3">
-        <SectionHeading
-          title="Video edukasi populer"
-          action={
-            <Button asChild variant="outline" size="xs">
-              <Link href="/dashboard/video">
-                Lihat Semua
-                <ArrowRightIcon data-icon="inline-end" />
-              </Link>
-            </Button>
-          }
-        />
-        {videos.videos.length ? (
-          <div className="grid gap-4 xl:grid-cols-2">
-            {videos.videos.map((video) => (
-              <VideoCard
-                key={video.id}
-                video={videoListCard(video, "/dashboard/video")}
+          <section className="flex flex-col gap-3">
+            <SectionHeading
+              title="Video edukasi populer"
+              action={
+                <Button asChild variant="outline" size="xs">
+                  <Link href="/dashboard/video">
+                    Lihat Semua
+                    <ArrowRightIcon data-icon="inline-end" />
+                  </Link>
+                </Button>
+              }
+            />
+            {videos.videos.length ? (
+              <div className="grid gap-4 xl:grid-cols-2">
+                {videos.videos.map((video) => (
+                  <VideoCard
+                    key={video.id}
+                    video={videoListCard(video, "/dashboard/video")}
+                    className={softCardClass}
+                  />
+                ))}
+              </div>
+            ) : (
+              <EmptyState
+                icon={PlayCircleIcon}
+                title="Belum ada video"
+                description="Video edukasi terbit akan muncul di sini."
+                action={
+                  <Button asChild variant="outline" size="sm">
+                    <Link href="/dashboard/video">Cek Video</Link>
+                  </Button>
+                }
               />
-            ))}
-          </div>
-        ) : (
-          <EmptyState
-            icon={PlayCircleIcon}
-            title="Belum ada video"
-            description="Video edukasi terbit akan muncul di sini."
-            action={
-              <Button asChild variant="outline" size="sm">
-                <Link href="/dashboard/video">Cek Video</Link>
-              </Button>
-            }
-          />
-        )}
-      </section>
+            )}
+          </section>
 
-      <section className="flex flex-col gap-3">
-        <SectionHeading
-          title="Artikel kesehatan terbaru"
-          action={
-            <Button asChild variant="outline" size="xs">
-              <Link href="/dashboard/artikel">
-                Lihat Semua
-                <ArrowRightIcon data-icon="inline-end" />
-              </Link>
-            </Button>
-          }
-        />
-        {articles.articles.length ? (
-          <div className="grid gap-4 xl:grid-cols-2">
-            {articles.articles.map((article) => (
-              <ArticleCard
-                key={article.id}
-                article={articleListCard(article, "/dashboard/artikel")}
+          <section className="flex flex-col gap-3">
+            <SectionHeading
+              title="Artikel kesehatan terbaru"
+              action={
+                <Button asChild variant="outline" size="xs">
+                  <Link href="/dashboard/artikel">
+                    Lihat Semua
+                    <ArrowRightIcon data-icon="inline-end" />
+                  </Link>
+                </Button>
+              }
+            />
+            {articles.articles.length ? (
+              <div className="grid gap-4 xl:grid-cols-2">
+                {articles.articles.map((article) => (
+                  <ArticleCard
+                    key={article.id}
+                    article={articleListCard(article, "/dashboard/artikel")}
+                    className={softCardClass}
+                  />
+                ))}
+              </div>
+            ) : (
+              <EmptyState
+                icon={NewspaperIcon}
+                title="Belum ada artikel"
+                description="Artikel kesehatan terbit akan muncul di sini."
+                action={
+                  <Button asChild variant="outline" size="sm">
+                    <Link href="/dashboard/artikel">Cek Artikel</Link>
+                  </Button>
+                }
               />
-            ))}
-          </div>
-        ) : (
-          <EmptyState
-            icon={NewspaperIcon}
-            title="Belum ada artikel"
-            description="Artikel kesehatan terbit akan muncul di sini."
-            action={
-              <Button asChild variant="outline" size="sm">
-                <Link href="/dashboard/artikel">Cek Artikel</Link>
-              </Button>
-            }
-          />
-        )}
-      </section>
+            )}
+          </section>
+        </div>
+      </div>
     </main>
   )
 }

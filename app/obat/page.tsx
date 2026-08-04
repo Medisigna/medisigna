@@ -31,7 +31,7 @@ export default async function DrugInformationPage({ searchParams }: PageProps) {
   const result = await getPublishedDrugs({ query, letter, page })
 
   return (
-    <main className="flex min-h-svh flex-col bg-muted-foreground/5">
+    <main className="flex min-h-svh flex-col bg-secondary">
       <SiteHeader />
       <div className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 md:py-12">
         <DrugList

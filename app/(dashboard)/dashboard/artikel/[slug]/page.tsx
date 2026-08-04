@@ -15,7 +15,7 @@ export default async function DashboardArticleDetailPage({
   if (!article) notFound()
 
   return (
-    <div className="px-4 py-4 md:px-6 md:py-8">
+    <div className="py-4 md:py-8">
       <ArticleDetailView
         article={article}
         backHref="/dashboard/artikel"

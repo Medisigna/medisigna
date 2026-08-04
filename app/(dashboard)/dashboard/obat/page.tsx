@@ -21,14 +21,18 @@ export default async function DashboardDrugPage({ searchParams }: PageProps) {
   const result = await getPublishedDrugs({ query, letter, page })
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-4 py-5 md:px-6 md:py-8">
-      <DrugList
-        result={result}
-        query={query}
-        letter={letter}
-        action="/dashboard/obat"
-        detailBasePath="/dashboard/obat"
-      />
+    <main className="min-h-[calc(100dvh-7rem)] rounded-[2rem] bg-secondary py-4 md:rounded-[2.25rem] md:py-6">
+      <div className="mx-auto w-full max-w-6xl">
+        <DrugList
+          result={result}
+          query={query}
+          letter={letter}
+          action="/dashboard/obat"
+          detailBasePath="/dashboard/obat"
+          bordered={false}
+          variant="soft"
+        />
+      </div>
     </main>
   )
 }

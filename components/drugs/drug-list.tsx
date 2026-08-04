@@ -35,6 +35,7 @@ export function DrugList({
   action,
   detailBasePath,
   bordered = true,
+  variant = "default",
 }: {
   result: DrugListResult
   query: string
@@ -42,8 +43,10 @@ export function DrugList({
   action: string
   detailBasePath: string
   bordered?: boolean
+  variant?: "default" | "soft"
 }) {
   const { drugs, page, total, hasPreviousPage, hasNextPage } = result
+  const isSoft = variant === "soft"
   const pageHref = (nextPage: number) => {
     const params = new URLSearchParams()
     if (query) params.set("q", query)
@@ -62,13 +65,15 @@ export function DrugList({
 
   return (
     <section className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">
+      <div className={cn(isSoft && "px-2 py-2 md:px-1")}>
+        <h1 className="text-2xl font-semibold tracking-tight text-secondary-foreground">
           {query ? `Hasil untuk "${query}"` : "Daftar obat"}
         </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {drugs.length} dari {total} informasi
-        </p>
+        {!isSoft ? (
+          <p className="mt-1 text-sm text-muted-foreground">
+            {drugs.length} dari {total} informasi
+          </p>
+        ) : null}
       </div>
 
       <form
@@ -82,7 +87,12 @@ export function DrugList({
           placeholder="Cari nama obat, merek, atau alias"
           ariaLabel="Cari obat"
           hiddenParams={{ letter }}
-          inputGroupClassName="h-11 rounded-2xl bg-background shadow-sm"
+          inputGroupClassName={cn(
+            "h-11 rounded-2xl",
+            isSoft
+              ? "border-0 bg-card shadow-none ring-0"
+              : "bg-background shadow-sm"
+          )}
         />
         {query || letter ? (
           <Button
@@ -98,7 +108,11 @@ export function DrugList({
         ) : null}
       </form>
 
-      <AlphabetFilter activeLetter={letter} hrefForLetter={letterHref} />
+      <AlphabetFilter
+        activeLetter={letter}
+        hrefForLetter={letterHref}
+        variant={variant}
+      />
 
       {drugs.length ? (
         <div className="grid gap-4 md:grid-cols-2">
@@ -110,7 +124,10 @@ export function DrugList({
             >
               <Card
                 className={cn(
-                  "h-full rounded-xl bg-card py-4 shadow-none ring-0 transition-colors group-hover:bg-muted/40",
+                  "h-full bg-card py-4 shadow-none ring-0 transition-colors",
+                  isSoft
+                    ? "rounded-[1.75rem] border-0 group-hover:bg-card/80"
+                    : "rounded-xl group-hover:bg-muted/40",
                   bordered && "border border-border/70"
                 )}
               >
@@ -140,7 +157,12 @@ export function DrugList({
           ))}
         </div>
       ) : (
-        <Card>
+        <Card
+          className={cn(
+            isSoft &&
+              "rounded-[1.75rem] border border-dashed border-border/70 bg-card shadow-none ring-0"
+          )}
+        >
           <CardContent className="flex flex-col items-center gap-4 py-10 text-center">
             <div className="flex size-14 items-center justify-center rounded-2xl bg-muted text-muted-foreground">
               <SearchIcon className="size-6" />
@@ -182,7 +204,14 @@ export function DrugList({
         </div>
       ) : null}
 
-      <Card className="border-primary/20 bg-primary/5 shadow-none">
+      <Card
+        className={cn(
+          "shadow-none",
+          isSoft
+            ? "rounded-[1.75rem] border-0 bg-card ring-0"
+            : "border-primary/20 bg-primary/5"
+        )}
+      >
         <CardHeader>
           <CardTitle>Catatan penting</CardTitle>
           <CardDescription className="leading-6">

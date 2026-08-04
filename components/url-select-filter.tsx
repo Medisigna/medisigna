@@ -2,8 +2,11 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 
+import { cn } from "@/lib/utils"
+
 export function UrlSelectFilter({
   ariaLabel,
+  className,
   labels,
   options,
   paramName,
@@ -11,6 +14,7 @@ export function UrlSelectFilter({
   emptyValue = "ALL",
 }: {
   ariaLabel: string
+  className?: string
   labels: Record<string, string>
   options: readonly string[]
   paramName: string
@@ -36,9 +40,14 @@ export function UrlSelectFilter({
           params.set(paramName, nextValue)
         }
 
-        router.replace(params.size ? `${pathname}?${params.toString()}` : pathname)
+        router.replace(
+          params.size ? `${pathname}?${params.toString()}` : pathname
+        )
       }}
-      className="h-11 rounded-md border bg-background px-3 text-sm"
+      className={cn(
+        "h-11 rounded-md border bg-background px-3 text-sm",
+        className
+      )}
       aria-label={ariaLabel}
     >
       {options.map((option) => (

@@ -26,6 +26,12 @@
 - Keep UI copy concise. Do not add descriptive or explanatory text in the interface unless it is necessary for the user to complete the task.
 - Keep the codebase in English: file names, route names, variables, functions, types, database fields, comments, and technical identifiers should remain English.
 - Use `react-hot-toast` for user feedback when a button submits a form or triggers a mutation. Show loading, success, and error states where applicable, with Bahasa Indonesia toast copy.
+- Dashboard user and pharmacist pages should follow the established soft dashboard style: `bg-secondary` page surfaces with white/`bg-card` components, rounded card-like sections, borderless search fields/cards where possible, and calm vertical spacing between sections.
+- Do not add extra horizontal page padding (`px-*`) to dashboard pages unless the existing layout wrapper already uses it. Keep dashboard content aligned with the shared shell/container spacing.
+- Dashboard header and sidebar should stay white/`bg-card`, borderless, and visually clean. Avoid visible border/ring treatments on the shell unless the user explicitly asks for them.
+- Mobile dashboard UI should not use a separate visual style from desktop unless required for layout. Prefer the same card, badge, and spacing language across breakpoints.
+- Use assets from `public/menu-icons/` for home dashboard menu and bottom navigation icons when a matching icon exists. Bottom nav active states should be soft (`bg-primary/10 text-primary`) and borderless.
+- Category badges in dashboard content should use the article-style soft pill treatment (`bg-primary/10 text-primary`) unless a stronger status color is explicitly needed. Coming soon badges should use yellow.
 
 ## Next.js Work
 

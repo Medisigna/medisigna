@@ -4,7 +4,10 @@ import { notFound } from "next/navigation"
 import { SiteFooter } from "@/components/landing/site-footer"
 import { SiteHeader } from "@/components/landing/site-header"
 import { VideoDetailView } from "@/components/videos/video-detail"
-import { getPublishedVideoBySlug, youtubeThumbnailUrl } from "@/lib/educational-videos"
+import {
+  getPublishedVideoBySlug,
+  youtubeThumbnailUrl,
+} from "@/lib/educational-videos"
 
 type PageProps = {
   params: Promise<{ slug: string }>
@@ -32,7 +35,7 @@ export default async function PublicVideoDetailPage({ params }: PageProps) {
   if (!video) notFound()
 
   return (
-    <main className="flex min-h-svh flex-col bg-muted-foreground/5">
+    <main className="flex min-h-svh flex-col bg-secondary">
       <SiteHeader />
       <div className="flex-1 px-4 py-8 md:px-6 md:py-12">
         <VideoDetailView
