@@ -124,6 +124,7 @@ function ForumReplyItem({
   canReply,
   currentUserId,
   depth = 0,
+  loginHref,
   post,
   repliesByParentId,
   replyDisabledMessage,
@@ -132,8 +133,9 @@ function ForumReplyItem({
   threadTitle,
 }: {
   canReply: boolean
-  currentUserId: string
+  currentUserId?: string | null
   depth?: number
+  loginHref?: string
   post: ForumPostItem
   repliesByParentId: Map<string, ForumPostItem[]>
   replyDisabledMessage?: string
@@ -175,6 +177,7 @@ function ForumReplyItem({
             <ForumCommentActions
               canReply={canReply}
               disabledMessage={replyDisabledMessage}
+              loginHref={loginHref}
               parentPostId={post.id}
               replyCount={childReplies.length}
               replyToName={postAuthorName}
@@ -192,6 +195,7 @@ function ForumReplyItem({
                 canReply={canReply}
                 currentUserId={currentUserId}
                 depth={depth + 1}
+                loginHref={loginHref}
                 post={reply}
                 repliesByParentId={repliesByParentId}
                 replyDisabledMessage={replyDisabledMessage}
@@ -212,19 +216,24 @@ export function ForumThreadDetailView({
   canReport,
   canReply,
   currentUserId,
+  editBasePath,
+  loginHref,
   replyDisabledMessage,
   thread,
 }: {
   basePath: string
   canReport: boolean
   canReply: boolean
-  currentUserId: string
+  currentUserId?: string | null
+  editBasePath?: string
+  loginHref?: string
   replyDisabledMessage?: string
   thread: ForumThreadDetail
 }) {
   const [firstPost, ...replies] = thread.posts
   const replyCount = Math.max(thread.postCount - 1, 0)
   const threadHref = `${basePath}/${thread.slug}`
+  const editHref = `${editBasePath ?? basePath}/${thread.slug}/edit`
   const repliesByParentId = new Map<string, ForumPostItem[]>()
   const topLevelReplies: ForumPostItem[] = []
 
@@ -241,7 +250,7 @@ export function ForumThreadDetailView({
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-4">
-      <ForumMarkRead threadId={thread.id} />
+      {currentUserId ? <ForumMarkRead threadId={thread.id} /> : null}
       <Button asChild variant="ghost" className="w-fit">
         <Link href={basePath}>
           <ArrowLeftIcon data-icon="inline-start" />
@@ -273,7 +282,7 @@ export function ForumThreadDetailView({
                 <ForumThreadActionsMenu
                   canEdit={currentUserId === thread.authorId}
                   canReport={canReport}
-                  editHref={`${threadHref}/edit`}
+                  editHref={editHref}
                   targetId={thread.id}
                 />
               </div>
@@ -319,6 +328,7 @@ export function ForumThreadDetailView({
                     key={post.id}
                     canReply={canReply}
                     currentUserId={currentUserId}
+                    loginHref={loginHref}
                     post={post}
                     repliesByParentId={repliesByParentId}
                     replyDisabledMessage={replyDisabledMessage}
@@ -340,6 +350,7 @@ export function ForumThreadDetailView({
               threadId={thread.id}
               disabled={!canReply}
               disabledMessage={replyDisabledMessage}
+              loginHref={loginHref}
               inline
             />
           </div>

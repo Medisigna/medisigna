@@ -52,7 +52,7 @@ function letterHref(query: string, activeLetter: string, nextLetter: string) {
 
 function MetaBadge({ children }: { children: React.ReactNode }) {
   return (
-    <span className="inline-flex w-fit items-center rounded-md bg-secondary px-2 py-1 text-xs font-medium text-secondary-foreground">
+    <span className="inline-flex w-fit items-center rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
       {children}
     </span>
   )
@@ -66,7 +66,7 @@ export default async function PharmacistDrugPage({ searchParams }: PageProps) {
   const result = await getPharmacistDrugs({ query, letter, page })
 
   return (
-    <main className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-5 md:px-6 md:py-8">
+    <main className="mx-auto flex w-full max-w-6xl flex-col gap-6 py-4 md:py-6">
       <AppMessage error={params?.error} success={params?.success} />
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex flex-col gap-1">
@@ -91,7 +91,7 @@ export default async function PharmacistDrugPage({ searchParams }: PageProps) {
           placeholder="Cari obat, merek, atau alias"
           ariaLabel="Cari obat"
           hiddenParams={{ letter }}
-          inputGroupClassName="h-11 bg-background shadow-sm"
+          inputGroupClassName="h-11 rounded-2xl border-0 bg-card shadow-none ring-0"
         />
         {query || letter ? (
           <Button
@@ -107,15 +107,20 @@ export default async function PharmacistDrugPage({ searchParams }: PageProps) {
         ) : null}
       </form>
 
-      <AlphabetFilter
-        activeLetter={letter}
-        hrefForLetter={(nextLetter) => letterHref(query, letter, nextLetter)}
-      />
+        <AlphabetFilter
+          activeLetter={letter}
+          hrefForLetter={(nextLetter) => letterHref(query, letter, nextLetter)}
+          variant="soft"
+        />
 
       {result.drugs.length ? (
         <div className="grid gap-4 md:grid-cols-2">
           {result.drugs.map((drug) => (
-            <Card key={drug.id} size="sm">
+            <Card
+              key={drug.id}
+              size="sm"
+              className="rounded-[1.75rem] border-0 bg-card shadow-none ring-0"
+            >
               <CardHeader>
                 <div className="flex flex-wrap gap-2">
                   {drug.drugClass ? <MetaBadge>{drug.drugClass}</MetaBadge> : null}
@@ -144,9 +149,9 @@ export default async function PharmacistDrugPage({ searchParams }: PageProps) {
           ))}
         </div>
       ) : (
-        <Card>
+        <Card className="rounded-[1.75rem] border-0 bg-card shadow-none ring-0">
           <CardContent className="flex flex-col items-center gap-4 py-10 text-center">
-            <div className="flex size-14 items-center justify-center rounded-md bg-muted text-muted-foreground">
+            <div className="flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
               <SearchIcon className="size-6" />
             </div>
             <div>

@@ -12,7 +12,7 @@ export default async function PharmacistDrugDetailPage({ params }: PageProps) {
   if (!drug) notFound()
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-4 py-5 md:px-6 md:py-8">
+    <main className="mx-auto w-full max-w-6xl py-4 md:py-6">
       <PharmacistDrugDetail drug={drug} />
     </main>
   )

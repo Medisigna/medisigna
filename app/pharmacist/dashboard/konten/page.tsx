@@ -41,7 +41,7 @@ const contentTypes = [
 
 export default function PharmacistContentPage() {
   return (
-    <main className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-5 md:px-6 md:py-8">
+    <main className="mx-auto flex w-full max-w-6xl flex-col gap-6 py-4 md:py-6">
       <header className="flex flex-col gap-2">
         <div className="flex flex-col gap-1">
           <h1 className="text-2xl font-semibold tracking-tight">Konten</h1>
@@ -56,9 +56,12 @@ export default function PharmacistContentPage() {
           const Icon = item.icon
 
           return (
-            <Card key={item.href} className="overflow-hidden">
+            <Card
+              key={item.href}
+              className="overflow-hidden rounded-[1.75rem] border-0 bg-card shadow-none ring-0"
+            >
               <CardHeader className="flex flex-col items-center gap-3 text-center">
-                <div className="flex size-12 items-center justify-center rounded-lg bg-muted text-primary">
+                <div className="flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
                   <Icon className="size-5" aria-hidden="true" />
                 </div>
                 <div className="flex flex-col items-center gap-1">

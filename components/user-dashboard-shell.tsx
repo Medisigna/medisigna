@@ -97,7 +97,7 @@ const pharmacistNavItems: DashboardNavItem[] = [
   },
   {
     href: "/pharmacist/dashboard/obat",
-    label: "Obat",
+    label: "Obat A-Z",
     description: "Kelola informasi obat",
     icon: PillIcon,
     iconSrc: "/menu-icons/medicines.png",
@@ -122,6 +122,7 @@ const pharmacistNavItems: DashboardNavItem[] = [
     description: "Tulis obat, artikel, video",
     icon: FileTextIcon,
     iconSrc: "/menu-icons/article.png",
+    hideOnMobileNav: true,
     children: [
       {
         href: "/pharmacist/dashboard/tulis-obat",
@@ -151,7 +152,7 @@ const pharmacistNavItems: DashboardNavItem[] = [
     label: "Profil",
     description: "Data apoteker",
     icon: UserIcon,
-    hideOnMobileNav: true,
+    iconSrc: "/menu-icons/etc.png",
   },
 ]
 

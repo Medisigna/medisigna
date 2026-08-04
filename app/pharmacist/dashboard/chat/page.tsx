@@ -30,17 +30,18 @@ export default async function PharmacistChatPage() {
   })
 
   return (
-    <main className="mx-auto grid h-[calc(100svh-9.5rem)] w-full min-w-0 max-w-6xl overflow-hidden gap-4 px-3 py-4 sm:px-4 md:h-[calc(100svh-3.5rem)] md:px-6 md:py-8 lg:grid-cols-[340px_minmax(0,1fr)]">
-      <section className="flex min-h-0 min-w-0 flex-col gap-4 rounded-xl border bg-card p-3 sm:p-4 lg:rounded-2xl lg:p-6">
+    <main className="mx-auto grid h-[calc(100svh-9.5rem)] w-full min-w-0 max-w-6xl overflow-hidden gap-4 py-4 md:h-[calc(100svh-3.5rem)] md:py-6 lg:grid-cols-[340px_minmax(0,1fr)]">
+      <section className="flex min-h-0 min-w-0 flex-col gap-4 rounded-[1.75rem] bg-card p-3 sm:p-4 lg:p-6">
         <h1 className="text-xl font-semibold">Riwayat Chat</h1>
         <SessionList
           filterable
+          variant="soft"
           basePath="/pharmacist/dashboard/chat"
           sessions={sessions.map(toSessionListItem)}
         />
       </section>
 
-      <section className="hidden min-h-0 items-center justify-center rounded-md border bg-card p-6 text-center text-sm text-muted-foreground lg:flex">
+      <section className="hidden min-h-0 items-center justify-center rounded-[1.75rem] bg-card p-6 text-center text-sm text-muted-foreground lg:flex">
         Pilih chat untuk membuka percakapan.
       </section>
     </main>

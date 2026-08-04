@@ -44,6 +44,8 @@ export function ForumThreadActionsMenu({
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
 
+  if (!canEdit && !canReport) return null
+
   function submitDelete() {
     const formData = new FormData()
     formData.set("threadId", targetId)

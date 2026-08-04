@@ -27,9 +27,9 @@ export default async function PharmacistVideoPreviewPage({
   if (!video || video.authorId !== user.id) notFound()
 
   return (
-    <main className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-5 md:px-6 md:py-8">
+    <main className="mx-auto flex w-full max-w-6xl flex-col gap-6 py-4 md:py-6">
       <AppMessage error={query?.error} success={query?.success} />
-      <Card>
+      <Card className="rounded-[1.75rem] border-0 bg-card shadow-none ring-0">
         <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-3">
           <div>
             <p className="text-sm text-muted-foreground">Status</p>

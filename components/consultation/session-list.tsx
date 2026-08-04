@@ -249,7 +249,9 @@ export function SessionList({
           <div
             className={cn(
               "flex min-h-40 flex-1 flex-col items-center justify-center gap-3 border border-dashed bg-card/70 p-6 text-center",
-              isSoft ? "rounded-[1.75rem]" : "rounded-lg"
+              isSoft
+                ? "rounded-[1.75rem] border-0 bg-card"
+                : "rounded-lg"
             )}
           >
             <div className="flex size-10 items-center justify-center rounded-full bg-primary/10 text-primary">

@@ -50,6 +50,7 @@ const educationItems = [
 const navItems = [
   ["Obat A-Z", "/obat"],
   ["Konsultasi", "/pharmacists"],
+  ["Forum", "/forum"],
   ["Tentang", "/about"],
   ["FAQ", "/faq"],
   ["Kontak", "/contact"],
@@ -61,6 +62,7 @@ const mobileNavSections = [
     items: [
       ["Konsultasi", "/pharmacists"],
       ["Obat A-Z", "/obat"],
+      ["Forum", "/forum"],
     ],
   },
   {

@@ -27,14 +27,14 @@ export default async function EditPharmacistVideoPage({
   const categories = await getCategoryNamesForForm(video.category)
 
   return (
-    <main className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-5 md:px-6 md:py-8">
+    <main className="mx-auto flex w-full max-w-6xl flex-col gap-6 py-4 md:py-6">
       <AppMessage error={query?.error} success={query?.success} />
       <header>
         <p className="text-sm text-muted-foreground">Tulis Video</p>
         <h1 className="text-2xl font-semibold">Perbaiki Video</h1>
       </header>
       {video.adminNote ? (
-        <Card>
+        <Card className="rounded-[1.75rem] border-0 bg-card shadow-none ring-0">
           <CardHeader>
             <CardTitle>Catatan admin</CardTitle>
           </CardHeader>

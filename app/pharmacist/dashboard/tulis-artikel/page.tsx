@@ -72,7 +72,7 @@ export default async function PharmacistArticlesPage({ searchParams }: PageProps
   })
 
   return (
-    <main className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-5 md:px-6 md:py-8">
+    <main className="mx-auto flex w-full max-w-6xl flex-col gap-6 py-4 md:py-6">
       <AppMessage error={params?.error} success={params?.success} />
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div>
@@ -90,7 +90,7 @@ export default async function PharmacistArticlesPage({ searchParams }: PageProps
         </Button>
       </header>
 
-      <Card>
+      <Card className="rounded-[1.75rem] border-0 bg-card shadow-none ring-0">
         <CardHeader>
           <CardTitle>Status Verifikasi</CardTitle>
           <CardDescription>Artikel yang pernah Anda submit ke admin.</CardDescription>
@@ -103,7 +103,7 @@ export default async function PharmacistArticlesPage({ searchParams }: PageProps
               placeholder="Cari artikel atau kategori"
               ariaLabel="Cari artikel"
               hiddenParams={{ status: status !== "ALL" ? status : undefined }}
-              inputGroupClassName="h-11 bg-background shadow-sm"
+              inputGroupClassName="h-11 rounded-2xl border-0 bg-secondary shadow-none ring-0"
             />
             <SubmissionStatusFilter labels={filterLabels} options={statusOptions} status={status} />
             {query || status !== "ALL" ? (

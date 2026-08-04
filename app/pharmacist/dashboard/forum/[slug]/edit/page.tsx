@@ -29,7 +29,7 @@ export default async function PharmacistForumThreadEditPage({ params }: PageProp
   if (!canWriteForum(user) || thread.authorId !== user.id) notFound()
 
   return (
-    <main className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 py-5 md:px-6 md:py-8">
+    <main className="mx-auto flex w-full max-w-4xl flex-col gap-6 py-4 md:py-6">
       <ForumThreadEditForm
         basePath="/pharmacist/dashboard/forum"
         categories={categories}

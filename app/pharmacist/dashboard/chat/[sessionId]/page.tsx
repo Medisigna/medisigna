@@ -73,12 +73,13 @@ export default async function PharmacistChatSessionPage({ params }: PageProps) {
   if (!session || session.pharmacistId !== user.id) notFound()
 
   return (
-    <main className="mx-auto grid h-[100dvh] max-w-6xl overflow-hidden lg:h-[calc(100svh-3.5rem)] lg:min-h-0 lg:grid-cols-[340px_minmax(0,1fr)] lg:gap-4 lg:px-6 lg:py-8">
+    <main className="mx-auto grid h-[100dvh] max-w-6xl overflow-hidden lg:h-[calc(100svh-3.5rem)] lg:min-h-0 lg:grid-cols-[340px_minmax(0,1fr)] lg:gap-4 lg:py-6">
       <AppMessage />
-      <section className="hidden min-h-0 flex-col gap-4 rounded-2xl border bg-card p-6 lg:flex">
+      <section className="hidden min-h-0 flex-col gap-4 rounded-[1.75rem] bg-card p-6 lg:flex">
         <h1 className="text-xl font-semibold">Riwayat Chat</h1>
         <SessionList
           filterable
+          variant="soft"
           basePath="/pharmacist/dashboard/chat"
           activeSessionId={session.id}
           sessions={sessions.map(toSessionListItem)}
@@ -86,7 +87,7 @@ export default async function PharmacistChatSessionPage({ params }: PageProps) {
       </section>
 
       <section className="flex min-h-0 flex-col lg:gap-4">
-        <section className="flex shrink-0 items-center gap-3 border-b bg-card px-3 py-2.5 lg:rounded-lg lg:border">
+        <section className="flex shrink-0 items-center gap-3 bg-card px-3 py-2.5 lg:rounded-[1.75rem]">
           <Button
             asChild
             variant="ghost"
@@ -136,7 +137,7 @@ export default async function PharmacistChatSessionPage({ params }: PageProps) {
         </section>
 
         <ChatRoom
-          className="min-h-0 flex-1 rounded-none border-x-0 border-b-0 lg:min-h-[calc(100svh-10rem)] lg:rounded-lg lg:border"
+          className="min-h-0 flex-1 rounded-none border-0 shadow-none lg:min-h-[calc(100svh-10rem)] lg:rounded-[1.75rem]"
           sessionId={session.id}
           currentUserId={user.id}
           currentUserRole="PHARMACIST"

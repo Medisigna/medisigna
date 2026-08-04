@@ -229,6 +229,7 @@ export function ForumReplyComposer({
   disabled,
   disabledMessage,
   inline = false,
+  loginHref,
   onCancel,
   parentPostId,
   replyToName,
@@ -238,6 +239,7 @@ export function ForumReplyComposer({
   disabled?: boolean
   disabledMessage?: string
   inline?: boolean
+  loginHref?: string
   onCancel?: () => void
   parentPostId?: string
   replyToName?: string
@@ -248,6 +250,11 @@ export function ForumReplyComposer({
   const formRef = useRef<HTMLFormElement>(null)
   const [attachmentKey, setAttachmentKey] = useState(0)
   const [isPending, startTransition] = useTransition()
+  const wrapperClass = compact
+    ? "pt-3"
+    : inline
+      ? "p-5 sm:p-6"
+      : "rounded-xl bg-background p-4 shadow-sm ring-1 ring-border/70"
 
   function submit(formData: FormData) {
     startTransition(async () => {
@@ -264,16 +271,26 @@ export function ForumReplyComposer({
     })
   }
 
+  if (disabled && loginHref) {
+    return (
+      <div className={wrapperClass}>
+        <div className="flex flex-col items-start gap-3 rounded-2xl bg-secondary p-4">
+          <div className="flex flex-col gap-1">
+            <p className="font-semibold text-foreground">Balas diskusi</p>
+            <p className="text-sm text-muted-foreground">
+              {disabledMessage ?? "Masuk untuk membalas forum."}
+            </p>
+          </div>
+          <Button asChild>
+            <Link href={loginHref}>Masuk untuk Membalas</Link>
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div
-      className={
-        compact
-          ? "pt-3"
-          : inline
-            ? "p-5 sm:p-6"
-            : "rounded-xl bg-background p-4 shadow-sm ring-1 ring-border/70"
-      }
-    >
+    <div className={wrapperClass}>
       <div className="flex flex-col gap-3">
         {compact ? null : (
           <div className="flex flex-col gap-1">

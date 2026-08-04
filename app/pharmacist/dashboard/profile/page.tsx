@@ -23,7 +23,7 @@ export default async function PharmacistProfilePage({ searchParams }: PageProps)
   const params = await searchParams
 
   return (
-    <main className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-5 sm:px-6 sm:py-8">
+    <main className="mx-auto flex max-w-3xl flex-col gap-6 py-4 md:py-6">
       <header>
         <div>
           <p className="text-sm text-muted-foreground">Dashboard Apoteker</p>
@@ -34,7 +34,7 @@ export default async function PharmacistProfilePage({ searchParams }: PageProps)
         </div>
       </header>
 
-      <form action={savePharmacistProfile} className="flex flex-col gap-5 rounded-md border bg-card p-5">
+      <form action={savePharmacistProfile} className="flex flex-col gap-5 rounded-[1.75rem] bg-card p-5">
         <AppMessage error={params?.error} success={params?.success} />
         <ProfilePhotoField
           currentImage={profile?.profilePhotoUrl ?? user.image}
@@ -50,7 +50,7 @@ export default async function PharmacistProfilePage({ searchParams }: PageProps)
             <select
               name="availabilityStatus"
               defaultValue={profile?.availabilityStatus ?? "OFFLINE"}
-              className="h-9 rounded-md border border-input bg-transparent px-2.5 text-sm shadow-xs"
+              className="h-9 rounded-2xl border-0 bg-secondary px-2.5 text-sm shadow-none"
             >
               <option value="ONLINE">Online</option>
               <option value="OFFLINE">Offline</option>
