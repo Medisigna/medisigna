@@ -1,5 +1,4 @@
 import { uploadImageToCloudinary } from "@/lib/cloudinary-upload"
-import sharp from "sharp"
 
 const maxImageDimension = 1200
 const webpQuality = 82
@@ -10,17 +9,24 @@ function webpFileName(fileName: string) {
 }
 
 async function optimizeConsultationImage(file: File) {
-  const input = Buffer.from(await file.arrayBuffer())
-  const output = await sharp(input, { limitInputPixels: 64_000_000 })
-    .autoOrient()
-    .resize(maxImageDimension, maxImageDimension, {
-      fit: "inside",
-      withoutEnlargement: true,
-    })
-    .webp({ quality: webpQuality })
-    .toBuffer()
+  try {
+    const sharpModule = await import("sharp")
+    const sharp = sharpModule.default || sharpModule
+    const input = Buffer.from(await file.arrayBuffer())
+    const output = await sharp(input, { limitInputPixels: 64_000_000 })
+      .autoOrient()
+      .resize(maxImageDimension, maxImageDimension, {
+        fit: "inside",
+        withoutEnlargement: true,
+      })
+      .webp({ quality: webpQuality })
+      .toBuffer()
 
-  return new File([output], webpFileName(file.name), { type: "image/webp" })
+    return new File([output], webpFileName(file.name), { type: "image/webp" })
+  } catch (error) {
+    console.warn("sharp dynamic import unavailable, using raw image file:", error)
+    return file
+  }
 }
 
 export async function saveConsultationImage(file: File): Promise<{
