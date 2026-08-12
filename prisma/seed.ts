@@ -6,6 +6,7 @@ import { hashPassword } from "better-auth/crypto"
 import { db } from "../lib/db"
 
 const pharmacistPassword = "Apoteker123!"
+const patientPassword = "Pasien123!"
 const adminPassword = "Admin123!"
 
 const admin = {
@@ -68,6 +69,19 @@ const pharmacists = [
     practiceLocation: "Apotek Prima Farma, Manado",
     serviceHours: "07.00 - 15.00 WITA",
     availabilityStatus: "OFFLINE",
+  },
+] as const
+
+const demoPatients = [
+  {
+    name: "Maya Lestari",
+    email: "maya.pasien@medisigna.local",
+    phone: "081300000001",
+  },
+  {
+    name: "Raka Pratama",
+    email: "raka.pasien@medisigna.local",
+    phone: "081300000002",
   },
 ] as const
 
@@ -345,6 +359,200 @@ const demoEducationalVideos = [
   },
 ] as const
 
+const demoForumCategories = [
+  {
+    name: "Obat Harian",
+    slug: "obat-harian",
+    description: "Diskusi tentang penggunaan obat rutin dan obat yang sering dipakai di rumah.",
+  },
+  {
+    name: "Efek Samping",
+    slug: "efek-samping",
+    description: "Ruang bertanya tentang keluhan setelah menggunakan obat.",
+  },
+  {
+    name: "Ibu dan Anak",
+    slug: "ibu-dan-anak",
+    description: "Diskusi seputar obat, vitamin, dan keamanan penggunaan pada keluarga.",
+  },
+  {
+    name: "Antibiotik",
+    slug: "antibiotik",
+    description: "Diskusi penggunaan antibiotik yang tepat dan bertanggung jawab.",
+  },
+] as const
+
+const demoForumThreads = [
+  {
+    slug: "minum-obat-maag-boleh-bareng-obat-lain",
+    title: "Minum obat maag boleh bareng obat lain?",
+    categorySlug: "obat-harian",
+    authorEmail: demoPatients[0].email,
+    createdAt: new Date("2026-08-08T01:10:00.000Z"),
+    bodyMarkdown:
+      "Aku lagi minum obat maag cair sebelum makan, tapi juga ada obat alergi dari klinik. Biasanya aku minum semuanya dekat-dekatan karena takut lupa.\n\nSebenarnya perlu dikasih jarak berapa lama ya?",
+    replies: [
+      {
+        key: "pharmacist-answer",
+        authorEmail: pharmacists[0].email,
+        createdAt: new Date("2026-08-08T01:24:00.000Z"),
+        bodyMarkdown:
+          "Sebaiknya diberi jarak sekitar 1-2 jam dari obat lain, terutama kalau obat maag yang diminum termasuk antasida.\n\nAntasida bisa memengaruhi penyerapan beberapa obat. Kalau obat alerginya diminum malam, obat maag bisa tetap mengikuti jadwal sebelum makan.",
+      },
+      {
+        authorEmail: demoPatients[0].email,
+        parentKey: "pharmacist-answer",
+        createdAt: new Date("2026-08-08T01:38:00.000Z"),
+        bodyMarkdown:
+          "Berarti kalau obat maag jam 7 pagi, obat alerginya aman sekitar jam 9 ya? Obat alerginya cetirizine.",
+      },
+      {
+        authorEmail: pharmacists[1].email,
+        parentKey: "pharmacist-answer",
+        createdAt: new Date("2026-08-08T02:02:00.000Z"),
+        bodyMarkdown:
+          "Untuk cetirizine umumnya bisa diminum malam karena bisa bikin mengantuk pada sebagian orang. Kalau ada aturan khusus dari dokter, ikuti yang dari dokter dulu.",
+      },
+    ],
+  },
+  {
+    slug: "anak-demam-parasetamol-turun-lalu-naik-lagi",
+    title: "Anak demam, parasetamol turun lalu naik lagi",
+    categorySlug: "ibu-dan-anak",
+    authorEmail: demoPatients[1].email,
+    createdAt: new Date("2026-08-08T04:15:00.000Z"),
+    bodyMarkdown:
+      "Anak umur 5 tahun demam sejak tadi malam. Setelah parasetamol turun, tapi 5 jam kemudian naik lagi.\n\nMasih boleh lanjut sesuai dosis kemasan atau harus langsung dibawa periksa?",
+    replies: [
+      {
+        key: "dose-check",
+        authorEmail: pharmacists[2].email,
+        createdAt: new Date("2026-08-08T04:33:00.000Z"),
+        bodyMarkdown:
+          "Parasetamol biasanya boleh diulang sesuai interval pada kemasan, tapi dosis perlu disesuaikan dengan berat badan anak.\n\nSegera periksa kalau anak tampak lemas berat, sulit minum, sesak, kejang, muncul ruam luas, atau demam menetap lebih dari 3 hari.",
+      },
+      {
+        authorEmail: demoPatients[1].email,
+        parentKey: "dose-check",
+        createdAt: new Date("2026-08-08T04:46:00.000Z"),
+        bodyMarkdown:
+          "Beratnya sekitar 18 kg. Anak masih mau minum dan makan sedikit, cuma rewel.",
+      },
+      {
+        authorEmail: pharmacists[2].email,
+        parentKey: "dose-check",
+        createdAt: new Date("2026-08-08T05:05:00.000Z"),
+        bodyMarkdown:
+          "Kalau masih mau minum, pantau cairan dan suhu. Pastikan takaran parasetamol mengikuti kekuatan sediaan yang dipakai. Kalau ragu dengan ml per dosis, sebaiknya cek label atau tanya apoteker dengan foto kemasannya.",
+      },
+    ],
+  },
+  {
+    slug: "antibiotik-sisa-boleh-diminum-lagi",
+    title: "Antibiotik sisa boleh diminum lagi?",
+    categorySlug: "antibiotik",
+    authorEmail: demoPatients[0].email,
+    createdAt: new Date("2026-08-09T02:05:00.000Z"),
+    bodyMarkdown:
+      "Bulan lalu aku dapat antibiotik untuk radang tenggorokan, masih ada sisa 4 tablet. Sekarang tenggorokan sakit lagi dan agak demam.\n\nBoleh diminum lagi tidak?",
+    replies: [
+      {
+        key: "dont-use-leftover",
+        authorEmail: pharmacists[3].email,
+        createdAt: new Date("2026-08-09T02:22:00.000Z"),
+        bodyMarkdown:
+          "Jangan gunakan antibiotik sisa tanpa pemeriksaan. Sakit tenggorokan tidak selalu karena bakteri, dan antibiotik yang tidak tepat bisa meningkatkan risiko resistensi atau efek samping.",
+      },
+      {
+        authorEmail: pharmacists[0].email,
+        parentKey: "dont-use-leftover",
+        createdAt: new Date("2026-08-09T02:45:00.000Z"),
+        bodyMarkdown:
+          "Tambahan: sisa 4 tablet juga biasanya tidak cukup untuk satu terapi lengkap. Lebih aman periksa dulu, terutama kalau demam tinggi, sulit menelan, atau keluhan makin berat.",
+      },
+    ],
+  },
+  {
+    slug: "minum-obat-alergi-bikin-ngantuk",
+    title: "Minum obat alergi bikin ngantuk, normal?",
+    categorySlug: "efek-samping",
+    authorEmail: demoPatients[1].email,
+    createdAt: new Date("2026-08-10T08:30:00.000Z"),
+    bodyMarkdown:
+      "Aku minum cetirizine karena gatal-gatal, tapi setelah itu ngantuk banget sampai susah kerja. Ini normal atau harus ganti obat?",
+    replies: [
+      {
+        key: "sleepy-answer",
+        authorEmail: pharmacists[1].email,
+        createdAt: new Date("2026-08-10T08:49:00.000Z"),
+        bodyMarkdown:
+          "Mengantuk bisa terjadi pada sebagian orang setelah cetirizine. Kalau mengganggu aktivitas, coba diskusikan alternatif dengan apoteker atau dokter, misalnya pilihan antihistamin yang lebih tidak mengantuk untuk sebagian orang.",
+      },
+      {
+        authorEmail: demoPatients[1].email,
+        parentKey: "sleepy-answer",
+        createdAt: new Date("2026-08-10T09:12:00.000Z"),
+        bodyMarkdown:
+          "Kalau diminum malam saja boleh? Gatalnya biasanya muncul sore sampai malam.",
+      },
+      {
+        authorEmail: pharmacists[4].email,
+        parentKey: "sleepy-answer",
+        createdAt: new Date("2026-08-10T09:26:00.000Z"),
+        bodyMarkdown:
+          "Boleh dipertimbangkan diminum malam jika sesuai aturan pakai produk dan tidak ada arahan berbeda dari dokter. Hindari menyetir atau aktivitas butuh fokus kalau masih terasa mengantuk.",
+      },
+    ],
+  },
+  {
+    slug: "oralit-untuk-diare-dewasa",
+    title: "Oralit untuk diare dewasa diminum seberapa sering?",
+    categorySlug: "obat-harian",
+    authorEmail: demoPatients[0].email,
+    createdAt: new Date("2026-08-11T03:20:00.000Z"),
+    bodyMarkdown:
+      "Diare dari pagi sudah 4 kali. Di rumah ada oralit sachet. Untuk dewasa minumnya seberapa sering ya, dan boleh tetap makan biasa?",
+    replies: [
+      {
+        key: "ors-answer",
+        authorEmail: pharmacists[4].email,
+        createdAt: new Date("2026-08-11T03:41:00.000Z"),
+        bodyMarkdown:
+          "Oralit diminum sedikit-sedikit tapi sering, terutama setiap setelah BAB cair. Larutkan sesuai volume air pada kemasan, jangan dibuat lebih pekat atau ditambah gula.\n\nMakan tetap boleh sesuai toleransi, pilih makanan yang ringan dulu.",
+      },
+      {
+        authorEmail: pharmacists[2].email,
+        parentKey: "ors-answer",
+        createdAt: new Date("2026-08-11T04:04:00.000Z"),
+        bodyMarkdown:
+          "Segera cari bantuan kalau ada darah pada BAB, demam tinggi, muntah terus, sangat lemas, tanda dehidrasi, atau diare tidak membaik.",
+      },
+    ],
+  },
+] as const
+
+type SeedForumUser = {
+  id: string
+  email: string
+}
+
+type SeedForumCategory = {
+  id: string
+  slug: string
+}
+
+type SeedForumPost = {
+  id: string
+}
+
+type SeedForumReply = {
+  authorEmail: string
+  bodyMarkdown: string
+  createdAt: Date
+  key?: string
+  parentKey?: string
+}
+
 function markdownList(items: readonly string[]) {
   return items.map((item) => `- ${item}`).join("\n")
 }
@@ -517,6 +725,49 @@ async function main() {
     })
   }
 
+  for (const patient of demoPatients) {
+    const user = await db.user.upsert({
+      where: { email: patient.email },
+      create: {
+        id: randomUUID(),
+        name: patient.name,
+        email: patient.email,
+        emailVerified: true,
+        phone: patient.phone,
+        role: "PATIENT",
+        status: "ACTIVE",
+      },
+      update: {
+        name: patient.name,
+        phone: patient.phone,
+        role: "PATIENT",
+        status: "ACTIVE",
+      },
+    })
+
+    const password = await hashPassword(patientPassword)
+    const credentialAccount = await db.account.findFirst({
+      where: { userId: user.id, providerId: "credential" },
+    })
+
+    if (credentialAccount) {
+      await db.account.update({
+        where: { id: credentialAccount.id },
+        data: { accountId: user.id, password },
+      })
+    } else {
+      await db.account.create({
+        data: {
+          id: randomUUID(),
+          accountId: user.id,
+          providerId: "credential",
+          userId: user.id,
+          password,
+        },
+      })
+    }
+  }
+
   const reviewer = await db.user.findUniqueOrThrow({
     where: { email: pharmacists[0].email },
   })
@@ -621,8 +872,134 @@ async function main() {
     })
   }
 
+  const forumUsers = (await db.user.findMany({
+    where: {
+      email: {
+        in: [
+          ...demoPatients.map((patient) => patient.email),
+          ...pharmacists.map((pharmacist) => pharmacist.email),
+        ],
+      },
+    },
+  })) as SeedForumUser[]
+  const forumUsersByEmail = new Map(
+    forumUsers.map((user: SeedForumUser) => [user.email, user])
+  )
+
+  for (const category of demoForumCategories) {
+    await db.forumCategory.upsert({
+      where: { slug: category.slug },
+      create: {
+        id: randomUUID(),
+        name: category.name,
+        slug: category.slug,
+        description: category.description,
+        isActive: true,
+      },
+      update: {
+        name: category.name,
+        description: category.description,
+        isActive: true,
+      },
+    })
+  }
+
+  const forumCategories = (await db.forumCategory.findMany({
+    where: {
+      slug: {
+        in: demoForumCategories.map((category) => category.slug),
+      },
+    },
+  })) as SeedForumCategory[]
+  const forumCategoriesBySlug = new Map(
+    forumCategories.map((category: SeedForumCategory) => [category.slug, category])
+  )
+
+  for (const threadSeed of demoForumThreads) {
+    const author = forumUsersByEmail.get(threadSeed.authorEmail)
+    const category = forumCategoriesBySlug.get(threadSeed.categorySlug)
+    const lastPostAt =
+      threadSeed.replies[threadSeed.replies.length - 1]?.createdAt ??
+      threadSeed.createdAt
+
+    if (!author || !category) {
+      throw new Error(`Forum seed invalid for thread: ${threadSeed.slug}`)
+    }
+
+    const thread = (await db.forumThread.upsert({
+      where: { slug: threadSeed.slug },
+      create: {
+        id: randomUUID(),
+        title: threadSeed.title,
+        slug: threadSeed.slug,
+        categoryId: category.id,
+        authorId: author.id,
+        status: "ACTIVE",
+        isPinned: false,
+        lastPostAt,
+        createdAt: threadSeed.createdAt,
+        updatedAt: lastPostAt,
+      },
+      update: {
+        title: threadSeed.title,
+        categoryId: category.id,
+        authorId: author.id,
+        status: "ACTIVE",
+        isPinned: false,
+        hiddenAt: null,
+        hiddenById: null,
+        hiddenReason: null,
+        lockedAt: null,
+        lockedById: null,
+        lastPostAt,
+        updatedAt: lastPostAt,
+      },
+    })) as SeedForumPost
+
+    await db.forumPost.deleteMany({
+      where: { threadId: thread.id },
+    })
+
+    const firstPost = (await db.forumPost.create({
+      data: {
+        id: randomUUID(),
+        threadId: thread.id,
+        authorId: author.id,
+        bodyMarkdown: threadSeed.bodyMarkdown,
+        status: "VISIBLE",
+        createdAt: threadSeed.createdAt,
+        updatedAt: threadSeed.createdAt,
+      },
+    })) as SeedForumPost
+    const forumPostsByKey = new Map<string, string>([["root", firstPost.id]])
+
+    for (const [index, reply] of (threadSeed.replies as readonly SeedForumReply[]).entries()) {
+      const replyAuthor = forumUsersByEmail.get(reply.authorEmail)
+      const parentPostId = forumPostsByKey.get(reply.parentKey ?? "root")
+
+      if (!replyAuthor || !parentPostId) {
+        throw new Error(`Forum reply seed invalid for thread: ${threadSeed.slug}`)
+      }
+
+      const post = (await db.forumPost.create({
+        data: {
+          id: randomUUID(),
+          threadId: thread.id,
+          parentPostId,
+          authorId: replyAuthor.id,
+          bodyMarkdown: reply.bodyMarkdown,
+          status: "VISIBLE",
+          createdAt: reply.createdAt,
+          updatedAt: reply.createdAt,
+        },
+      })) as SeedForumPost
+
+      forumPostsByKey.set(reply.key ?? `reply-${index}`, post.id)
+    }
+  }
+
   console.log(
-    `Seeded admin (${admin.email} / ${adminPassword}), ${pharmacists.length} verified pharmacists, ${demoDrugs.length} demo drugs, ${demoArticles.length} articles, and ${demoEducationalVideos.length} educational videos with pharmacist password: ${pharmacistPassword}`
+    `Seeded admin (${admin.email} / ${adminPassword}), ${pharmacists.length} verified pharmacists, ${demoPatients.length} patients, ${demoDrugs.length} demo drugs, ${demoArticles.length} articles, ${demoEducationalVideos.length} educational videos, and ${demoForumThreads.length} forum discussions. Pharmacist password: ${pharmacistPassword}. Patient password: ${patientPassword}`
   )
 }
 

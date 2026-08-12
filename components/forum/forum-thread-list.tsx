@@ -10,6 +10,7 @@ import {
 import { ForumBadge } from "@/components/forum/forum-badge"
 import { ForumEmptyState } from "@/components/forum/forum-empty-state"
 import { ForumImagePreviewDialog } from "@/components/forum/forum-image-preview-dialog"
+import { ForumLikeButton } from "@/components/forum/forum-like-button"
 import { ForumShareDialog } from "@/components/forum/forum-share-dialog"
 import { ForumThreadFilters } from "@/components/forum/forum-thread-filters"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -114,6 +115,7 @@ export function ForumThreadList({
   basePath,
   categories,
   category,
+  currentUserId,
   query,
   threads,
   total,
@@ -123,6 +125,7 @@ export function ForumThreadList({
   basePath: string
   categories: ForumCategoryItem[]
   category?: string
+  currentUserId?: string | null
   query?: string
   threads: ForumThreadListItem[]
   total: number
@@ -244,6 +247,20 @@ export function ForumThreadList({
                     />
 
                     <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                      {thread.firstPostId ? (
+                        <div className="pointer-events-auto relative z-10">
+                          <ForumLikeButton
+                            postId={thread.firstPostId}
+                            initialLiked={thread.isLiked}
+                            likeCount={thread.likeCount}
+                            loginHref={
+                              currentUserId
+                                ? undefined
+                                : `/login?callbackUrl=${encodeURIComponent(detailHref)}`
+                            }
+                          />
+                        </div>
+                      ) : null}
                       <span className="inline-flex items-center gap-1.5">
                         <MessageSquareTextIcon aria-hidden="true" />
                         <span>{replyCount}</span>

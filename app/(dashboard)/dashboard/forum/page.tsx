@@ -41,6 +41,7 @@ export default async function PatientForumPage({ searchParams }: PageProps) {
           basePath="/dashboard/forum"
           categories={categories}
           category={category}
+          currentUserId={user.id}
           query={query}
           threads={threads}
           total={total}

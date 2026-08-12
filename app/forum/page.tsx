@@ -52,6 +52,7 @@ export default async function PublicForumPage({ searchParams }: PageProps) {
           basePath="/forum"
           categories={categories}
           category={category}
+          currentUserId={user?.id}
           query={query}
           threads={threads}
           total={total}

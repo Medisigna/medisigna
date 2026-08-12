@@ -5,12 +5,16 @@ import Link from "next/link"
 import { MessageSquareTextIcon } from "lucide-react"
 
 import { ForumReplyComposer } from "@/components/forum/forum-composer"
+import { ForumLikeButton } from "@/components/forum/forum-like-button"
 import { ForumShareDialog } from "@/components/forum/forum-share-dialog"
 import { Button } from "@/components/ui/button"
 
 export function ForumCommentActions({
   canReply,
   disabledMessage,
+  isLiked,
+  likeCount,
+  likeLoginHref,
   loginHref,
   parentPostId,
   replyCount,
@@ -21,6 +25,9 @@ export function ForumCommentActions({
 }: {
   canReply: boolean
   disabledMessage?: string
+  isLiked: boolean
+  likeCount: number
+  likeLoginHref?: string
   loginHref?: string
   parentPostId: string
   replyCount: number
@@ -34,6 +41,12 @@ export function ForumCommentActions({
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-1">
+        <ForumLikeButton
+          postId={parentPostId}
+          initialLiked={isLiked}
+          likeCount={likeCount}
+          loginHref={likeLoginHref}
+        />
         <Button
           type={loginHref && !canReply ? undefined : "button"}
           asChild={loginHref && !canReply ? true : undefined}

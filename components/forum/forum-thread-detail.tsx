@@ -10,6 +10,7 @@ import {
 import { ForumBadge } from "@/components/forum/forum-badge"
 import { ForumCommentActions } from "@/components/forum/forum-comment-actions"
 import { ForumImagePreviewDialog } from "@/components/forum/forum-image-preview-dialog"
+import { ForumLikeButton } from "@/components/forum/forum-like-button"
 import { ForumMarkRead } from "@/components/forum/forum-mark-read"
 import { ForumReplyComposer } from "@/components/forum/forum-composer"
 import { ForumReplyOwnerActions } from "@/components/forum/forum-reply-owner-actions"
@@ -49,41 +50,29 @@ function formatDate(date: Date) {
   }).format(date)
 }
 
-function ForumAuthor({
-  post,
-  size = "md",
-}: {
-  post: ForumPostItem
-  size?: "sm" | "md"
-}) {
+function ForumAuthorMeta({ post }: { post: ForumPostItem }) {
   const name = forumAuthorName({
     authorName: post.authorName,
     authorRole: post.authorRole,
   })
 
   return (
-    <div className="flex min-w-0 items-center gap-3">
-      <Avatar className={size === "md" ? "size-9 sm:size-10" : "size-8"}>
-        <AvatarImage src={post.authorImage ?? undefined} alt={name} />
-        <AvatarFallback>{initials(name)}</AvatarFallback>
-      </Avatar>
-      <div className="min-w-0">
-        <div className="flex flex-wrap items-center gap-2">
-          <p className="truncate font-semibold text-foreground">{name}</p>
-          {post.authorRole === "PHARMACIST" ? (
-            <span
-              className="inline-flex text-primary"
-              aria-label="Apoteker terverifikasi"
-              title="Apoteker terverifikasi"
-            >
-              <BadgeCheckIcon className="size-3.5" aria-hidden="true" />
-            </span>
-          ) : null}
-        </div>
-        {post.authorTitle ? (
-          <p className="truncate text-xs text-muted-foreground">{post.authorTitle}</p>
+    <div className="min-w-0">
+      <div className="flex flex-wrap items-center gap-2">
+        <p className="truncate font-semibold text-foreground">{name}</p>
+        {post.authorRole === "PHARMACIST" ? (
+          <span
+            className="inline-flex text-primary"
+            aria-label="Apoteker terverifikasi"
+            title="Apoteker terverifikasi"
+          >
+            <BadgeCheckIcon className="size-3.5" aria-hidden="true" />
+          </span>
         ) : null}
       </div>
+      {post.authorTitle ? (
+        <p className="truncate text-xs text-muted-foreground">{post.authorTitle}</p>
+      ) : null}
     </div>
   )
 }
@@ -176,16 +165,36 @@ function ForumReplyItem({
     authorRole: post.authorRole,
   })
   const childReplies = repliesByParentId.get(post.id) ?? []
+  const likeLoginHref = currentUserId
+    ? undefined
+    : `/login?callbackUrl=${encodeURIComponent(threadHref)}`
 
   return (
-    <article id={`post-${post.id}`} className={depth === 0 ? "p-5 sm:p-6" : "pt-5"}>
-      <div className="ml-3 min-w-0 border-l pl-4 sm:ml-6 sm:pl-5">
+    <article
+      id={`post-${post.id}`}
+      className={cn(
+        "grid grid-cols-[2rem_minmax(0,1fr)] gap-3",
+        depth === 0 ? "p-5 sm:p-6" : "pt-5"
+      )}
+    >
+      <div className="relative flex justify-center">
+        {childReplies.length ? (
+          <span
+            className="absolute top-9 bottom-0 left-1/2 w-px -translate-x-1/2 bg-border"
+            aria-hidden="true"
+          />
+        ) : null}
+        <Avatar className="relative z-10 size-8 shrink-0 bg-card">
+          <AvatarImage src={post.authorImage ?? undefined} alt={postAuthorName} />
+          <AvatarFallback>{initials(postAuthorName)}</AvatarFallback>
+        </Avatar>
+      </div>
+
+      <div className="min-w-0">
         <div className="mb-3 flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <ForumAuthor post={post} size="sm" />
-            <p className="ml-11 mt-1 text-xs text-muted-foreground">
-              {formatDate(post.createdAt)}
-            </p>
+            <ForumAuthorMeta post={post} />
+            <p className="mt-1 text-xs text-muted-foreground">{formatDate(post.createdAt)}</p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
             {post.status === "HIDDEN" ? (
@@ -205,6 +214,9 @@ function ForumReplyItem({
             <ForumCommentActions
               canReply={canReply}
               disabledMessage={replyDisabledMessage}
+              isLiked={post.isLiked}
+              likeCount={post.likeCount}
+              likeLoginHref={likeLoginHref}
               loginHref={loginHref}
               parentPostId={post.id}
               replyCount={childReplies.length}
@@ -262,6 +274,9 @@ export function ForumThreadDetailView({
   const replyCount = Math.max(thread.postCount - 1, 0)
   const threadHref = `${basePath}/${thread.slug}`
   const editHref = `${editBasePath ?? basePath}/${thread.slug}/edit`
+  const likeLoginHref = currentUserId
+    ? undefined
+    : `/login?callbackUrl=${encodeURIComponent(threadHref)}`
   const repliesByParentId = new Map<string, ForumPostItem[]>()
   const topLevelReplies: ForumPostItem[] = []
 
@@ -362,6 +377,14 @@ export function ForumThreadDetailView({
             ) : null}
 
             <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+              {firstPost ? (
+                <ForumLikeButton
+                  postId={firstPost.id}
+                  initialLiked={firstPost.isLiked}
+                  likeCount={firstPost.likeCount}
+                  loginHref={likeLoginHref}
+                />
+              ) : null}
               <Button asChild variant="ghost" size="sm" aria-label={`${replyCount} komentar`}>
                 <a href="#forum-reply-composer">
                   <MessageSquareTextIcon aria-hidden="true" />

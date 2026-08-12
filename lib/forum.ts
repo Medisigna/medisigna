@@ -27,6 +27,7 @@ export type ForumThreadListItem = {
   id: string
   title: string
   slug: string
+  firstPostId: string | null
   bodyMarkdown: string | null
   status: ForumThreadStatus
   isPinned: boolean
@@ -42,6 +43,8 @@ export type ForumThreadListItem = {
   authorRole: "PATIENT" | "PHARMACIST" | "ADMIN"
   authorTitle: string | null
   postCount: number
+  likeCount: number
+  isLiked: boolean
   unreadCount: number
   reportCount: number
   attachments: ForumPostAttachmentItem[]
@@ -63,6 +66,8 @@ export type ForumPostItem = {
   hiddenReason: string | null
   createdAt: Date
   updatedAt: Date
+  likeCount: number
+  isLiked: boolean
   attachments: ForumPostAttachmentItem[]
 }
 
@@ -211,6 +216,16 @@ export async function getForumThreads({
       ) AS "unreadCount"
     `
     : Prisma.sql`0::int AS "unreadCount"`
+  const likedSql = userId
+    ? Prisma.sql`
+      EXISTS (
+        SELECT 1
+        FROM "ForumPostLike" current_like
+        WHERE current_like."postId" = first_post.id
+          AND current_like."userId" = ${userId}
+      ) AS "isLiked"
+    `
+    : Prisma.sql`false AS "isLiked"`
 
   const [threadRows, totalRows]: [ForumThreadListRow[], Array<{ total: number }>] =
     await Promise.all([
@@ -219,14 +234,8 @@ export async function getForumThreads({
         t.id,
         t.title,
         t.slug,
-        (
-          SELECT first_post."bodyMarkdown"
-          FROM "ForumPost" first_post
-          WHERE first_post."threadId" = t.id
-            ${includeHidden ? Prisma.empty : Prisma.sql`AND first_post.status::text = 'VISIBLE'`}
-          ORDER BY first_post."createdAt" ASC
-          LIMIT 1
-        ) AS "bodyMarkdown",
+        first_post.id AS "firstPostId",
+        first_post."bodyMarkdown" AS "bodyMarkdown",
         t.status::text AS status,
         t."isPinned",
         t."hiddenReason",
@@ -246,6 +255,12 @@ export async function getForumThreads({
           WHERE p."threadId" = t.id
             ${includeHidden ? Prisma.empty : Prisma.sql`AND p.status::text = 'VISIBLE'`}
         ) AS "postCount",
+        (
+          SELECT COUNT(*)::int
+          FROM "ForumPostLike" post_like
+          WHERE post_like."postId" = first_post.id
+        ) AS "likeCount",
+        ${likedSql},
         ${unreadSql},
         (
           SELECT COUNT(*)::int
@@ -258,6 +273,14 @@ export async function getForumThreads({
       JOIN "user" author ON author.id = t."authorId"
       LEFT JOIN "PharmacistProfile" pharmacist_profile
         ON pharmacist_profile."userId" = author.id
+      LEFT JOIN LATERAL (
+        SELECT first_post.id, first_post."bodyMarkdown"
+        FROM "ForumPost" first_post
+        WHERE first_post."threadId" = t.id
+          ${includeHidden ? Prisma.empty : Prisma.sql`AND first_post.status::text = 'VISIBLE'`}
+        ORDER BY first_post."createdAt" ASC
+        LIMIT 1
+      ) first_post ON true
       ${where}
       ORDER BY t."isPinned" DESC, t."lastPostAt" DESC
       LIMIT ${normalizedLimit}
@@ -329,14 +352,8 @@ export const getForumThreadBySlug = cache(
           t.id,
           t.title,
           t.slug,
-          (
-            SELECT first_post."bodyMarkdown"
-            FROM "ForumPost" first_post
-            WHERE first_post."threadId" = t.id
-              ${includeHidden ? Prisma.empty : Prisma.sql`AND first_post.status::text = 'VISIBLE'`}
-            ORDER BY first_post."createdAt" ASC
-            LIMIT 1
-          ) AS "bodyMarkdown",
+          first_post.id AS "firstPostId",
+          first_post."bodyMarkdown" AS "bodyMarkdown",
           t.status::text AS status,
           t."isPinned",
           t."hiddenReason",
@@ -356,6 +373,23 @@ export const getForumThreadBySlug = cache(
             WHERE p."threadId" = t.id
               ${includeHidden ? Prisma.empty : Prisma.sql`AND p.status::text = 'VISIBLE'`}
           ) AS "postCount",
+          (
+            SELECT COUNT(*)::int
+            FROM "ForumPostLike" post_like
+            WHERE post_like."postId" = first_post.id
+          ) AS "likeCount",
+          ${
+            userId
+              ? Prisma.sql`
+                EXISTS (
+                  SELECT 1
+                  FROM "ForumPostLike" current_like
+                  WHERE current_like."postId" = first_post.id
+                    AND current_like."userId" = ${userId}
+                ) AS "isLiked"
+              `
+              : Prisma.sql`false AS "isLiked"`
+          },
           ${
             userId
               ? Prisma.sql`
@@ -384,6 +418,14 @@ export const getForumThreadBySlug = cache(
         JOIN "user" author ON author.id = t."authorId"
         LEFT JOIN "PharmacistProfile" pharmacist_profile
           ON pharmacist_profile."userId" = author.id
+        LEFT JOIN LATERAL (
+          SELECT first_post.id, first_post."bodyMarkdown"
+          FROM "ForumPost" first_post
+          WHERE first_post."threadId" = t.id
+            ${includeHidden ? Prisma.empty : Prisma.sql`AND first_post.status::text = 'VISIBLE'`}
+          ORDER BY first_post."createdAt" ASC
+          LIMIT 1
+        ) first_post ON true
         WHERE t.slug = ${slug}
           ${includeHidden ? Prisma.empty : Prisma.sql`AND t.status::text <> 'HIDDEN'`}
         LIMIT 1
@@ -413,7 +455,24 @@ export const getForumThreadBySlug = cache(
         p.status::text AS status,
         p."hiddenReason",
         p."createdAt",
-        p."updatedAt"
+        p."updatedAt",
+        (
+          SELECT COUNT(*)::int
+          FROM "ForumPostLike" post_like
+          WHERE post_like."postId" = p.id
+        ) AS "likeCount",
+        ${
+          userId
+            ? Prisma.sql`
+              EXISTS (
+                SELECT 1
+                FROM "ForumPostLike" current_like
+                WHERE current_like."postId" = p.id
+                  AND current_like."userId" = ${userId}
+              ) AS "isLiked"
+            `
+            : Prisma.sql`false AS "isLiked"`
+        }
       FROM "ForumPost" p
       JOIN "user" author ON author.id = p."authorId"
       LEFT JOIN "PharmacistProfile" pharmacist_profile

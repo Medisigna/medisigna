@@ -124,6 +124,7 @@ model User {
   forumPosts          ForumPost[]           @relation("ForumPostAuthor")
   hiddenForumPosts    ForumPost[]           @relation("ForumPostHider")
   forumPostAttachments ForumPostAttachment[] @relation("ForumPostAttachmentUploader")
+  forumPostLikes     ForumPostLike[]
   forumReports        ForumReport[]         @relation("ForumReportReporter")
   resolvedForumReports ForumReport[]        @relation("ForumReportResolver")
   forumSubscriptions  ForumSubscription[]
@@ -455,6 +456,7 @@ model ForumPost {
   updatedAt    DateTime          @updatedAt
   reports      ForumReport[]
   attachments  ForumPostAttachment[]
+  likes        ForumPostLike[]
 
   @@index([threadId])
   @@index([parentPostId])
@@ -480,6 +482,18 @@ model ForumPostAttachment {
   @@index([postId])
   @@index([uploadedById])
   @@index([isInline])
+}
+
+model ForumPostLike {
+  postId    String
+  post      ForumPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
+
+  @@id([postId, userId])
+  @@index([postId])
+  @@index([userId])
 }
 
 model ForumReport {

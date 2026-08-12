@@ -46,6 +46,7 @@ export default async function PharmacistForumPage({ searchParams }: PageProps) {
         basePath="/pharmacist/dashboard/forum"
         categories={categories}
         category={category}
+        currentUserId={user.id}
         query={query}
         threads={threads}
         total={total}
