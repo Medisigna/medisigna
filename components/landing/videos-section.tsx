@@ -45,13 +45,13 @@ export async function VideosSection() {
   const videos = videoCards(result.videos)
 
   return (
-    <section className="bg-secondary px-6 pt-24 pb-16 md:pt-28 md:pb-20 lg:pt-52">
-      <div className="mx-auto flex max-w-6xl flex-col items-center gap-8 md:gap-10">
-        <h2 className="max-w-3xl text-center text-2xl font-semibold tracking-tight text-foreground md:text-5xl">
-          Tonton <span className="text-primary">Video Populer</span>
+    <section className="bg-secondary px-6 pt-28 pb-16 md:pt-44 md:pb-20 lg:pt-20">
+      <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 md:gap-5">
+        <h2 className="max-w-3xl self-start text-left text-2xl font-semibold tracking-tight text-foreground md:text-5xl">
+          Video Edukasi
         </h2>
 
-        <div className="mt-4 grid w-full gap-5 md:mt-6 lg:grid-cols-2">
+        <div className="grid w-full max-w-4xl gap-5 md:self-start">
           {videos.map((video) => (
             <VideoCard key={video.title} video={video} />
           ))}
@@ -59,7 +59,7 @@ export async function VideosSection() {
 
         <Button
           asChild
-          className="rounded-full bg-foreground text-background hover:bg-foreground/90"
+          className="rounded-full border-0 bg-white text-foreground shadow-none hover:bg-white/90"
         >
           <Link href="/video">
             Lihat Semua Video

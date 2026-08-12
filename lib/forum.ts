@@ -27,6 +27,7 @@ export type ForumThreadListItem = {
   id: string
   title: string
   slug: string
+  bodyMarkdown: string | null
   status: ForumThreadStatus
   isPinned: boolean
   hiddenReason: string | null
@@ -218,6 +219,14 @@ export async function getForumThreads({
         t.id,
         t.title,
         t.slug,
+        (
+          SELECT first_post."bodyMarkdown"
+          FROM "ForumPost" first_post
+          WHERE first_post."threadId" = t.id
+            ${includeHidden ? Prisma.empty : Prisma.sql`AND first_post.status::text = 'VISIBLE'`}
+          ORDER BY first_post."createdAt" ASC
+          LIMIT 1
+        ) AS "bodyMarkdown",
         t.status::text AS status,
         t."isPinned",
         t."hiddenReason",
@@ -320,6 +329,14 @@ export const getForumThreadBySlug = cache(
           t.id,
           t.title,
           t.slug,
+          (
+            SELECT first_post."bodyMarkdown"
+            FROM "ForumPost" first_post
+            WHERE first_post."threadId" = t.id
+              ${includeHidden ? Prisma.empty : Prisma.sql`AND first_post.status::text = 'VISIBLE'`}
+            ORDER BY first_post."createdAt" ASC
+            LIMIT 1
+          ) AS "bodyMarkdown",
           t.status::text AS status,
           t."isPinned",
           t."hiddenReason",

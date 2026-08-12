@@ -42,7 +42,7 @@ export default async function PublicForumPage({ searchParams }: PageProps) {
   return (
     <main className="flex min-h-svh flex-col bg-secondary">
       <SiteHeader />
-      <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 px-4 py-8 sm:px-6 md:py-12">
+      <div className="mx-auto flex w-full max-w-[640px] flex-1 flex-col gap-4 px-4 py-8 sm:px-6 md:py-12">
         <ForumThreadComposer
           href="/forum/new"
           disabled={Boolean(user) && !canWrite}

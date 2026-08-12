@@ -62,7 +62,7 @@ export function HeroImageCarousel({ items }: { items: HeroCarouselItem[] }) {
                 height={1100}
                 sizes="(min-width: 1024px) 400px, 100vw"
                 priority={index === 0}
-                className="aspect-[5/6] max-h-[28rem] w-full rounded-2xl object-cover"
+                className="aspect-[5/6] max-h-72 w-full rounded-2xl object-cover sm:max-h-80 md:max-h-96 lg:max-h-[28rem]"
               />
             </CarouselItem>
           ))}

@@ -20,6 +20,7 @@ export default function ArticlesPage({ searchParams }: PageProps) {
           action="/artikel"
           eyebrow="Medisigna"
           searchParams={searchParams}
+          variant="soft"
         />
       </div>
       <SiteFooter />

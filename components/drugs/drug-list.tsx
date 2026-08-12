@@ -115,7 +115,7 @@ export function DrugList({
       />
 
       {drugs.length ? (
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid max-w-4xl gap-4">
           {drugs.map((drug) => (
             <Link
               key={drug.id}

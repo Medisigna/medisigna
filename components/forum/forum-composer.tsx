@@ -205,6 +205,15 @@ export function ForumThreadEditForm({
               name="bodyMarkdown"
               label="Isi diskusi"
               defaultValue={firstPost?.bodyMarkdown}
+              initialAttachments={
+                firstPost?.attachments.map((attachment) => ({
+                  id: attachment.id,
+                  altText: attachment.altText ?? attachment.fileName,
+                  fileName: attachment.fileName,
+                  fileUrl: attachment.fileUrl,
+                  isInline: false,
+                })) ?? []
+              }
               required
               height={260}
             />

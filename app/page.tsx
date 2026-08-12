@@ -1,7 +1,6 @@
 import { ArticlesSection } from "@/components/landing/articles-section"
 import { FinalCtaSection } from "@/components/landing/final-cta-section"
 import { FaqSection } from "@/components/landing/faq-section"
-import { ForumSection } from "@/components/landing/forum-section"
 import { HeroSection } from "@/components/landing/hero-section"
 import { SiteFooter } from "@/components/landing/site-footer"
 import { SiteHeader } from "@/components/landing/site-header"
@@ -14,7 +13,6 @@ export default function Page() {
       <HeroSection />
       <VideosSection />
       <ArticlesSection />
-      <ForumSection />
       <FaqSection />
       <FinalCtaSection />
       <SiteFooter />

@@ -51,7 +51,7 @@ function parseForumAttachments(formData: FormData) {
       altText: textField(item.altText, "Gambar diskusi", 160),
       fileName: textField(item.fileName, "gambar", 180),
       fileUrl: String(item.fileUrl).trim(),
-      isInline: item.isInline === true,
+      isInline: false,
     }))
 }
 

@@ -40,7 +40,8 @@ export default async function DrugInformationPage({ searchParams }: PageProps) {
           letter={letter}
           action="/obat"
           detailBasePath="/obat"
-          bordered
+          bordered={false}
+          variant="soft"
         />
       </div>
       <SiteFooter />

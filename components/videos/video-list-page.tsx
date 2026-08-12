@@ -92,7 +92,7 @@ export async function VideoListPage({
       </header>
 
       {result.videos.length ? (
-        <section className="grid gap-5 lg:grid-cols-2">
+        <section className="grid max-w-4xl gap-5">
           {result.videos.map((video) => (
             <VideoCard
               key={video.id}

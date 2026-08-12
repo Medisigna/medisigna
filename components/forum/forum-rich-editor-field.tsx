@@ -45,21 +45,11 @@ type ForumEditorAttachment = {
   altText: string
   fileName: string
   fileUrl: string
-  isInline: boolean
+  isInline: false
 }
 
 function editorMarkdown(editor: Editor) {
   return ((editor as MarkdownEditor).getMarkdown?.() ?? "").trim()
-}
-
-function editorImageUrls(editor: Editor) {
-  const urls = new Set<string>()
-  editor.state.doc.descendants((node) => {
-    if (node.type.name === "image" && typeof node.attrs.src === "string") {
-      urls.add(node.attrs.src)
-    }
-  })
-  return urls
 }
 
 function normalizeUrl(value: string) {
@@ -105,11 +95,9 @@ function ToolbarButton({
 
 function AttachmentFrame({
   attachment,
-  onAddToBody,
   onRemove,
 }: {
   attachment: ForumEditorAttachment
-  onAddToBody: (attachment: ForumEditorAttachment) => void
   onRemove: (attachment: ForumEditorAttachment) => void
 }) {
   return (
@@ -120,15 +108,6 @@ function AttachmentFrame({
         className="aspect-video w-full object-cover"
       />
       <div className="absolute inset-x-2 top-2 flex justify-end gap-2">
-        <Button
-          type="button"
-          size="sm"
-          className="h-8 shadow-md"
-          onClick={() => onAddToBody(attachment)}
-        >
-          <ImageIcon data-icon="inline-start" />
-          Tambah ke isi
-        </Button>
         <Button
           type="button"
           size="icon-sm"
@@ -142,7 +121,7 @@ function AttachmentFrame({
       </div>
       <div className="flex items-center justify-between gap-3 px-3 py-2 text-xs text-muted-foreground">
         <span className="truncate">{attachment.fileName}</span>
-        <span>Attachment</span>
+        <span>Gambar</span>
       </div>
     </div>
   )
@@ -153,6 +132,7 @@ export function ForumRichEditorField({
   label,
   defaultValue,
   hideLabel = false,
+  initialAttachments = [],
   required,
   height = 260,
 }: {
@@ -160,6 +140,7 @@ export function ForumRichEditorField({
   label: string
   defaultValue?: string | null
   hideLabel?: boolean
+  initialAttachments?: ForumEditorAttachment[]
   required?: boolean
   height?: number
 }) {
@@ -167,7 +148,8 @@ export function ForumRichEditorField({
   const inputRef = useRef<HTMLInputElement>(null)
   const imageInputRef = useRef<HTMLInputElement>(null)
   const [value, setValue] = useState(defaultValue ?? "")
-  const [attachments, setAttachments] = useState<ForumEditorAttachment[]>([])
+  const [attachments, setAttachments] =
+    useState<ForumEditorAttachment[]>(initialAttachments)
   const [isUploadingImage, setIsUploadingImage] = useState(false)
   const [, setEditorStateVersion] = useState(0)
 
@@ -215,13 +197,7 @@ export function ForumRichEditorField({
     onSelectionUpdate: () => setEditorStateVersion((version) => version + 1),
     onTransaction: () => setEditorStateVersion((version) => version + 1),
     onUpdate: ({ editor: nextEditor }) => {
-      const imageUrls = editorImageUrls(nextEditor)
       setValue(editorMarkdown(nextEditor))
-      setAttachments((current) =>
-        current.filter(
-          (attachment) => !attachment.isInline || imageUrls.has(attachment.fileUrl)
-        )
-      )
     },
   })
 
@@ -260,66 +236,57 @@ export function ForumRichEditorField({
     )
   }
 
-  function insertImage(src: string, alt: string) {
-    runCommand((currentEditor) =>
-      currentEditor
-        .chain()
-        .focus()
-        .setImage({ src, alt })
-        .createParagraphNear()
-        .run()
-    )
-  }
-
-  function addAttachmentToBody(attachment: ForumEditorAttachment) {
-    if (!editor) return
-
-    insertImage(attachment.fileUrl, attachment.altText)
-    setAttachments((current) =>
-      current.map((item) =>
-        item.id === attachment.id ? { ...item, isInline: true } : item
-      )
-    )
-  }
-
   function removeAttachment(attachment: ForumEditorAttachment) {
     setAttachments((current) => current.filter((item) => item.id !== attachment.id))
   }
 
-  async function uploadMarkdownImage(file?: File) {
-    if (!file || !editor) return
+  async function uploadMarkdownImages(fileList?: FileList | null) {
+    const files = Array.from(fileList ?? [])
+    if (!files.length) return
+
+    const imageFiles = files.filter((file) => file.type.startsWith("image/"))
+    if (!imageFiles.length) {
+      toast.error("File harus berupa gambar.")
+      return
+    }
 
     setIsUploadingImage(true)
 
-    const formData = new FormData()
-    formData.set("file", file)
-
     try {
-      const response = await fetch("/api/markdown/image-upload", {
-        method: "POST",
-        body: formData,
-      })
-      const result = (await response.json()) as {
-        secureUrl?: string
-        error?: string
-      }
+      const uploadedAttachments: ForumEditorAttachment[] = []
 
-      if (!response.ok || !result.secureUrl) {
-        throw new Error(result.error || "Upload gambar gagal.")
-      }
+      for (const file of imageFiles) {
+        const formData = new FormData()
+        formData.set("file", file)
 
-      const secureUrl = result.secureUrl
-      const alt = file.name.replace(/\.[^/.]+$/, "") || "Gambar"
-      setAttachments((current) => [
-        ...current,
-        {
+        const response = await fetch("/api/markdown/image-upload", {
+          method: "POST",
+          body: formData,
+        })
+        const result = (await response.json()) as {
+          secureUrl?: string
+          error?: string
+        }
+
+        if (!response.ok || !result.secureUrl) {
+          throw new Error(result.error || "Upload gambar gagal.")
+        }
+
+        const secureUrl = result.secureUrl
+        const alt = file.name.replace(/\.[^/.]+$/, "") || "Gambar"
+        uploadedAttachments.push({
           id: crypto.randomUUID(),
           altText: alt,
           fileName: file.name || alt,
           fileUrl: secureUrl,
           isInline: false,
-        },
-      ])
+        })
+      }
+
+      setAttachments((current) => [
+        ...current,
+        ...uploadedAttachments,
+      ].slice(0, 8))
       toast.success("Gambar diupload.")
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Upload gambar gagal.")
@@ -330,14 +297,9 @@ export function ForumRichEditorField({
   }
 
   const canUseToolbar = Boolean(editor)
-  const attachmentPreviews = attachments.filter((attachment) => !attachment.isInline)
 
   return (
     <div className="flex flex-col gap-2 text-sm font-medium">
-      <label id={id} className={hideLabel ? "sr-only" : undefined}>
-        {label}
-        {required ? <span className="text-destructive"> *</span> : null}
-      </label>
       <input ref={inputRef} type="hidden" name={name} value={value} readOnly />
       <input
         type="hidden"
@@ -348,10 +310,51 @@ export function ForumRichEditorField({
       <input
         ref={imageInputRef}
         type="file"
+        multiple
         accept="image/png,image/jpeg,image/webp"
         className="sr-only"
-        onChange={(event) => uploadMarkdownImage(event.target.files?.[0])}
+        onChange={(event) => uploadMarkdownImages(event.target.files)}
       />
+      <div className="flex flex-col gap-3 rounded-md border bg-background p-3">
+        {attachments.length ? (
+          attachments.length > 1 ? (
+            <Carousel opts={{ align: "start" }} className="px-8">
+              <CarouselContent>
+                {attachments.map((attachment) => (
+                    <CarouselItem key={attachment.id} className="basis-1/2">
+                    <AttachmentFrame
+                      attachment={attachment}
+                      onRemove={removeAttachment}
+                    />
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className="left-0" />
+              <CarouselNext className="right-0" />
+            </Carousel>
+          ) : (
+            <AttachmentFrame
+              attachment={attachments[0]}
+              onRemove={removeAttachment}
+            />
+          )
+        ) : null}
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="w-fit"
+          disabled={isUploadingImage}
+          onClick={() => imageInputRef.current?.click()}
+        >
+          <ImageIcon data-icon="inline-start" />
+          {isUploadingImage ? "Mengupload..." : "Tambah gambar"}
+        </Button>
+      </div>
+      <label id={id} className={hideLabel ? "sr-only" : undefined}>
+        {label}
+        {required ? <span className="text-destructive"> *</span> : null}
+      </label>
       <TooltipProvider>
         <div className="overflow-hidden rounded-md border bg-background">
           <div className="flex flex-wrap items-center gap-1 border-b bg-muted/30 p-1">
@@ -441,41 +444,7 @@ export function ForumRichEditorField({
             >
               <LinkIcon data-icon="inline-start" />
             </ToolbarButton>
-            <ToolbarButton
-              label={isUploadingImage ? "Mengupload gambar" : "Upload gambar"}
-              disabled={!canUseToolbar || isUploadingImage}
-              onClick={() => imageInputRef.current?.click()}
-            >
-              <ImageIcon data-icon="inline-start" />
-            </ToolbarButton>
           </div>
-          {attachmentPreviews.length ? (
-            <div className="border-b bg-muted/15 p-3">
-              {attachmentPreviews.length > 1 ? (
-                <Carousel opts={{ align: "start" }} className="px-8">
-                  <CarouselContent>
-                    {attachmentPreviews.map((attachment) => (
-                      <CarouselItem key={attachment.id} className="basis-full">
-                        <AttachmentFrame
-                          attachment={attachment}
-                          onAddToBody={addAttachmentToBody}
-                          onRemove={removeAttachment}
-                        />
-                      </CarouselItem>
-                    ))}
-                  </CarouselContent>
-                  <CarouselPrevious className="left-0" />
-                  <CarouselNext className="right-0" />
-                </Carousel>
-              ) : (
-                <AttachmentFrame
-                  attachment={attachmentPreviews[0]}
-                  onAddToBody={addAttachmentToBody}
-                  onRemove={removeAttachment}
-                />
-              )}
-            </div>
-          ) : null}
           <EditorContent editor={editor} />
         </div>
       </TooltipProvider>

@@ -20,6 +20,7 @@ export default function VideosPage({ searchParams }: PageProps) {
           action="/video"
           eyebrow="Medisigna"
           searchParams={searchParams}
+          variant="soft"
         />
       </div>
       <SiteFooter />

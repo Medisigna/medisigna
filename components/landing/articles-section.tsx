@@ -59,13 +59,12 @@ export async function ArticlesSection() {
 
   return (
     <section className="bg-secondary px-6 pt-12 pb-16 md:pt-16 md:pb-20 lg:pt-20">
-      <div className="mx-auto flex max-w-6xl flex-col items-center gap-8 md:gap-10">
-        <h2 className="max-w-3xl text-center text-2xl font-semibold tracking-tight text-foreground md:text-5xl">
-          Tetap Update Dengan{" "}
-          <span className="text-primary">Artikel Terbaru</span>
+      <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 md:gap-5">
+        <h2 className="max-w-3xl self-start text-left text-2xl font-semibold tracking-tight text-foreground md:text-5xl">
+          Artikel
         </h2>
 
-        <div className="mt-4 grid w-full gap-5 md:mt-6 lg:grid-cols-2">
+        <div className="grid w-full max-w-4xl gap-5 md:self-start">
           {articles.map((article) => (
             <ArticleCard key={article.title} article={article} />
           ))}
@@ -73,7 +72,7 @@ export async function ArticlesSection() {
 
         <Button
           asChild
-          className="rounded-full bg-foreground text-background hover:bg-foreground/90"
+          className="rounded-full border-0 bg-white text-foreground shadow-none hover:bg-white/90"
         >
           <Link href="/artikel">
             Lihat Semua Artikel

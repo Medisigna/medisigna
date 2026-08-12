@@ -108,7 +108,7 @@ export async function ArticleListPage({
       </header>
 
       {result.articles.length ? (
-        <section className="grid gap-5 lg:grid-cols-2">
+        <section className="grid max-w-4xl gap-5">
           {result.articles.map((article) => (
             <ArticleCard
               key={article.id}

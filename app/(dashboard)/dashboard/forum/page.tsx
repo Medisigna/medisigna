@@ -35,7 +35,7 @@ export default async function PatientForumPage({ searchParams }: PageProps) {
 
   return (
     <main className="min-h-[calc(100dvh-7rem)] rounded-[2rem] bg-secondary py-4 md:rounded-[2.25rem] md:py-6">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
+      <div className="mx-auto flex w-full max-w-[640px] flex-col gap-4">
         <ForumThreadComposer href="/dashboard/forum/new" />
         <ForumThreadList
           basePath="/dashboard/forum"

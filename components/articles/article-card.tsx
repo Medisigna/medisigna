@@ -1,6 +1,12 @@
 import Link from "next/link"
 
-import { Card, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 
 export type ArticleCardData = {
@@ -23,7 +29,7 @@ export function ArticleCard({
     <article>
       <Card
         className={cn(
-          "grid grid-cols-[5.75rem_minmax(0,1fr)] items-center gap-4 rounded-[1.75rem] bg-card p-3 py-3 shadow-none ring-0 transition-colors hover:bg-card/80 sm:grid-cols-[7.5rem_minmax(0,1fr)] sm:p-4",
+          "grid grid-cols-[5.75rem_minmax(0,1fr)] items-center gap-4 rounded-[1.75rem] bg-card p-3 py-3 shadow-none ring-0 transition-colors hover:bg-card/80 sm:grid-cols-[7.5rem_minmax(0,1fr)] sm:p-4 md:grid-cols-[12rem_minmax(0,1fr)] md:gap-6 md:p-5",
           className
         )}
       >
@@ -55,11 +61,16 @@ export function ArticleCard({
               href={article.href}
               className="focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
             >
-              <CardTitle className="line-clamp-2 text-base leading-snug font-semibold tracking-tight text-secondary-foreground">
+              <CardTitle className="line-clamp-2 text-base leading-snug font-semibold tracking-tight text-secondary-foreground md:text-2xl">
                 {article.title}
               </CardTitle>
             </Link>
           </CardHeader>
+          <CardContent className="hidden px-0 pt-0 md:block">
+            <p className="line-clamp-2 text-sm leading-6 text-muted-foreground">
+              {article.excerpt}
+            </p>
+          </CardContent>
           <CardFooter className="px-0 pt-0">
             <Link
               href={article.href}

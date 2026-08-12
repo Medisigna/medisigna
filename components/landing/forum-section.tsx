@@ -52,7 +52,7 @@ export async function ForumSection() {
         </div>
 
         {threads.length ? (
-          <div className="grid gap-4 lg:grid-cols-3">
+          <div className="grid gap-2 lg:grid-cols-3">
             {threads.map((thread) => {
               const authorName = forumAuthorName({
                 authorName: thread.authorName,
@@ -63,9 +63,9 @@ export async function ForumSection() {
               return (
                 <Card
                   key={thread.id}
-                  className="rounded-[1.75rem] border-0 bg-card shadow-none ring-0 transition-colors hover:bg-card/80"
+                  className="rounded-[1.75rem] border-0 bg-card py-0 shadow-none ring-0 transition-colors hover:bg-card/80"
                 >
-                  <CardContent className="flex h-full flex-col gap-4 p-5">
+                  <CardContent className="flex h-full flex-col gap-2 p-3">
                     <div className="flex flex-wrap items-center gap-2">
                       <ForumBadge tone="category">
                         {thread.categoryName}

@@ -3,6 +3,7 @@ import {
   BadgeCheckIcon,
   LockIcon,
   MessageSquareTextIcon,
+  MoreHorizontalIcon,
   PinIcon,
 } from "lucide-react"
 
@@ -32,12 +33,27 @@ function initials(name: string) {
 }
 
 function formatDate(date: Date) {
+  const diffMs = Date.now() - date.getTime()
+  const minute = 60 * 1000
+  const hour = 60 * minute
+  const day = 24 * hour
+
+  if (diffMs < hour) return `${Math.max(Math.floor(diffMs / minute), 1)} menit`
+  if (diffMs < day) return `${Math.floor(diffMs / hour)} jam`
+  if (diffMs < 30 * day) return `${Math.floor(diffMs / day)} hari`
+
   return new Intl.DateTimeFormat("id-ID", {
     day: "2-digit",
     month: "short",
-    hour: "2-digit",
-    minute: "2-digit",
   }).format(date)
+}
+
+function plainPreview(markdown: string) {
+  return markdown
+    .replace(/!\[[^\]]*]\([^)]*\)/g, "")
+    .replace(/\[([^\]]+)]\([^)]*\)/g, "$1")
+    .replace(/[#*_`>~]/g, "")
+    .trim()
 }
 
 function ForumThreadAttachmentStrip({
@@ -47,18 +63,18 @@ function ForumThreadAttachmentStrip({
 }) {
   if (!attachments.length) return null
 
-  const visibleAttachments = attachments.slice(0, 3)
+  const visibleAttachments = attachments.slice(0, 6)
   const hiddenCount = attachments.length - visibleAttachments.length
-  const gridClass =
-    visibleAttachments.length === 1
-      ? "max-w-sm grid-cols-1"
-      : visibleAttachments.length === 2
-        ? "max-w-lg grid-cols-2"
-        : "max-w-2xl grid-cols-3"
+  const isSingle = visibleAttachments.length === 1
 
   return (
     <div
-      className={`pointer-events-auto relative z-10 mx-auto mt-4 grid w-full gap-2 ${gridClass}`}
+      className={cn(
+        "pointer-events-auto relative z-10 mt-3",
+        isSingle
+          ? "max-w-md"
+          : "flex gap-1.5 overflow-x-auto overscroll-x-contain pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      )}
     >
       {visibleAttachments.map((attachment, index) => (
         <ForumImagePreviewDialog
@@ -69,12 +85,18 @@ function ForumThreadAttachmentStrip({
         >
           <button
             type="button"
-            className="group/preview relative overflow-hidden rounded-md border bg-muted/20 text-left transition-opacity hover:opacity-90 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+            className={cn(
+              "group/preview relative overflow-hidden rounded-xl border bg-card text-left transition-opacity hover:opacity-90 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none",
+              isSingle ? "w-full" : "w-[72vw] shrink-0 sm:w-52"
+            )}
           >
             <img
               src={attachment.fileUrl}
               alt={attachment.altText ?? attachment.fileName}
-              className="aspect-video w-full object-cover"
+              className={cn(
+                "w-full object-cover",
+                isSingle ? "max-h-96" : "aspect-[3/4]"
+              )}
             />
             {index === visibleAttachments.length - 1 && hiddenCount > 0 ? (
               <span className="absolute inset-0 flex items-center justify-center bg-foreground/55 text-sm font-semibold text-background">
@@ -110,7 +132,7 @@ export function ForumThreadList({
   const isSoft = variant === "soft"
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="mx-auto flex w-full max-w-[640px] flex-col gap-3">
       <div>
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-secondary-foreground">
@@ -118,7 +140,7 @@ export function ForumThreadList({
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             {total} diskusi
-            {unreadTotal > 0 ? ` · ${unreadTotal} belum dibaca` : ""}
+            {unreadTotal > 0 ? ` - ${unreadTotal} belum dibaca` : ""}
           </p>
         </div>
       </div>
@@ -131,7 +153,7 @@ export function ForumThreadList({
       />
 
       {threads.length ? (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-3">
           {threads.map((thread) => {
             const detailHref = `${basePath}/${thread.slug}`
             const replyCount = Math.max(thread.postCount - 1, 0)
@@ -139,40 +161,44 @@ export function ForumThreadList({
               authorName: thread.authorName,
               authorRole: thread.authorRole,
             })
+            const bodyPreview = thread.bodyMarkdown
+              ? plainPreview(thread.bodyMarkdown)
+              : null
 
             return (
               <Card
                 key={thread.id}
                 className={cn(
-                  "relative border-0 transition-shadow",
+                  "relative border-0 bg-card py-0 transition-shadow",
                   isSoft
-                    ? "rounded-[1.75rem] bg-card shadow-none ring-0 hover:shadow-none"
-                    : "rounded-xl bg-background shadow-sm hover:shadow-md"
+                    ? "rounded-2xl shadow-none ring-0 hover:shadow-none"
+                    : "rounded-2xl shadow-sm hover:shadow-md"
                 )}
               >
                 <Link
                   href={detailHref}
                   className={cn(
                     "absolute inset-0 z-0 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none",
-                    isSoft ? "rounded-[1.75rem]" : "rounded-xl"
+                    "rounded-2xl"
                   )}
                   aria-label={`Buka diskusi ${thread.title}`}
                 />
-                <CardContent className="pointer-events-none relative z-10 px-4 py-4 sm:px-5 sm:py-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex min-w-0 items-center gap-4">
-                      <Avatar className="size-9 shrink-0 sm:size-10">
-                        <AvatarImage
-                          src={thread.authorImage ?? undefined}
-                          alt={authorName}
-                        />
-                        <AvatarFallback>{initials(authorName)}</AvatarFallback>
-                      </Avatar>
-                      <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <p className="truncate text-base font-semibold text-foreground">
+                <CardContent className="pointer-events-none relative z-10 p-3 sm:p-4">
+                  <article className="flex min-w-0 flex-col">
+                    <div className="flex min-w-0 items-start justify-between gap-3">
+                      <div className="flex min-w-0 items-center gap-3">
+                        <Avatar className="size-10 shrink-0">
+                          <AvatarImage
+                            src={thread.authorImage ?? undefined}
+                            alt={authorName}
+                          />
+                          <AvatarFallback>{initials(authorName)}</AvatarFallback>
+                        </Avatar>
+
+                        <div className="flex min-w-0 flex-wrap items-center gap-1.5 text-sm leading-5">
+                          <span className="truncate font-semibold text-foreground">
                             {authorName}
-                          </p>
+                          </span>
                           {thread.authorRole === "PHARMACIST" ? (
                             <span
                               className="inline-flex text-primary"
@@ -185,32 +211,42 @@ export function ForumThreadList({
                               />
                             </span>
                           ) : null}
-                        </div>
-                        <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-                          <ForumBadge tone="category">
+                          <span className="text-muted-foreground">&gt;</span>
+                          <span className="font-medium text-foreground">
                             {thread.categoryName}
-                          </ForumBadge>
-                          <span>{formatDate(thread.lastPostAt)}</span>
+                          </span>
+                          <span className="text-muted-foreground">
+                            {formatDate(thread.lastPostAt)}
+                          </span>
                         </div>
                       </div>
+                      <MoreHorizontalIcon
+                        className="size-4 shrink-0 text-muted-foreground"
+                        aria-hidden="true"
+                      />
                     </div>
-                  </div>
 
-                  <h2 className="mt-4 line-clamp-3 text-xl leading-snug font-semibold tracking-tight text-foreground group-hover/card:underline">
-                    {thread.title}
-                  </h2>
+                    <Link
+                      href={detailHref}
+                      className="pointer-events-auto relative z-10 mt-2 block text-[15px] leading-6 font-medium text-foreground hover:text-primary"
+                    >
+                      {thread.title}
+                    </Link>
 
-                  <ForumThreadAttachmentStrip
-                    attachments={thread.attachments}
-                  />
+                    {bodyPreview && bodyPreview !== thread.title ? (
+                      <p className="mt-1 line-clamp-8 whitespace-pre-line text-[15px] leading-6 text-foreground">
+                        {bodyPreview}
+                      </p>
+                    ) : null}
 
-                  <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-                    <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+                    <ForumThreadAttachmentStrip
+                      attachments={thread.attachments}
+                    />
+
+                    <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                       <span className="inline-flex items-center gap-1.5">
                         <MessageSquareTextIcon aria-hidden="true" />
-                        <span className="font-medium text-primary">
-                          {replyCount}
-                        </span>
+                        <span>{replyCount}</span>
                       </span>
                       <div className="pointer-events-auto relative z-10">
                         <ForumShareDialog
@@ -237,7 +273,7 @@ export function ForumThreadList({
                         </ForumBadge>
                       ) : null}
                     </div>
-                  </div>
+                  </article>
                 </CardContent>
               </Card>
             )

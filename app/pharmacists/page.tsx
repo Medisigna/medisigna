@@ -18,6 +18,9 @@ type PageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>
 }
 
+const softCardClass =
+  "rounded-[1.75rem] border-0 bg-card shadow-none ring-0 hover:shadow-none"
+
 export default async function PublicPharmacistsPage({
   searchParams,
 }: PageProps) {
@@ -56,15 +59,16 @@ export default async function PublicPharmacistsPage({
           <h1 className="text-2xl font-semibold tracking-tight">
             Pilih Apoteker
           </h1>
-          <PharmacistSearch action="/pharmacists" query={query} />
+          <PharmacistSearch action="/pharmacists" query={query} variant="soft" />
         </section>
 
-        <section className="grid gap-4 xl:grid-cols-2">
+        <section className="grid max-w-4xl gap-4">
           {pharmacists.length ? (
             pharmacists.map((profile) => (
               <PharmacistCard
                 key={profile.id}
                 profile={profile}
+                className={softCardClass}
                 action={
                   profile.availabilityStatus !== "ONLINE" ? (
                     <Button disabled className="w-full">
@@ -102,7 +106,7 @@ export default async function PublicPharmacistsPage({
               />
             ))
           ) : (
-            <Card className="bg-card shadow-none ring-0 md:col-span-2 xl:col-span-3">
+            <Card className="max-w-4xl rounded-[1.75rem] border-0 bg-card shadow-none ring-0">
               <CardContent className="flex flex-col items-center gap-4 py-8 text-center">
                 <div className="flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
                   <SearchIcon className="size-6" />

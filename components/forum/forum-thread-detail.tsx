@@ -2,7 +2,6 @@ import Link from "next/link"
 import {
   ArrowLeftIcon,
   BadgeCheckIcon,
-  CalendarIcon,
   LockIcon,
   MessageSquareTextIcon,
   PinIcon,
@@ -22,6 +21,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import type { ForumPostAttachmentItem, ForumPostItem, ForumThreadDetail } from "@/lib/forum"
 import { forumAuthorName } from "@/lib/forum"
+import { cn } from "@/lib/utils"
 
 function initials(name: string) {
   return name
@@ -34,12 +34,18 @@ function initials(name: string) {
 }
 
 function formatDate(date: Date) {
+  const diffMs = Date.now() - date.getTime()
+  const minute = 60 * 1000
+  const hour = 60 * minute
+  const day = 24 * hour
+
+  if (diffMs < hour) return `${Math.max(Math.floor(diffMs / minute), 1)} menit`
+  if (diffMs < day) return `${Math.floor(diffMs / hour)} jam`
+  if (diffMs < 30 * day) return `${Math.floor(diffMs / day)} hari`
+
   return new Intl.DateTimeFormat("id-ID", {
     day: "2-digit",
     month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
   }).format(date)
 }
 
@@ -95,9 +101,20 @@ function ForumAttachmentGallery({ attachments }: { attachments: ForumPostAttachm
   const gallery = attachments.filter((attachment) => !attachment.isInline)
   if (!gallery.length) return null
 
+  const visibleAttachments = gallery.slice(0, 6)
+  const hiddenCount = gallery.length - visibleAttachments.length
+  const isSingle = visibleAttachments.length === 1
+
   return (
-    <div className="grid gap-3 sm:grid-cols-2">
-      {gallery.map((attachment) => (
+    <div
+      className={cn(
+        "mt-3",
+        isSingle
+          ? "max-w-md"
+          : "flex gap-1.5 overflow-x-auto overscroll-x-contain pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      )}
+    >
+      {visibleAttachments.map((attachment, index) => (
         <ForumImagePreviewDialog
           key={attachment.id}
           src={attachment.fileUrl}
@@ -106,13 +123,24 @@ function ForumAttachmentGallery({ attachments }: { attachments: ForumPostAttachm
         >
           <button
             type="button"
-            className="overflow-hidden rounded-md border bg-muted/20 text-left transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+            className={cn(
+              "relative overflow-hidden rounded-xl border bg-card text-left transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
+              isSingle ? "w-full" : "w-[72vw] shrink-0 sm:w-52"
+            )}
           >
             <img
               src={attachment.fileUrl}
               alt={attachment.altText ?? attachment.fileName}
-              className="aspect-video w-full object-cover"
+              className={cn(
+                "w-full object-cover",
+                isSingle ? "max-h-96" : "aspect-[3/4]"
+              )}
             />
+            {index === visibleAttachments.length - 1 && hiddenCount > 0 ? (
+              <span className="absolute inset-0 flex items-center justify-center bg-foreground/55 text-sm font-semibold text-background">
+                +{hiddenCount}
+              </span>
+            ) : null}
           </button>
         </ForumImagePreviewDialog>
       ))}
@@ -249,7 +277,7 @@ export function ForumThreadDetailView({
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-4">
+    <div className="mx-auto flex w-full max-w-[640px] flex-col gap-3">
       {currentUserId ? <ForumMarkRead threadId={thread.id} /> : null}
       <Button asChild variant="ghost" className="w-fit">
         <Link href={basePath}>
@@ -258,27 +286,59 @@ export function ForumThreadDetailView({
         </Link>
       </Button>
 
-      <Card className="overflow-hidden rounded-xl border-0 bg-background shadow-sm ring-1 ring-border/70">
+      <Card className="overflow-hidden rounded-2xl border-0 bg-card py-0 shadow-none ring-0">
         <CardContent className="p-0">
           <article
             id={firstPost ? `post-${firstPost.id}` : undefined}
-            className="flex flex-col gap-5 p-5 sm:p-6"
+            className="flex flex-col p-3 sm:p-4"
           >
             <div className="flex items-start justify-between gap-3">
-              {firstPost ? <ForumAuthor post={firstPost} /> : null}
-              <div className="flex shrink-0 items-center gap-2">
-                {thread.isPinned ? (
-                  <ForumBadge tone="primary">
-                    <PinIcon aria-hidden="true" />
-                    Pin
-                  </ForumBadge>
-                ) : null}
-                {thread.status === "LOCKED" ? (
-                  <ForumBadge tone="warning">
-                    <LockIcon aria-hidden="true" />
-                    Dikunci
-                  </ForumBadge>
-                ) : null}
+              {firstPost ? (
+                <div className="flex min-w-0 items-center gap-3">
+                  <Avatar className="size-10 shrink-0">
+                    <AvatarImage
+                      src={firstPost.authorImage ?? undefined}
+                      alt={forumAuthorName({
+                        authorName: firstPost.authorName,
+                        authorRole: firstPost.authorRole,
+                      })}
+                    />
+                    <AvatarFallback>
+                      {initials(
+                        forumAuthorName({
+                          authorName: firstPost.authorName,
+                          authorRole: firstPost.authorRole,
+                        })
+                      )}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex min-w-0 flex-wrap items-center gap-1.5 text-sm leading-5">
+                    <span className="truncate font-semibold text-foreground">
+                      {forumAuthorName({
+                        authorName: firstPost.authorName,
+                        authorRole: firstPost.authorRole,
+                      })}
+                    </span>
+                    {firstPost.authorRole === "PHARMACIST" ? (
+                      <span
+                        className="inline-flex text-primary"
+                        aria-label="Apoteker terverifikasi"
+                        title="Apoteker terverifikasi"
+                      >
+                        <BadgeCheckIcon className="size-3.5" aria-hidden="true" />
+                      </span>
+                    ) : null}
+                    <span className="text-muted-foreground">&gt;</span>
+                    <span className="font-medium text-foreground">
+                      {thread.categoryName}
+                    </span>
+                    <span className="text-muted-foreground">
+                      {formatDate(thread.createdAt)}
+                    </span>
+                  </div>
+                </div>
+              ) : null}
+              <div className="shrink-0">
                 <ForumThreadActionsMenu
                   canEdit={currentUserId === thread.authorId}
                   canReport={canReport}
@@ -288,28 +348,20 @@ export function ForumThreadDetailView({
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-              <ForumBadge tone="category">{thread.categoryName}</ForumBadge>
-              <span className="inline-flex items-center gap-1.5">
-                <CalendarIcon aria-hidden="true" />
-                {formatDate(thread.createdAt)}
-              </span>
-            </div>
-
-            <h1 className="text-2xl font-semibold leading-tight tracking-tight text-foreground sm:text-3xl">
+            <h1 className="mt-2 text-[15px] leading-6 font-medium text-foreground">
               {thread.title}
             </h1>
 
             {firstPost?.status === "HIDDEN" ? (
               <HiddenPost reason={firstPost.hiddenReason} />
             ) : firstPost ? (
-              <div className="flex flex-col gap-4">
+              <div className="mt-1 flex flex-col">
                 {firstPost.bodyMarkdown ? <MarkdownPreview source={firstPost.bodyMarkdown} /> : null}
                 <ForumAttachmentGallery attachments={firstPost.attachments} />
               </div>
             ) : null}
 
-            <div className="flex flex-wrap items-center gap-5 border-t pt-4 text-sm text-muted-foreground">
+            <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
               <Button asChild variant="ghost" size="sm" aria-label={`${replyCount} komentar`}>
                 <a href="#forum-reply-composer">
                   <MessageSquareTextIcon aria-hidden="true" />
@@ -317,6 +369,18 @@ export function ForumThreadDetailView({
                 </a>
               </Button>
               <ForumShareDialog href={threadHref} title={thread.title} label="Share" />
+              {thread.isPinned ? (
+                <ForumBadge tone="primary">
+                  <PinIcon aria-hidden="true" />
+                  Pin
+                </ForumBadge>
+              ) : null}
+              {thread.status === "LOCKED" ? (
+                <ForumBadge tone="warning">
+                  <LockIcon aria-hidden="true" />
+                  Dikunci
+                </ForumBadge>
+              ) : null}
             </div>
           </article>
 

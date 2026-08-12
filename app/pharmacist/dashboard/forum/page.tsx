@@ -36,7 +36,7 @@ export default async function PharmacistForumPage({ searchParams }: PageProps) {
   const canWrite = canWriteForum(user)
 
   return (
-    <main className="mx-auto flex w-full max-w-6xl flex-col gap-6 py-4 md:py-6">
+    <main className="mx-auto flex w-full max-w-[640px] flex-col gap-4 py-4 md:py-6">
       <ForumThreadComposer
         href="/pharmacist/dashboard/forum/new"
         disabled={!canWrite}

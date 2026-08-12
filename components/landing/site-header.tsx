@@ -11,7 +11,6 @@ import {
 } from "lucide-react"
 
 import { BrandLogo } from "@/components/brand-logo"
-import { ThemeToggle } from "@/components/theme-toggle"
 import { Button } from "@/components/ui/button"
 import {
   Drawer,
@@ -105,14 +104,14 @@ export function SiteHeader() {
       return false
     }
 
-    const hero = document.getElementById("landing-hero")
+    const heroSurface = document.getElementById("landing-hero-surface")
 
-    if (!hero) {
+    if (!heroSurface) {
       return false
     }
 
-    const rect = hero.getBoundingClientRect()
-    return rect.top < 80 && rect.bottom > 72
+    const rect = heroSurface.getBoundingClientRect()
+    return rect.top < 80 && rect.bottom > 24
   }, [isHome])
 
   const isHeroSurface = useSyncExternalStore(
@@ -130,10 +129,10 @@ export function SiteHeader() {
     >
       <div
         className={cn(
-          "mx-auto flex max-w-6xl items-center justify-between gap-3 rounded-xl border px-3 py-2 text-sm backdrop-blur transition-colors duration-200 sm:px-4",
+          "mx-auto flex max-w-6xl items-center justify-between gap-3 rounded-xl px-3 py-2 text-sm backdrop-blur transition-colors duration-200 sm:px-4",
           isHeroSurface
-            ? "border-white/20 bg-white/8 text-white shadow-black/10"
-            : "border-border/70 bg-background/70 text-foreground shadow-foreground/5"
+            ? "bg-white/8 text-white"
+            : "bg-card text-foreground"
         )}
       >
         <Link
@@ -223,12 +222,6 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex shrink-0 items-center gap-2">
-          <ThemeToggle
-            className={cn(
-              isHeroSurface &&
-                "border-white/30 bg-white/10 text-white hover:bg-white/20 hover:text-white"
-            )}
-          />
           <Drawer>
             <DrawerTrigger asChild>
               <Button
@@ -245,12 +238,11 @@ export function SiteHeader() {
               </Button>
             </DrawerTrigger>
             <DrawerContent>
-              <DrawerHeader className="flex flex-row items-center justify-between">
+              <DrawerHeader className="flex flex-row items-center">
                 <DrawerTitle className="flex items-center gap-2">
                   <BrandLogo className="size-9" />
                   <span>Medisigna</span>
                 </DrawerTitle>
-                <ThemeToggle />
               </DrawerHeader>
               <div className="flex flex-col gap-5 px-4 pb-2">
                 {mobileNavSections.map((section) => (

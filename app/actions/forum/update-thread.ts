@@ -1,6 +1,7 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
+import { randomUUID } from "node:crypto"
 
 import { value } from "@/app/actions/shared"
 import { canWriteForum, uniqueForumThreadSlug } from "@/lib/forum"
@@ -9,6 +10,49 @@ import { requireUser } from "@/lib/session"
 
 function forumBasePath(role: string) {
   return role === "PHARMACIST" ? "/pharmacist/dashboard/forum" : "/dashboard/forum"
+}
+
+type ForumAttachmentInput = {
+  altText?: unknown
+  fileName?: unknown
+  fileUrl?: unknown
+  isInline?: unknown
+}
+
+function textField(value: unknown, fallback: string, maxLength: number) {
+  const text = typeof value === "string" ? value.trim() : ""
+  return (text || fallback).slice(0, maxLength)
+}
+
+function parseForumAttachments(formData: FormData) {
+  const raw = value(formData, "forumAttachments")
+  if (!raw) return []
+
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(raw)
+  } catch {
+    return []
+  }
+
+  if (!Array.isArray(parsed)) return []
+
+  return parsed
+    .slice(0, 8)
+    .map((item): ForumAttachmentInput | null =>
+      item && typeof item === "object" ? (item as ForumAttachmentInput) : null
+    )
+    .filter((item): item is ForumAttachmentInput => {
+      if (!item) return false
+      if (typeof item.fileUrl !== "string") return false
+      return /^https:\/\//i.test(item.fileUrl)
+    })
+    .map((item) => ({
+      altText: textField(item.altText, "Gambar diskusi", 160),
+      fileName: textField(item.fileName, "gambar", 180),
+      fileUrl: String(item.fileUrl).trim(),
+      isInline: false,
+    }))
 }
 
 export async function updateForumThread(formData: FormData) {
@@ -23,12 +67,15 @@ export async function updateForumThread(formData: FormData) {
   const title = value(formData, "title")
   const categoryId = value(formData, "categoryId")
   const bodyMarkdown = value(formData, "bodyMarkdown")
+  const attachments = parseForumAttachments(formData)
 
   if (!threadId) return { ok: false, error: "Diskusi tidak valid." }
   if (!title) return { ok: false, error: "Judul wajib diisi." }
   if (title.length > 140) return { ok: false, error: "Judul maksimal 140 karakter." }
   if (!categoryId) return { ok: false, error: "Kategori wajib dipilih." }
-  if (!bodyMarkdown) return { ok: false, error: "Isi diskusi wajib diisi." }
+  if (!bodyMarkdown && !attachments.length) {
+    return { ok: false, error: "Isi diskusi atau gambar wajib diisi." }
+  }
 
   const thread = (
     await db.$queryRaw<Array<{ id: string; authorId: string; slug: string }>>`
@@ -90,10 +137,46 @@ export async function updateForumThread(formData: FormData) {
         "updatedAt" = NOW()
       WHERE id = ${firstPost.id}
     `
+
+    await tx.$executeRaw`
+      DELETE FROM "ForumPostAttachment"
+      WHERE "postId" = ${firstPost.id}
+    `
+
+    for (const [index, attachment] of attachments.entries()) {
+      await tx.$executeRaw`
+        INSERT INTO "ForumPostAttachment" (
+          id,
+          "postId",
+          "uploadedById",
+          "fileUrl",
+          "fileName",
+          "altText",
+          "isInline",
+          "sortOrder",
+          "createdAt"
+        )
+        VALUES (
+          ${randomUUID()},
+          ${firstPost.id},
+          ${user.id},
+          ${attachment.fileUrl},
+          ${attachment.fileName},
+          ${attachment.altText},
+          ${attachment.isInline},
+          ${index},
+          NOW()
+        )
+      `
+    }
   })
 
   revalidatePath("/dashboard/forum")
+  revalidatePath(`/dashboard/forum/${thread.slug}`)
+  revalidatePath(`/dashboard/forum/${slug}`)
   revalidatePath("/pharmacist/dashboard/forum")
+  revalidatePath(`/pharmacist/dashboard/forum/${thread.slug}`)
+  revalidatePath(`/pharmacist/dashboard/forum/${slug}`)
   revalidatePath("/admin/forum")
 
   return { ok: true, slug, href: `${basePath}/${slug}` }
