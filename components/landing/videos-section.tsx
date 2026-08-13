@@ -2,6 +2,7 @@ import Link from "next/link"
 import { ArrowRightIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { LandingHighlightTitle } from "@/components/landing/landing-highlight-title"
 import { VideoCard, type VideoCardData } from "@/components/videos/video-card"
 import {
   getVideos,
@@ -45,11 +46,11 @@ export async function VideosSection() {
   const videos = videoCards(result.videos)
 
   return (
-    <section className="bg-secondary px-6 pt-28 pb-16 md:pt-44 md:pb-20 lg:pt-20">
+    <section className="bg-secondary bg-[linear-gradient(to_right,color-mix(in_oklch,var(--border)_30%,transparent)_1px,transparent_1px),linear-gradient(to_bottom,color-mix(in_oklch,var(--border)_30%,transparent)_1px,transparent_1px)] bg-[size:32px_32px] px-6 pt-28 pb-16 md:pt-44 md:pb-20 lg:pt-20">
       <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 md:gap-5">
-        <h2 className="max-w-3xl self-start text-left text-2xl font-semibold tracking-tight text-foreground md:text-5xl">
+        <LandingHighlightTitle className="self-start">
           Video Edukasi
-        </h2>
+        </LandingHighlightTitle>
 
         <div className="grid w-full max-w-4xl gap-5 md:self-start">
           {videos.map((video) => (

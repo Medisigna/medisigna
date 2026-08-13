@@ -4,6 +4,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
+import { LandingHighlightTitle } from "@/components/landing/landing-highlight-title"
 
 const faqs = [
   {
@@ -24,30 +25,34 @@ const faqs = [
 
 export function FaqSection() {
   return (
-    <section className="mx-auto flex max-w-6xl flex-col gap-6 px-6 py-12">
-      <div className="flex flex-col gap-3">
-        <p className="text-sm font-medium text-muted-foreground">FAQ</p>
-        <h2 className="text-3xl font-semibold tracking-tight">
-          Pertanyaan singkat.
-        </h2>
+    <section className="bg-secondary bg-[linear-gradient(to_right,color-mix(in_oklch,var(--border)_30%,transparent)_1px,transparent_1px),linear-gradient(to_bottom,color-mix(in_oklch,var(--border)_30%,transparent)_1px,transparent_1px)] bg-[size:32px_32px] px-6 py-12">
+      <div className="mx-auto flex max-w-6xl flex-col gap-6">
+        <div className="flex flex-col gap-3">
+          <LandingHighlightTitle as="p" className="text-sm md:text-sm">
+            FAQ
+          </LandingHighlightTitle>
+          <h2 className="text-3xl font-semibold tracking-tight">
+            Pertanyaan singkat.
+          </h2>
+        </div>
+        <Accordion
+          type="single"
+          collapsible
+          defaultValue={faqs[0]?.question}
+          className=""
+        >
+          {faqs.map((faq) => (
+            <AccordionItem key={faq.question} value={faq.question}>
+              <AccordionTrigger className="text-base font-semibold hover:no-underline">
+                {faq.question}
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground">
+                {faq.answer}
+              </AccordionContent>
+            </AccordionItem>
+          ))}
+        </Accordion>
       </div>
-      <Accordion
-        type="single"
-        collapsible
-        defaultValue={faqs[0]?.question}
-        className=""
-      >
-        {faqs.map((faq) => (
-          <AccordionItem key={faq.question} value={faq.question}>
-            <AccordionTrigger className="text-base font-semibold hover:no-underline">
-              {faq.question}
-            </AccordionTrigger>
-            <AccordionContent className="text-muted-foreground">
-              {faq.answer}
-            </AccordionContent>
-          </AccordionItem>
-        ))}
-      </Accordion>
     </section>
   )
 }
