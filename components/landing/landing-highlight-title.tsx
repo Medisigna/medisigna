@@ -23,7 +23,7 @@ export function LandingHighlightTitle({
       <span className="relative z-10">{children}</span>
       <span
         aria-hidden="true"
-        className="absolute inset-x-0 bottom-1 z-0 h-[0.78em] origin-left -rotate-1 rounded-xs bg-primary/50 md:bottom-2"
+        className="absolute -left-1 -right-2 bottom-1 z-0 h-[0.70em] origin-left -rotate-1 rounded-xs bg-[#0878ea]/30 md:-left-3 md:-right-4 md:bottom-2"
       />
     </Component>
   )
