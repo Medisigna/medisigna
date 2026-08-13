@@ -218,11 +218,14 @@ export function DrugForm({
 
         <div className="flex flex-col gap-4">
           <ol
-            className="grid gap-3 md:grid-cols-[repeat(var(--step-count),minmax(0,1fr))]"
+            className="flex gap-3 overflow-x-auto overflow-y-hidden pb-1 md:grid md:grid-cols-[repeat(var(--step-count),minmax(0,1fr))] md:overflow-visible md:pb-0"
             style={{ "--step-count": steps.length } as CSSProperties}
           >
             {steps.map((step, index) => (
-              <li key={step.id} className="relative flex justify-center">
+              <li
+                key={step.id}
+                className="relative flex min-w-24 shrink-0 justify-center md:min-w-0"
+              >
                 {index < steps.length - 1 ? (
                   <span className="absolute top-4 left-1/2 hidden h-px w-full bg-border md:block" />
                 ) : null}

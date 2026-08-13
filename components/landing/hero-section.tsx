@@ -189,7 +189,7 @@ export function HeroSection() {
 
       <ServiceMenu
         className="relative z-20 mx-auto -mt-16 -mb-32 grid max-w-5xl grid-cols-4 gap-2 rounded-xl bg-secondary p-2 text-card-foreground sm:-mt-[4.5rem] sm:-mb-36 sm:gap-3 sm:p-3 md:grid-cols-4 lg:hidden"
-        itemClassName="h-20 min-h-0 rounded-[1.25rem] bg-card gap-1 shadow-none ring-0 hover:bg-card/80 sm:h-20 sm:min-h-0 md:h-20 md:min-h-0 md:gap-1"
+        itemClassName="h-20 min-h-0 rounded-[1.25rem] bg-secondary gap-1 shadow-none ring-0 hover:bg-secondary/80 sm:h-20 sm:min-h-0 md:h-20 md:min-h-0 md:gap-1"
         iconWrapClassName="size-10 sm:size-10 md:size-10"
         iconInnerClassName="size-full"
         iconClassName="size-7 sm:size-7 md:size-7"

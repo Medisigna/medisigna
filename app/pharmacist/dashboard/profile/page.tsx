@@ -1,3 +1,6 @@
+import { LogOutIcon } from "lucide-react"
+
+import { logout } from "@/app/actions/auth/logout"
 import { savePharmacistProfile } from "@/app/actions/pharmacist/save-profile"
 import { AppMessage } from "@/components/app-message"
 import { ProfilePhotoField } from "@/components/pharmacists/profile-photo-field"
@@ -24,7 +27,7 @@ export default async function PharmacistProfilePage({ searchParams }: PageProps)
 
   return (
     <main className="mx-auto flex max-w-3xl flex-col gap-6 py-4 md:py-6">
-      <header>
+      <header className="flex items-start justify-between gap-4">
         <div>
           <p className="text-sm text-muted-foreground">Dashboard Apoteker</p>
           <h1 className="text-2xl font-semibold">{user.name}</h1>
@@ -32,6 +35,12 @@ export default async function PharmacistProfilePage({ searchParams }: PageProps)
             {verificationLabels[profile?.verificationStatus ?? "PENDING"]}
           </p>
         </div>
+        <form action={logout}>
+          <Button type="submit" variant="outline" className="rounded-xl">
+            <LogOutIcon data-icon="inline-start" />
+            Keluar
+          </Button>
+        </form>
       </header>
 
       <form action={savePharmacistProfile} className="flex flex-col gap-5 rounded-[1.75rem] bg-card p-5">

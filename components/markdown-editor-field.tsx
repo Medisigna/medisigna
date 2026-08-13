@@ -1,16 +1,80 @@
 "use client"
 
-import dynamic from "next/dynamic"
-import { ImageIcon } from "lucide-react"
-import { useEffect, useId, useMemo, useRef, useState } from "react"
+import { useEffect, useId, useRef, useState } from "react"
+import Image from "@tiptap/extension-image"
+import Link from "@tiptap/extension-link"
+import Placeholder from "@tiptap/extension-placeholder"
+import { Markdown } from "@tiptap/markdown"
+import { EditorContent, useEditor, type Editor } from "@tiptap/react"
+import StarterKit from "@tiptap/starter-kit"
+import {
+  BoldIcon,
+  Heading2Icon,
+  ImageIcon,
+  ItalicIcon,
+  LinkIcon,
+  ListIcon,
+  ListOrderedIcon,
+  QuoteIcon,
+  StrikethroughIcon,
+} from "lucide-react"
 import toast from "react-hot-toast"
-import { commands, type ICommand, type TextAreaTextApi } from "@uiw/react-md-editor"
 
-const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false })
+import { Button } from "@/components/ui/button"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
-type PendingImageInsert = {
-  api: TextAreaTextApi
-  selectedText?: string
+type MarkdownEditor = Editor & {
+  getMarkdown: () => string
+}
+
+function editorMarkdown(editor: Editor) {
+  return ((editor as MarkdownEditor).getMarkdown?.() ?? "").trim()
+}
+
+function normalizeUrl(value: string) {
+  const trimmed = value.trim()
+  if (!trimmed) return ""
+  if (/^(https?:\/\/|mailto:|tel:|\/)/i.test(trimmed)) return trimmed
+  return `https://${trimmed}`
+}
+
+function ToolbarButton({
+  children,
+  disabled,
+  isActive,
+  label,
+  onClick,
+}: {
+  children: React.ReactNode
+  disabled?: boolean
+  isActive?: boolean
+  label: string
+  onClick: () => void
+}) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          type="button"
+          variant={isActive ? "secondary" : "ghost"}
+          size="icon-sm"
+          aria-label={label}
+          aria-pressed={isActive}
+          disabled={disabled}
+          className={isActive ? "shadow-xs ring-1 ring-border" : undefined}
+          onClick={onClick}
+        >
+          {children}
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>{label}</TooltipContent>
+    </Tooltip>
+  )
 }
 
 export function MarkdownEditorField({
@@ -29,9 +93,58 @@ export function MarkdownEditorField({
   const id = useId()
   const inputRef = useRef<HTMLInputElement>(null)
   const imageInputRef = useRef<HTMLInputElement>(null)
-  const pendingImageInsertRef = useRef<PendingImageInsert | null>(null)
   const [value, setValue] = useState(defaultValue ?? "")
   const [isUploadingImage, setIsUploadingImage] = useState(false)
+  const [, setEditorStateVersion] = useState(0)
+
+  const editor = useEditor({
+    extensions: [
+      StarterKit.configure({
+        heading: {
+          levels: [2, 3],
+        },
+      }),
+      Link.configure({
+        autolink: true,
+        defaultProtocol: "https",
+        enableClickSelection: true,
+        linkOnPaste: true,
+        markdownLinks: true,
+        openOnClick: false,
+        HTMLAttributes: {
+          rel: "noopener noreferrer nofollow",
+          target: "_blank",
+        },
+      }),
+      Image.configure({
+        allowBase64: false,
+        inline: false,
+      }),
+      Placeholder.configure({
+        placeholder: `Tulis ${label.toLowerCase()}...`,
+      }),
+      Markdown,
+    ],
+    content: defaultValue ?? "",
+    contentType: "markdown",
+    editorProps: {
+      attributes: {
+        "aria-labelledby": id,
+        "aria-multiline": "true",
+        "aria-required": required ? "true" : "false",
+        class:
+          "forum-rich-editor min-h-40 px-3 py-2 text-sm leading-6 outline-none",
+        role: "textbox",
+        style: `min-height: ${height}px;`,
+      },
+    },
+    immediatelyRender: false,
+    onSelectionUpdate: () => setEditorStateVersion((version) => version + 1),
+    onTransaction: () => setEditorStateVersion((version) => version + 1),
+    onUpdate: ({ editor: nextEditor }) => {
+      setValue(editorMarkdown(nextEditor))
+    },
+  })
 
   useEffect(() => {
     const input = inputRef.current
@@ -41,36 +154,45 @@ export function MarkdownEditorField({
     input.dispatchEvent(new Event("change", { bubbles: true }))
   }, [value])
 
-  const editorCommands = useMemo<ICommand[]>(() => {
-    const uploadImageCommand: ICommand = {
-      ...commands.image,
-      name: "upload-image",
-      keyCommand: "upload-image",
-      icon: <ImageIcon className="markdown-editor-upload-icon" aria-hidden="true" />,
-      buttonProps: {
-        "aria-label": isUploadingImage ? "Mengupload gambar" : "Upload gambar",
-        title: isUploadingImage ? "Mengupload gambar" : "Upload gambar",
-        disabled: isUploadingImage,
-      },
-      execute: (state, api) => {
-        pendingImageInsertRef.current = {
-          api,
-          selectedText: state.selectedText,
-        }
-        imageInputRef.current?.click()
-      },
+  function runCommand(command: (editor: Editor) => void) {
+    if (!editor) return
+    command(editor)
+    setValue(editorMarkdown(editor))
+    setEditorStateVersion((version) => version + 1)
+  }
+
+  function setLink() {
+    if (!editor) return
+
+    const previousUrl = editor.getAttributes("link").href as string | undefined
+    const inputUrl = window.prompt("Masukkan link", previousUrl ?? "")
+    if (inputUrl === null) return
+
+    const href = normalizeUrl(inputUrl)
+    if (!href) {
+      runCommand((currentEditor) =>
+        currentEditor.chain().focus().extendMarkRange("link").unsetLink().run()
+      )
+      return
     }
 
-    return commands.getCommands().map((command) =>
-      command.keyCommand === "image" ? uploadImageCommand : command
+    runCommand((currentEditor) =>
+      currentEditor
+        .chain()
+        .focus()
+        .extendMarkRange("link")
+        .setLink({ href })
+        .run()
     )
-  }, [isUploadingImage])
+  }
 
   async function uploadMarkdownImage(file?: File) {
-    const pending = pendingImageInsertRef.current
-    pendingImageInsertRef.current = null
+    if (!file || !editor) return
 
-    if (!file || !pending) return
+    if (!file.type.startsWith("image/")) {
+      toast.error("File harus berupa gambar.")
+      return
+    }
 
     setIsUploadingImage(true)
 
@@ -91,21 +213,30 @@ export function MarkdownEditorField({
         throw new Error(result.error || "Upload gambar gagal.")
       }
 
-      const alt = pending.selectedText?.trim() || file.name.replace(/\.[^/.]+$/, "") || "Gambar"
-      const nextState = pending.api.replaceSelection(`![${alt}](${result.secureUrl})`)
-      setValue(nextState.text)
+      const alt = file.name.replace(/\.[^/.]+$/, "") || "Gambar"
+      runCommand((currentEditor) =>
+        currentEditor
+          .chain()
+          .focus()
+          .setImage({ src: result.secureUrl ?? "", alt })
+          .run()
+      )
       toast.success("Gambar ditambahkan.")
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Upload gambar gagal.")
+      toast.error(
+        error instanceof Error ? error.message : "Upload gambar gagal."
+      )
     } finally {
       setIsUploadingImage(false)
       if (imageInputRef.current) imageInputRef.current.value = ""
     }
   }
 
+  const canUseToolbar = Boolean(editor)
+
   return (
     <div className="flex flex-col gap-2 text-sm font-medium">
-      <label htmlFor={id}>
+      <label id={id}>
         {label}
         {required ? <span className="text-destructive"> *</span> : null}
       </label>
@@ -117,16 +248,116 @@ export function MarkdownEditorField({
         className="sr-only"
         onChange={(event) => uploadMarkdownImage(event.target.files?.[0])}
       />
-      <div data-color-mode="light">
-        <MDEditor
-          textareaProps={{ id, "aria-required": required }}
-          value={value}
-          onChange={(nextValue) => setValue(nextValue ?? "")}
-          height={height}
-          preview="live"
-          commands={editorCommands}
-        />
-      </div>
+      <TooltipProvider>
+        <div className="overflow-hidden rounded-md border bg-background">
+          <div className="flex flex-wrap items-center gap-1 border-b bg-muted/30 p-1">
+            <ToolbarButton
+              label="Heading"
+              disabled={!canUseToolbar}
+              isActive={editor?.isActive("heading", { level: 2 })}
+              onClick={() =>
+                runCommand((currentEditor) =>
+                  currentEditor
+                    .chain()
+                    .focus()
+                    .toggleHeading({ level: 2 })
+                    .run()
+                )
+              }
+            >
+              <Heading2Icon data-icon="inline-start" />
+            </ToolbarButton>
+            <ToolbarButton
+              label="Tebal"
+              disabled={!canUseToolbar}
+              isActive={editor?.isActive("bold")}
+              onClick={() =>
+                runCommand((currentEditor) =>
+                  currentEditor.chain().focus().toggleBold().run()
+                )
+              }
+            >
+              <BoldIcon data-icon="inline-start" />
+            </ToolbarButton>
+            <ToolbarButton
+              label="Miring"
+              disabled={!canUseToolbar}
+              isActive={editor?.isActive("italic")}
+              onClick={() =>
+                runCommand((currentEditor) =>
+                  currentEditor.chain().focus().toggleItalic().run()
+                )
+              }
+            >
+              <ItalicIcon data-icon="inline-start" />
+            </ToolbarButton>
+            <ToolbarButton
+              label="Coret"
+              disabled={!canUseToolbar}
+              isActive={editor?.isActive("strike")}
+              onClick={() =>
+                runCommand((currentEditor) =>
+                  currentEditor.chain().focus().toggleStrike().run()
+                )
+              }
+            >
+              <StrikethroughIcon data-icon="inline-start" />
+            </ToolbarButton>
+            <ToolbarButton
+              label="Kutipan"
+              disabled={!canUseToolbar}
+              isActive={editor?.isActive("blockquote")}
+              onClick={() =>
+                runCommand((currentEditor) =>
+                  currentEditor.chain().focus().toggleBlockquote().run()
+                )
+              }
+            >
+              <QuoteIcon data-icon="inline-start" />
+            </ToolbarButton>
+            <ToolbarButton
+              label="Daftar poin"
+              disabled={!canUseToolbar}
+              isActive={editor?.isActive("bulletList")}
+              onClick={() =>
+                runCommand((currentEditor) =>
+                  currentEditor.chain().focus().toggleBulletList().run()
+                )
+              }
+            >
+              <ListIcon data-icon="inline-start" />
+            </ToolbarButton>
+            <ToolbarButton
+              label="Daftar angka"
+              disabled={!canUseToolbar}
+              isActive={editor?.isActive("orderedList")}
+              onClick={() =>
+                runCommand((currentEditor) =>
+                  currentEditor.chain().focus().toggleOrderedList().run()
+                )
+              }
+            >
+              <ListOrderedIcon data-icon="inline-start" />
+            </ToolbarButton>
+            <ToolbarButton
+              label="Link"
+              disabled={!canUseToolbar}
+              isActive={editor?.isActive("link")}
+              onClick={setLink}
+            >
+              <LinkIcon data-icon="inline-start" />
+            </ToolbarButton>
+            <ToolbarButton
+              label={isUploadingImage ? "Mengupload gambar" : "Upload gambar"}
+              disabled={!canUseToolbar || isUploadingImage}
+              onClick={() => imageInputRef.current?.click()}
+            >
+              <ImageIcon data-icon="inline-start" />
+            </ToolbarButton>
+          </div>
+          <EditorContent editor={editor} />
+        </div>
+      </TooltipProvider>
     </div>
   )
 }

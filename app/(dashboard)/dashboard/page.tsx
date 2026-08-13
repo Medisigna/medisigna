@@ -53,19 +53,16 @@ const quickMenuItems = [
     iconSrc: "/menu-icons/Forum.png",
   },
   {
+    href: "/dashboard/coming-soon",
     label: "Beli Obat",
     iconSrc: "/menu-icons/Shop.png",
     comingSoon: true,
   },
   {
-    label: "AI Apoteker",
+    href: "/dashboard/coming-soon",
+    label: "AI Kesehatan",
     iconSrc: "/menu-icons/AI.png",
     comingSoon: true,
-  },
-  {
-    label: "Lainnya",
-    iconSrc: "/menu-icons/etc.png",
-    href: "/dashboard/profile",
   },
 ]
 
@@ -164,7 +161,7 @@ function QuickMenu() {
         )
 
         const className =
-          "group flex h-20 min-w-0 flex-col items-center justify-center gap-1 rounded-[1.25rem] bg-card text-center shadow-none ring-0 transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+          "group flex h-20 min-w-0 flex-col items-center justify-center gap-1 rounded-[1.25rem] bg-secondary text-center shadow-none ring-0 transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
 
         if (!item.href) {
           return (
@@ -180,9 +177,9 @@ function QuickMenu() {
 
         return (
           <Link
-            key={item.href}
+            key={`${item.label}-${item.href}`}
             href={item.href}
-            className={`${className} hover:bg-card/80`}
+            className={`${className} hover:bg-secondary/80`}
           >
             {content}
           </Link>

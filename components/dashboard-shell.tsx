@@ -4,11 +4,16 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useCallback, useEffect, useRef, useState } from "react"
 import type { LucideIcon } from "lucide-react"
-import { ChevronDownIcon, LogOutIcon, MenuIcon, XIcon } from "lucide-react"
+import {
+  BellIcon,
+  ChevronDownIcon,
+  LogOutIcon,
+  MenuIcon,
+  XIcon,
+} from "lucide-react"
 
 import { logout } from "@/app/actions/auth/logout"
 import { BrandLogo } from "@/components/brand-logo"
-import { ThemeToggle } from "@/components/theme-toggle"
 import { Button } from "@/components/ui/button"
 import {
   Drawer,
@@ -39,7 +44,7 @@ type DashboardShellProps = {
   subtitle: string
   initialUnreadCount?: number
   chatHref?: string
-  profileHref?: string
+  mobileNavItems?: DashboardNavItem[]
   mobileNavigation?: "drawer" | "bottom"
 }
 
@@ -310,7 +315,7 @@ export function DashboardShell({
   subtitle,
   initialUnreadCount = 0,
   chatHref,
-  profileHref,
+  mobileNavItems: configuredMobileNavItems,
   mobileNavigation = "drawer",
 }: DashboardShellProps) {
   const pathname = usePathname()
@@ -323,7 +328,8 @@ export function DashboardShell({
   const lastScrollYRef = useRef(0)
   const scrollFrameRef = useRef<number | null>(null)
   const initials = getUserInitials(user.name)
-  const mobileNavItems = navItems.filter((item) => !item.hideOnMobileNav)
+  const mobileNavItems =
+    configuredMobileNavItems ?? navItems.filter((item) => !item.hideOnMobileNav)
   const shouldHideMobileNav =
     mobileNavigation === "bottom" && !isChatRoom && mobileNavHidden
 
@@ -534,24 +540,16 @@ export function DashboardShell({
               </div>
 
               <div className="flex shrink-0 items-center gap-2">
-                <ThemeToggle />
-                <Link
-                  href={profileHref ?? "#"}
-                  aria-label="Buka profil"
-                  className="flex min-w-0 items-center gap-2 rounded-full transition-colors hover:bg-muted/70"
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon-lg"
+                  className="rounded-full"
+                  aria-label="Notifikasi"
+                  title="Notifikasi"
                 >
-                  <span className="flex size-10 items-center justify-center rounded-full bg-secondary text-sm font-semibold">
-                    {initials}
-                  </span>
-                  <span className="hidden min-w-0 text-right text-xs md:block">
-                    <span className="block truncate font-medium">
-                      {user.name}
-                    </span>
-                    <span className="block truncate text-muted-foreground">
-                      {user.email}
-                    </span>
-                  </span>
-                </Link>
+                  <BellIcon />
+                </Button>
               </div>
             </div>
           </header>

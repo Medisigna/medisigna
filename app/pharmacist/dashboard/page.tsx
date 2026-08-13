@@ -23,12 +23,12 @@ const quickMenuItems: {
 }[] = [
   {
     href: "/pharmacist/dashboard/chat",
-    label: "Chat Pasien",
+    label: "Chat",
     iconSrc: "/menu-icons/consult.png",
   },
   {
     href: "/pharmacist/dashboard/forum",
-    label: "Forum Diskusi",
+    label: "Forum",
     iconSrc: "/menu-icons/Forum.png",
   },
   {
@@ -37,26 +37,18 @@ const quickMenuItems: {
     iconSrc: "/menu-icons/medicines.png",
   },
   {
-    href: "/pharmacist/dashboard/tulis-obat",
-    label: "Tulis Obat",
-    iconSrc: "/menu-icons/medicines.png",
-  },
-  {
-    href: "/pharmacist/dashboard/tulis-artikel",
-    label: "Tulis Artikel",
+    href: "/pharmacist/dashboard/konten",
+    label: "Buat Konten",
     iconSrc: "/menu-icons/article.png",
   },
   {
-    href: "/pharmacist/dashboard/tulis-video",
-    label: "Buat Video",
-    iconSrc: "/menu-icons/education.png",
-  },
-  {
+    href: "/pharmacist/dashboard/coming-soon",
     label: "Beli Obat",
     iconSrc: "/menu-icons/Shop.png",
     comingSoon: true,
   },
   {
+    href: "/pharmacist/dashboard/coming-soon",
     label: "AI Apoteker",
     iconSrc: "/menu-icons/AI.png",
     comingSoon: true,
@@ -154,7 +146,7 @@ function QuickMenu() {
           </>
         )
         const className =
-          "group flex h-20 min-w-0 flex-col items-center justify-center gap-1 rounded-[1.25rem] bg-card text-center shadow-none ring-0 transition-colors hover:bg-card/80 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+          "group flex h-20 min-w-0 flex-col items-center justify-center gap-1 rounded-[1.25rem] bg-secondary text-center shadow-none ring-0 transition-colors hover:bg-secondary/80 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
 
         if (!item.href) {
           return (
@@ -169,7 +161,11 @@ function QuickMenu() {
         }
 
         return (
-          <Link key={item.href} href={item.href} className={className}>
+          <Link
+            key={`${item.label}-${item.href}`}
+            href={item.href}
+            className={className}
+          >
             {content}
           </Link>
         )
@@ -209,7 +205,7 @@ export default async function PharmacistDashboardPage() {
               title="Artikel kesehatan terbaru"
               action={
                 <Button asChild variant="outline" size="xs">
-                  <Link href="/artikel">
+                  <Link href="/pharmacist/dashboard/artikel">
                     Lihat Semua
                     <ArrowRightIcon data-icon="inline-end" />
                   </Link>
@@ -221,7 +217,10 @@ export default async function PharmacistDashboardPage() {
                 {articles.articles.map((article) => (
                   <ArticleCard
                     key={article.id}
-                    article={articleListCard(article)}
+                    article={articleListCard(
+                      article,
+                      "/pharmacist/dashboard/artikel"
+                    )}
                     className={softCardClass}
                   />
                 ))}
@@ -233,7 +232,9 @@ export default async function PharmacistDashboardPage() {
                 description="Artikel kesehatan terbit akan muncul di sini."
                 action={
                   <Button asChild variant="outline" size="sm">
-                    <Link href="/artikel">Cek Artikel</Link>
+                    <Link href="/pharmacist/dashboard/artikel">
+                      Cek Artikel
+                    </Link>
                   </Button>
                 }
               />
@@ -245,7 +246,7 @@ export default async function PharmacistDashboardPage() {
               title="Video edukasi populer"
               action={
                 <Button asChild variant="outline" size="xs">
-                  <Link href="/video">
+                  <Link href="/pharmacist/dashboard/video">
                     Lihat Semua
                     <ArrowRightIcon data-icon="inline-end" />
                   </Link>
@@ -257,7 +258,7 @@ export default async function PharmacistDashboardPage() {
                 {videos.videos.map((video) => (
                   <VideoCard
                     key={video.id}
-                    video={videoListCard(video)}
+                    video={videoListCard(video, "/pharmacist/dashboard/video")}
                     className={softCardClass}
                   />
                 ))}
@@ -269,7 +270,7 @@ export default async function PharmacistDashboardPage() {
                 description="Video edukasi terbit akan muncul di sini."
                 action={
                   <Button asChild variant="outline" size="sm">
-                    <Link href="/video">Cek Video</Link>
+                    <Link href="/pharmacist/dashboard/video">Cek Video</Link>
                   </Button>
                 }
               />

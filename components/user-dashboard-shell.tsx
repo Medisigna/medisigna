@@ -86,6 +86,54 @@ const patientNavItems: DashboardNavItem[] = [
   },
 ]
 
+const patientMobileNavItems: DashboardNavItem[] = [
+  {
+    href: "/dashboard",
+    label: "Beranda",
+    description: "Ringkasan konseling obat",
+    icon: HomeIcon,
+    iconSrc: "/menu-icons/home.png",
+    exact: true,
+  },
+  {
+    href: "/dashboard/artikel",
+    label: "Artikel",
+    description: "Bacaan kesehatan",
+    icon: NewspaperIcon,
+    iconSrc: "/menu-icons/article.png",
+    children: [
+      {
+        href: "/dashboard/video",
+        label: "Video Kesehatan",
+        description: "Video edukasi",
+        icon: VideoIcon,
+        iconSrc: "/menu-icons/education.png",
+      },
+    ],
+  },
+  {
+    href: "/dashboard/chat",
+    label: "Konsultasi",
+    description: "Percakapan aktif",
+    icon: MessageCircleIcon,
+    iconSrc: "/menu-icons/consult.png",
+  },
+  {
+    href: "/dashboard/forum",
+    label: "Forum",
+    description: "Diskusi kesehatan",
+    icon: MessagesSquareIcon,
+    iconSrc: "/menu-icons/Forum.png",
+  },
+  {
+    href: "/dashboard/profile",
+    label: "Profil",
+    description: "Data akun pasien",
+    icon: UserIcon,
+    iconSrc: "/menu-icons/etc.png",
+  },
+]
+
 const pharmacistNavItems: DashboardNavItem[] = [
   {
     href: "/pharmacist/dashboard",
@@ -167,7 +215,7 @@ export function UserDashboardShell(props: UserShellProps) {
       {...props}
       navItems={patientNavItems}
       chatHref="/dashboard/chat"
-      profileHref="/dashboard/profile"
+      mobileNavItems={patientMobileNavItems}
       subtitle="Konseling obat"
       mobileNavigation="bottom"
     />
@@ -180,7 +228,6 @@ export function PharmacistDashboardShell(props: UserShellProps) {
       {...props}
       navItems={pharmacistNavItems}
       chatHref="/pharmacist/dashboard/chat"
-      profileHref="/pharmacist/dashboard/profile"
       subtitle="Konseling pasien"
       mobileNavigation="bottom"
     />
