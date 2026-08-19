@@ -18,6 +18,11 @@ export async function sendNotificationToUser({
   link = "/dashboard/chat",
   type = "CONSULTATION_CHAT",
 }: SendNotificationOptions) {
+  if (!recipientId) {
+    console.warn("[Push Server] Recipient ID kosong (null/undefined). Skip pengiriman notifikasi.")
+    return { ok: false, error: "Recipient ID kosong" }
+  }
+
   try {
     // 1. Create in-app Notification record in Database
     const notification = await db.notification.create({
@@ -38,11 +43,13 @@ export async function sendNotificationToUser({
     })
 
     if (fcmTokens.length === 0) {
+      console.log(`[Push Server] Recipient (${recipientId}) tidak memiliki FCM Token terdaftar di database. Skip pengiriman push.`)
       return { ok: true, notification, pushSentCount: 0 }
     }
 
     const messaging = getAdminMessaging()
     if (!messaging) {
+      console.warn(`[Push Server] Inisialisasi Firebase Admin Messaging gagal/belum lengkap. Skip pengiriman push ke FCM server.`)
       return { ok: true, notification, pushSentCount: 0 }
     }
 
@@ -67,11 +74,14 @@ export async function sendNotificationToUser({
       },
     })
 
+    console.log(`[Push Server] Hasil FCM Push ke ${tokens.length} token: ${response.successCount} berhasil, ${response.failureCount} gagal.`)
+
     // 4. Prune invalid or unregistered tokens
     const tokensToDelete: string[] = []
     response.responses.forEach((resp: SendResponse, idx: number) => {
       if (!resp.success) {
         const error = resp.error
+        console.warn(`[Push Server] Token idx ${idx} gagal: ${error?.code} - ${error?.message}`)
         if (
           error?.code === "messaging/invalid-registration-token" ||
           error?.code === "messaging/registration-token-not-registered"
@@ -90,6 +100,7 @@ export async function sendNotificationToUser({
           token: { in: tokensToDelete },
         },
       })
+      console.log(`[Push Server] Menghapus ${tokensToDelete.length} FCM token yang kadaluarsa/invalid dari database.`)
     }
 
     return {

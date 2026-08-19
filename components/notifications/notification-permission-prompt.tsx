@@ -63,6 +63,7 @@ export function NotificationPermissionPrompt() {
     })
   }, [pathname, registerServiceWorker, saveTokenToServer])
 
+  // FCM Foreground Notification Handler
   useEffect(() => {
     let unsubscribe: (() => void) | undefined
 
@@ -71,7 +72,7 @@ export function NotificationPermissionPrompt() {
 
       toast(
         (t) => (
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-1 p-1">
             <div className="flex items-center justify-between gap-2 font-semibold text-secondary-foreground text-sm">
               <span>{msg.title || "Notifikasi Baru"}</span>
             </div>
@@ -109,6 +110,59 @@ export function NotificationPermissionPrompt() {
       if (unsubscribe) unsubscribe()
     }
   }, [])
+
+  // SSE Real-time Foreground Event Listener Fallback
+  useEffect(() => {
+    if (typeof window === "undefined") return
+
+    const eventSource = new EventSource("/api/consultation/events")
+
+    eventSource.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data)
+        if (data.type === "refresh" && data.sessionId) {
+          // Only show toast if user is not currently looking at the active chat room
+          if (!pathname.includes(data.sessionId)) {
+            toast(
+              (t) => (
+                <div className="flex flex-col gap-1 p-1">
+                  <span className="font-semibold text-sm">💬 Pesan Chat Baru</span>
+                  <p className="text-xs text-muted-foreground">Ada aktivitas atau balasan pesan baru di sesi konseling Anda.</p>
+                  <div className="mt-1 flex justify-end">
+                    <Link
+                      href={`/dashboard/chat/${data.sessionId}`}
+                      onClick={() => toast.dismiss(t.id)}
+                      className="rounded-lg bg-primary px-2.5 py-1 text-xs font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+                    >
+                      Buka Chat
+                    </Link>
+                  </div>
+                </div>
+              ),
+              {
+                id: `chat-event-${data.sessionId}`,
+                duration: 5000,
+                position: "top-right",
+                style: {
+                  borderRadius: "1rem",
+                  background: "var(--card)",
+                  color: "var(--card-foreground)",
+                  boxShadow: "0 10px 25px -5px rgba(0,0,0,0.1)",
+                  border: "1px solid var(--border)",
+                },
+              }
+            )
+          }
+        }
+      } catch (err) {
+        // silent parse error
+      }
+    }
+
+    return () => {
+      eventSource.close()
+    }
+  }, [pathname])
 
   return null
 }
