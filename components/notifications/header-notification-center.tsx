@@ -69,10 +69,18 @@ export function HeaderNotificationCenter() {
   useEffect(() => {
     fetchNotifications()
 
-    // Poll every 30 seconds as fallback
-    const interval = setInterval(fetchNotifications, 30000)
-    return () => clearInterval(interval)
+    const events = new EventSource("/api/consultation/events")
+    events.onmessage = () => {
+      fetchNotifications()
+    }
+
+    const interval = setInterval(fetchNotifications, 15000)
+    return () => {
+      events.close()
+      clearInterval(interval)
+    }
   }, [fetchNotifications])
+
 
   const markAllAsRead = async () => {
     try {
