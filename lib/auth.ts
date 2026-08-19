@@ -6,7 +6,10 @@ import { db } from "@/lib/db"
 import { env } from "@/lib/env"
 
 function getTrustedOrigins() {
-  const origins = new Set<string>()
+  const origins = new Set<string>([
+    "https://www.medisigna.id",
+    "https://medisigna.id",
+  ])
   if (env.NEXT_PUBLIC_APP_URL) {
     origins.add(env.NEXT_PUBLIC_APP_URL)
     if (env.NEXT_PUBLIC_APP_URL.includes("://www.")) {
@@ -25,6 +28,7 @@ function getTrustedOrigins() {
   }
   return Array.from(origins)
 }
+
 
 export const auth = betterAuth({
   database: prismaAdapter(db, {
