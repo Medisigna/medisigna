@@ -128,6 +128,8 @@ model User {
   forumReports        ForumReport[]         @relation("ForumReportReporter")
   resolvedForumReports ForumReport[]        @relation("ForumReportResolver")
   forumSubscriptions  ForumSubscription[]
+  fcmTokens           FcmToken[]
+  notifications       Notification[]
 
   @@map("user")
 }
@@ -536,3 +538,32 @@ model ForumSubscription {
   @@index([userId])
   @@index([threadId])
 }
+
+model FcmToken {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token      String   @unique
+  deviceType String?  @default("web")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  body      String
+  link      String?
+  isRead    Boolean  @default(false)
+  type      String   @default("CONSULTATION_CHAT")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([isRead])
+}
+

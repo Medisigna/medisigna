@@ -25,6 +25,9 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer"
 import { cn } from "@/lib/utils"
+import { HeaderNotificationCenter } from "@/components/notifications/header-notification-center"
+import { NotificationPermissionPrompt } from "@/components/notifications/notification-permission-prompt"
+
 
 export type DashboardNavItem = {
   href: string
@@ -540,17 +543,9 @@ export function DashboardShell({
               </div>
 
               <div className="flex shrink-0 items-center gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon-lg"
-                  className="rounded-full"
-                  aria-label="Notifikasi"
-                  title="Notifikasi"
-                >
-                  <BellIcon />
-                </Button>
+                <HeaderNotificationCenter />
               </div>
+
             </div>
           </header>
 
@@ -561,8 +556,10 @@ export function DashboardShell({
               mobileNavigation === "bottom" && !isChatRoom && "pb-24 lg:pb-0"
             )}
           >
+            <NotificationPermissionPrompt />
             {children}
           </main>
+
         </div>
       </div>
       {mobileNavigation === "bottom" && !isChatRoom ? (

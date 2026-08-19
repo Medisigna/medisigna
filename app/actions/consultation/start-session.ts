@@ -69,6 +69,19 @@ export async function startConsultationSession(pharmacistProfileId: string) {
       sessionId: result.session.id,
       userIds: [result.session.patientId, result.session.pharmacistId],
     })
+
+    try {
+      const { sendNotificationToUser } = await import("@/lib/notifications/send-push")
+      await sendNotificationToUser({
+        recipientId: profile.userId,
+        title: "Konsultasi Baru",
+        body: `Pasien ${user.name} telah memulai sesi konseling baru.`,
+        link: `/pharmacist/dashboard/chat/${result.session.id}`,
+        type: "CONSULTATION_START",
+      })
+    } catch (pushErr) {
+      console.warn("Push notification dispatch failed on start-session:", pushErr)
+    }
   }
   redirect(`/dashboard/chat/${result.session.id}`)
 }

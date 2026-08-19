@@ -95,6 +95,23 @@ export async function sendConsultationMessage(formData: FormData) {
       console.warn("publishConsultationEvent failed:", pubErr)
     }
 
+    const recipientId = session.patientId === user.id ? session.pharmacistId : session.patientId
+    const link = session.patientId === user.id ? `/pharmacist/dashboard/chat/${sessionId}` : `/dashboard/chat/${sessionId}`
+    const previewBody = body || (attachment ? "[Foto]" : "Mengirim pesan baru")
+
+    try {
+      const { sendNotificationToUser } = await import("@/lib/notifications/send-push")
+      await sendNotificationToUser({
+        recipientId,
+        title: `Pesan Baru: ${user.name}`,
+        body: previewBody,
+        link,
+        type: "CONSULTATION_CHAT",
+      })
+    } catch (pushErr) {
+      console.warn("Push notification dispatch failed:", pushErr)
+    }
+
     return { ok: true }
   } catch (error) {
     console.error("Error in sendConsultationMessage:", error)
