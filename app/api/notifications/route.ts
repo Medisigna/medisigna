@@ -3,6 +3,8 @@ import { NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { getCurrentUser } from "@/lib/session"
 
+const excludedHeaderTypes = ["CONSULTATION_CHAT", "CONSULTATION_START"]
+
 export async function GET() {
   const user = await getCurrentUser()
   if (!user || user.status !== "ACTIVE") {
@@ -11,7 +13,10 @@ export async function GET() {
 
   try {
     const notifications = await db.notification.findMany({
-      where: { userId: user.id },
+      where: {
+        userId: user.id,
+        type: { notIn: excludedHeaderTypes },
+      },
       orderBy: { createdAt: "desc" },
       take: 20,
     })
@@ -20,6 +25,7 @@ export async function GET() {
       where: {
         userId: user.id,
         isRead: false,
+        type: { notIn: excludedHeaderTypes },
       },
     })
 
@@ -42,7 +48,11 @@ export async function PATCH(req: Request) {
 
     if (markAll) {
       await db.notification.updateMany({
-        where: { userId: user.id, isRead: false },
+        where: {
+          userId: user.id,
+          isRead: false,
+          type: { notIn: excludedHeaderTypes },
+        },
         data: { isRead: true },
       })
       return NextResponse.json({ ok: true })
