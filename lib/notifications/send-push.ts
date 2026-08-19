@@ -55,26 +55,22 @@ export async function sendNotificationToUser({
 
     const tokens: string[] = fcmTokens.map((t: { id: string; token: string }) => t.token)
 
-    // 3. Send Multicast Push Notification via Firebase Admin
-    const response = await messaging.sendEachForMulticast({
-      tokens,
+    // 3. Send Push Notifications via modern Firebase Admin messaging.sendEach API
+    const messages = tokens.map((token: string) => ({
+      token,
       data: {
         title,
         body,
         link,
       },
       webpush: {
-        notification: {
-          title,
-          body,
-          icon: "/menu-icons/consult.png",
-          badge: "/menu-icons/consult.png",
-        },
         fcmOptions: {
           link,
         },
       },
-    })
+    }))
+
+    const response = await messaging.sendEach(messages)
 
     console.log(`[Push Server] Hasil FCM Push ke ${tokens.length} token: ${response.successCount} berhasil, ${response.failureCount} gagal.`)
 
