@@ -4,6 +4,7 @@ import { login } from "@/app/actions/auth/login"
 import { AppMessage } from "@/components/app-message"
 import { AuthBrandLink } from "@/components/auth-brand-link"
 import { PasswordInput } from "@/components/password-input"
+import { GoogleSignInButton } from "@/components/social-sign-in-button"
 import { SubmitButton } from "@/components/submit-button"
 import {
   Card,
@@ -14,6 +15,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { Separator } from "@/components/ui/separator"
 
 type PageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>
@@ -37,28 +39,37 @@ export default async function LoginPage({ searchParams }: PageProps) {
           <CardHeader className="gap-2 text-center">
             <CardTitle className="text-2xl font-semibold">Masuk</CardTitle>
             <CardDescription>
-              Gunakan email atau nomor WhatsApp.
+              Masuk dengan akun Google atau email Anda.
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-5">
             <AppMessage error={params?.error} />
-            <label className="flex flex-col gap-2 text-sm font-medium">
-              Email atau nomor WhatsApp
+            <GoogleSignInButton label="Masuk dengan Google" callbackUrl={callbackUrl} />
+            <div className="relative flex items-center justify-center">
+              <Separator className="w-full" />
+              <span className="absolute bg-card px-2 text-xs uppercase text-muted-foreground">
+                atau
+              </span>
+            </div>
+            <div className="flex flex-col gap-2 text-sm font-medium">
+              <label htmlFor="identifier">Email atau nomor WhatsApp</label>
               <Input
+                id="identifier"
                 name="identifier"
                 required
                 autoComplete="username"
                 defaultValue={identifier}
               />
-            </label>
-            <label className="flex flex-col gap-2 text-sm font-medium">
-              Password
+            </div>
+            <div className="flex flex-col gap-2 text-sm font-medium">
+              <label htmlFor="password">Password</label>
               <PasswordInput
+                id="password"
                 name="password"
                 required
                 autoComplete="current-password"
               />
-            </label>
+            </div>
           </CardContent>
           <CardFooter className="flex-col items-stretch gap-4">
             <SubmitButton pendingText="Masuk...">Masuk</SubmitButton>

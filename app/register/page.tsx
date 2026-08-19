@@ -4,6 +4,7 @@ import { registerPatient } from "@/app/actions/patient/register"
 import { AppMessage } from "@/components/app-message"
 import { AuthBrandLink } from "@/components/auth-brand-link"
 import { PasswordInput } from "@/components/password-input"
+import { GoogleSignInButton } from "@/components/social-sign-in-button"
 import { SubmitButton } from "@/components/submit-button"
 import {
   Card,
@@ -14,6 +15,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { Separator } from "@/components/ui/separator"
 
 type PageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>
@@ -36,41 +38,50 @@ export default async function RegisterPage({ searchParams }: PageProps) {
               Daftar Akun
             </CardTitle>
             <CardDescription>
-              Akun masyarakat untuk mulai menggunakan Medisigna.
+              Daftar dengan Google atau lengkapi formulir di bawah.
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-5">
             <AppMessage error={params?.error} />
-            <label className="flex flex-col gap-2 text-sm font-medium">
-              Nama lengkap
-              <Input name="name" required autoComplete="name" />
-            </label>
-            <label className="flex flex-col gap-2 text-sm font-medium">
-              Email
-              <Input name="email" type="email" required autoComplete="email" />
-            </label>
-            <label className="flex flex-col gap-2 text-sm font-medium">
-              Nomor WhatsApp
-              <Input name="phone" type="tel" required autoComplete="tel" />
-            </label>
-            <label className="flex flex-col gap-2 text-sm font-medium">
-              Password
+            <GoogleSignInButton label="Daftar dengan Google" callbackUrl={callbackUrl} />
+            <div className="relative flex items-center justify-center">
+              <Separator className="w-full" />
+              <span className="absolute bg-card px-2 text-xs uppercase text-muted-foreground">
+                atau
+              </span>
+            </div>
+            <div className="flex flex-col gap-2 text-sm font-medium">
+              <label htmlFor="name">Nama lengkap</label>
+              <Input id="name" name="name" required autoComplete="name" />
+            </div>
+            <div className="flex flex-col gap-2 text-sm font-medium">
+              <label htmlFor="email">Email</label>
+              <Input id="email" name="email" type="email" required autoComplete="email" />
+            </div>
+            <div className="flex flex-col gap-2 text-sm font-medium">
+              <label htmlFor="phone">Nomor WhatsApp</label>
+              <Input id="phone" name="phone" type="tel" required autoComplete="tel" />
+            </div>
+            <div className="flex flex-col gap-2 text-sm font-medium">
+              <label htmlFor="password">Password</label>
               <PasswordInput
+                id="password"
                 name="password"
                 required
                 minLength={8}
                 autoComplete="new-password"
               />
-            </label>
-            <label className="flex flex-col gap-2 text-sm font-medium">
-              Konfirmasi password
+            </div>
+            <div className="flex flex-col gap-2 text-sm font-medium">
+              <label htmlFor="confirmPassword">Konfirmasi password</label>
               <PasswordInput
+                id="confirmPassword"
                 name="confirmPassword"
                 required
                 minLength={8}
                 autoComplete="new-password"
               />
-            </label>
+            </div>
           </CardContent>
           <CardFooter className="flex-col items-stretch gap-4">
             <SubmitButton pendingText="Mendaftar...">Daftar</SubmitButton>

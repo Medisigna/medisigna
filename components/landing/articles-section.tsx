@@ -59,8 +59,17 @@ export async function ArticlesSection() {
   const articles = articleCards(result.articles)
 
   return (
-    <section className="bg-secondary bg-[linear-gradient(to_right,color-mix(in_oklch,var(--border)_30%,transparent)_1px,transparent_1px),linear-gradient(to_bottom,color-mix(in_oklch,var(--border)_30%,transparent)_1px,transparent_1px)] bg-[size:32px_32px] px-6 pt-12 pb-16 md:pt-16 md:pb-20 lg:pt-20">
-      <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 md:gap-5">
+    <section className="relative overflow-hidden bg-secondary px-6 pt-12 pb-16 md:pt-16 md:pb-20 lg:pt-20">
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 bg-[linear-gradient(to_right,color-mix(in_oklch,var(--border)_30%,transparent)_1px,transparent_1px),linear-gradient(to_bottom,color-mix(in_oklch,var(--border)_30%,transparent)_1px,transparent_1px)] bg-[size:32px_32px]"
+      />
+      <div
+        aria-hidden="true"
+        className="animate-landing-neon-glow absolute -left-32 top-0 h-80 w-[34rem] rounded-[58%_42%_66%_34%/42%_58%_42%_58%] bg-[radial-gradient(ellipse_at_center,rgba(52,211,153,0.16)_0%,rgba(125,211,252,0.1)_44%,transparent_74%)] blur-3xl [animation-delay:0.9s]"
+      />
+
+      <div className="relative mx-auto flex max-w-6xl flex-col items-center gap-4 md:gap-5">
         <LandingHighlightTitle className="self-start">
           Artikel
         </LandingHighlightTitle>
@@ -73,7 +82,7 @@ export async function ArticlesSection() {
 
         <Button
           asChild
-          className="rounded-full border-0 bg-white text-foreground shadow-none hover:bg-white/90"
+          className="rounded-full border-0 bg-white text-foreground shadow-[0_0_24px_-20px_rgba(52,211,153,0.42)] hover:bg-white/90"
         >
           <Link href="/artikel">
             Lihat Semua Artikel

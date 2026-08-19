@@ -46,8 +46,17 @@ export async function VideosSection() {
   const videos = videoCards(result.videos)
 
   return (
-    <section className="bg-secondary bg-[linear-gradient(to_right,color-mix(in_oklch,var(--border)_30%,transparent)_1px,transparent_1px),linear-gradient(to_bottom,color-mix(in_oklch,var(--border)_30%,transparent)_1px,transparent_1px)] bg-[size:32px_32px] px-6 pt-28 pb-16 md:pt-44 md:pb-20 lg:pt-20">
-      <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 md:gap-5">
+    <section className="relative overflow-hidden bg-secondary px-6 pt-28 pb-16 md:pt-44 md:pb-20 lg:pt-20">
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 bg-[linear-gradient(to_right,color-mix(in_oklch,var(--border)_30%,transparent)_1px,transparent_1px),linear-gradient(to_bottom,color-mix(in_oklch,var(--border)_30%,transparent)_1px,transparent_1px)] bg-[size:32px_32px]"
+      />
+      <div
+        aria-hidden="true"
+        className="animate-landing-neon-glow absolute -left-28 top-8 h-72 w-[34rem] rounded-[70%_30%_58%_42%/44%_62%_38%_56%] bg-[radial-gradient(ellipse_at_center,rgba(250,204,21,0.2)_0%,rgba(234,179,8,0.1)_42%,transparent_72%)] blur-3xl"
+      />
+
+      <div className="relative mx-auto flex max-w-6xl flex-col items-center gap-4 md:gap-5">
         <LandingHighlightTitle className="self-start">
           Video Edukasi
         </LandingHighlightTitle>
@@ -60,7 +69,7 @@ export async function VideosSection() {
 
         <Button
           asChild
-          className="rounded-full border-0 bg-white text-foreground shadow-none hover:bg-white/90"
+          className="rounded-full border-0 bg-white text-foreground shadow-[0_0_24px_-20px_rgba(234,179,8,0.48)] hover:bg-white/90"
         >
           <Link href="/video">
             Lihat Semua Video

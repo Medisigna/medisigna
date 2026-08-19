@@ -54,5 +54,33 @@ export const auth = betterAuth({
       },
     },
   },
+  socialProviders: {
+    google: {
+      clientId: env.GOOGLE_CLIENT_ID || "",
+      clientSecret: env.GOOGLE_CLIENT_SECRET || "",
+    },
+  },
+  databaseHooks: {
+    user: {
+      create: {
+        after: async (user) => {
+          if (user.role === "PATIENT" || !user.role) {
+            try {
+              await db.patientProfile.upsert({
+                where: { userId: user.id },
+                create: {
+                  userId: user.id,
+                  phone: user.phone ?? null,
+                },
+                update: {},
+              })
+            } catch (error) {
+              console.error("Failed to auto-create patient profile:", error)
+            }
+          }
+        },
+      },
+    },
+  },
   plugins: [nextCookies()],
 })
