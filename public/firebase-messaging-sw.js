@@ -16,10 +16,16 @@ if (firebaseConfig.projectId) {
   const messaging = firebase.messaging()
 
   messaging.onBackgroundMessage((payload) => {
-    const notificationTitle = payload.notification?.title || payload.data?.title || "Notifikasi Medisigna"
+    // Avoid double notification if webpush notification is already handled automatically by browser
+    if (payload.notification) {
+      return
+    }
+
+    const notificationTitle = payload.data?.title || "Notifikasi Medisigna"
     const notificationOptions = {
-      body: payload.notification?.body || payload.data?.body || "",
+      body: payload.data?.body || "",
       icon: "/menu-icons/consult.png",
+      badge: "/menu-icons/consult.png",
       data: {
         link: payload.data?.link || "/dashboard/chat",
       },

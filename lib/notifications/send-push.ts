@@ -58,16 +58,18 @@ export async function sendNotificationToUser({
     // 3. Send Multicast Push Notification via Firebase Admin
     const response = await messaging.sendEachForMulticast({
       tokens,
-      notification: {
-        title,
-        body,
-      },
       data: {
         title,
         body,
         link,
       },
       webpush: {
+        notification: {
+          title,
+          body,
+          icon: "/menu-icons/consult.png",
+          badge: "/menu-icons/consult.png",
+        },
         fcmOptions: {
           link,
         },
