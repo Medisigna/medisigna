@@ -22,6 +22,10 @@ export default async function PharmacistListPage({ searchParams }: PageProps) {
   const pharmacists = (await db.pharmacistProfile.findMany({
     where: {
       verificationStatus: "VERIFIED",
+      user: {
+        role: "PHARMACIST",
+        status: "ACTIVE",
+      },
       ...(query
         ? {
             OR: [

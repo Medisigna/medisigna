@@ -32,6 +32,10 @@ export default async function PublicPharmacistsPage({
     db.pharmacistProfile.findMany({
       where: {
         verificationStatus: "VERIFIED",
+        user: {
+          role: "PHARMACIST",
+          status: "ACTIVE",
+        },
         ...(query
           ? {
               OR: [

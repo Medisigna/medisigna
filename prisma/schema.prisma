@@ -130,8 +130,28 @@ model User {
   forumSubscriptions  ForumSubscription[]
   fcmTokens           FcmToken[]
   notifications       Notification[]
+  adminAuditActions   AdminAuditLog[]      @relation("AdminAuditActor")
+  adminAuditTargets   AdminAuditLog[]      @relation("AdminAuditTarget")
 
   @@map("user")
+}
+
+model AdminAuditLog {
+  id           String   @id @default(cuid())
+  actorId      String
+  actor        User     @relation("AdminAuditActor", fields: [actorId], references: [id], onDelete: Restrict)
+  targetUserId String
+  targetUser   User     @relation("AdminAuditTarget", fields: [targetUserId], references: [id], onDelete: Restrict)
+  action       String
+  before       Json?
+  after        Json?
+  metadata     Json?
+  createdAt    DateTime @default(now())
+
+  @@index([actorId])
+  @@index([targetUserId])
+  @@index([action])
+  @@index([createdAt])
 }
 
 model Session {
@@ -566,4 +586,3 @@ model Notification {
   @@index([userId])
   @@index([isRead])
 }
-

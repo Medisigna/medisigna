@@ -20,7 +20,14 @@ export default async function PharmacistDetailPage({ params, searchParams }: Pag
   const { id } = await params
   const query = await searchParams
   const profile = await db.pharmacistProfile.findFirst({
-    where: { id, verificationStatus: "VERIFIED" },
+    where: {
+      id,
+      verificationStatus: "VERIFIED",
+      user: {
+        role: "PHARMACIST",
+        status: "ACTIVE",
+      },
+    },
     include: { user: true },
   })
 

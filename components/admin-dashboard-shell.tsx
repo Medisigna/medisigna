@@ -5,6 +5,7 @@ import {
   PillIcon,
   MessagesSquareIcon,
   TagsIcon,
+  UsersIcon,
   UserCheckIcon,
   VideoIcon,
 } from "lucide-react"
@@ -21,6 +22,12 @@ const adminNavItems: DashboardNavItem[] = [
     description: "Review akun apoteker",
     icon: UserCheckIcon,
     exact: true,
+  },
+  {
+    href: "/admin/users",
+    label: "User Management",
+    description: "Kelola akun",
+    icon: UsersIcon,
   },
   {
     href: "/admin/obat",

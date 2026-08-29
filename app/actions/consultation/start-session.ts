@@ -14,7 +14,14 @@ export async function startConsultationSession(pharmacistProfileId: string) {
   const user = await requireRole("PATIENT")
   const path = `/dashboard/pharmacists/${pharmacistProfileId}`
   const profile = await db.pharmacistProfile.findFirst({
-    where: { id: pharmacistProfileId, verificationStatus: "VERIFIED" },
+    where: {
+      id: pharmacistProfileId,
+      verificationStatus: "VERIFIED",
+      user: {
+        role: "PHARMACIST",
+        status: "ACTIVE",
+      },
+    },
     include: { user: true },
   })
 
