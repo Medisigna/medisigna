@@ -440,16 +440,18 @@ export async function resetAdminUserPassword(formData: FormData): Promise<AdminU
 
   try {
     const userId = requireField(formData, "userId", "User")
+    const password = requireField(formData, "password", "Password baru")
+    const confirmPassword = requireField(formData, "confirmPassword", "Konfirmasi password")
     const target = await db.user.findUnique({
       where: { id: userId },
       select: { id: true, name: true, email: true, phone: true, role: true, status: true },
     })
     if (!target) return actionError("User tidak ditemukan.")
-
-    const temporaryPassword = generateTemporaryPassword()
+    if (password.length < 8) return actionError("Password minimal 8 karakter.")
+    if (password !== confirmPassword) return actionError("Konfirmasi password tidak sama.")
 
     await db.$transaction(async (tx: Prisma.TransactionClient) => {
-      await upsertCredentialPassword(tx, userId, temporaryPassword)
+      await upsertCredentialPassword(tx, userId, password)
       await tx.session.deleteMany({ where: { userId } })
       await recordAdminAudit(tx, {
         actorId: actor.id,
@@ -462,7 +464,7 @@ export async function resetAdminUserPassword(formData: FormData): Promise<AdminU
     })
 
     revalidateUserManagement(userId)
-    return actionOk("Password sementara dibuat.", { temporaryPassword })
+    return actionOk("Password user diperbarui.")
   } catch (error) {
     return actionError(error instanceof Error ? error.message : "Password gagal direset.")
   }

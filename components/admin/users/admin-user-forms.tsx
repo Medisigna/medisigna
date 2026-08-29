@@ -3,7 +3,6 @@
 import { ChangeEvent, useEffect, useId, useRef, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import {
-  CopyIcon,
   FileTextIcon,
   ImageIcon,
   KeyRoundIcon,
@@ -24,6 +23,16 @@ import {
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import {
   Attachment,
   AttachmentAction,
   AttachmentActions,
@@ -35,6 +44,7 @@ import {
 } from "@/components/ui/attachment"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { PasswordInput } from "@/components/password-input"
 
 type ActionResult = {
   ok: boolean
@@ -76,7 +86,7 @@ type PharmacistProfileData = {
 } | null
 
 const fieldClassName = "bg-card shadow-none"
-const selectClassName = "h-9 rounded-md border border-input bg-card px-2.5 text-sm shadow-none outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+const selectClassName = "h-9 w-full min-w-0 rounded-md border border-input bg-card px-2.5 text-sm shadow-none outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
 
 function dateValue(value?: Date | string | null) {
   if (!value) return ""
@@ -153,7 +163,7 @@ function AdminAttachmentFileField({
   }
 
   return (
-    <div className="flex flex-col gap-2 text-sm font-medium">
+    <div className="flex min-w-0 flex-col gap-2 text-sm font-medium">
       <span>{label}</span>
       <Input
         ref={inputRef}
@@ -164,7 +174,7 @@ function AdminAttachmentFileField({
         className="sr-only"
         onChange={handleChange}
       />
-      <Attachment state={fileName || hasCurrentFile ? "done" : "idle"} className="w-full">
+      <Attachment state={fileName || hasCurrentFile ? "done" : "idle"} className="w-full min-w-0!">
         <AttachmentMedia variant={mediaIsImage ? "image" : "icon"}>
           {mediaIsImage ? (
             <img src={mediaUrl} alt={`Preview ${label.toLowerCase()}`} />
@@ -252,13 +262,11 @@ export function AdminUserAccountForm({ user }: { user: UserFormData }) {
 
 export function AdminUserSecurityActions({ userId }: { userId: string }) {
   const { isPending, run } = useAdminAction()
-  const [temporaryPassword, setTemporaryPassword] = useState("")
+  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false)
 
-  function resetPassword() {
-    const formData = new FormData()
-    formData.set("userId", userId)
-    run(() => resetAdminUserPassword(formData), (result) => {
-      setTemporaryPassword(result.temporaryPassword ?? "")
+  function changePassword(formData: FormData) {
+    run(() => resetAdminUserPassword(formData), () => {
+      setPasswordDialogOpen(false)
     })
   }
 
@@ -268,11 +276,6 @@ export function AdminUserSecurityActions({ userId }: { userId: string }) {
     run(() => revokeAdminUserSessions(formData))
   }
 
-  async function copyPassword() {
-    await navigator.clipboard.writeText(temporaryPassword)
-    toast.success("Password disalin.")
-  }
-
   return (
     <Card className="shadow-none">
       <CardHeader>
@@ -280,24 +283,43 @@ export function AdminUserSecurityActions({ userId }: { userId: string }) {
         <CardDescription>Password dan sesi login.</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
-        {temporaryPassword ? (
-          <div className="rounded-xl bg-secondary p-3">
-            <p className="text-sm font-medium">Password sementara</p>
-            <div className="mt-2 flex min-w-0 items-center gap-2">
-              <code className="min-w-0 flex-1 truncate rounded-md bg-card px-2.5 py-2 text-sm">
-                {temporaryPassword}
-              </code>
-              <Button type="button" variant="outline" size="icon-sm" aria-label="Salin password" onClick={copyPassword}>
-                <CopyIcon />
-              </Button>
-            </div>
-          </div>
-        ) : null}
         <div className="flex flex-wrap gap-2">
-          <Button type="button" variant="outline" disabled={isPending} onClick={resetPassword}>
-            <KeyRoundIcon data-icon="inline-start" />
-            Reset Password
-          </Button>
+          <Dialog open={passwordDialogOpen} onOpenChange={setPasswordDialogOpen}>
+            <DialogTrigger asChild>
+              <Button type="button" variant="outline" disabled={isPending}>
+                <KeyRoundIcon data-icon="inline-start" />
+                Ubah Password
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Ubah Password</DialogTitle>
+                <DialogDescription>Password lama user akan langsung diganti setelah disimpan.</DialogDescription>
+              </DialogHeader>
+              <form action={changePassword} className="flex flex-col gap-4">
+                <input type="hidden" name="userId" value={userId} />
+                <label className="flex flex-col gap-2 text-sm font-medium">
+                  Password baru
+                  <PasswordInput name="password" required minLength={8} autoComplete="new-password" />
+                </label>
+                <label className="flex flex-col gap-2 text-sm font-medium">
+                  Konfirmasi password
+                  <PasswordInput name="confirmPassword" required minLength={8} autoComplete="new-password" />
+                </label>
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button type="button" variant="outline">
+                      Batal
+                    </Button>
+                  </DialogClose>
+                  <Button type="submit" disabled={isPending}>
+                    <KeyRoundIcon data-icon="inline-start" />
+                    {isPending ? "Menyimpan..." : "Simpan Password"}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
           <Button type="button" variant="outline" disabled={isPending} onClick={revokeSessions}>
             <LogOutIcon data-icon="inline-start" />
             Cabut Sesi
@@ -380,23 +402,23 @@ export function AdminPharmacistProfileForm({
   }
 
   return (
-    <Card className="shadow-none">
+    <Card className="min-w-0 shadow-none">
       <CardHeader>
         <CardTitle>Profil Apoteker</CardTitle>
         <CardDescription>Data STR, praktik, dan verifikasi.</CardDescription>
       </CardHeader>
-      <CardContent>
-        <form action={submit} className="grid gap-4 sm:grid-cols-2">
+      <CardContent className="min-w-0">
+        <form action={submit} className="grid min-w-0 gap-4 sm:grid-cols-2">
           <input type="hidden" name="userId" value={userId} />
-          <label className="flex flex-col gap-2 text-sm font-medium">
+          <label className="flex min-w-0 flex-col gap-2 text-sm font-medium">
             Gelar
             <Input name="title" required defaultValue={profile?.title ?? ""} className={fieldClassName} />
           </label>
-          <label className="flex flex-col gap-2 text-sm font-medium">
+          <label className="flex min-w-0 flex-col gap-2 text-sm font-medium">
             Nomor STR
             <Input name="strNumber" required defaultValue={profile?.strNumber ?? ""} className={fieldClassName} />
           </label>
-          <label className="flex flex-col gap-2 text-sm font-medium">
+          <label className="flex min-w-0 flex-col gap-2 text-sm font-medium">
             Status verifikasi
             <select name="verificationStatus" defaultValue={profile?.verificationStatus ?? "VERIFIED"} className={selectClassName}>
               <option value="VERIFIED">Terverifikasi</option>
@@ -405,7 +427,7 @@ export function AdminPharmacistProfileForm({
               <option value="REJECTED">Ditolak</option>
             </select>
           </label>
-          <label className="flex flex-col gap-2 text-sm font-medium">
+          <label className="flex min-w-0 flex-col gap-2 text-sm font-medium">
             Ketersediaan
             <select name="availabilityStatus" defaultValue={profile?.availabilityStatus ?? "OFFLINE"} className={selectClassName}>
               <option value="ONLINE">Online</option>
@@ -427,27 +449,27 @@ export function AdminPharmacistProfileForm({
             description="PNG, JPG, WebP, atau PDF."
             currentUrl={profile?.strDocumentUrl}
           />
-          <label className="flex flex-col gap-2 text-sm font-medium sm:col-span-2">
+          <label className="flex min-w-0 flex-col gap-2 text-sm font-medium sm:col-span-2">
             Bio
             <Textarea name="bio" required defaultValue={profile?.bio ?? ""} className={fieldClassName} />
           </label>
-          <label className="flex flex-col gap-2 text-sm font-medium sm:col-span-2">
+          <label className="flex min-w-0 flex-col gap-2 text-sm font-medium sm:col-span-2">
             Topik bantuan
             <Input name="topics" required defaultValue={profile?.topics?.join(", ") ?? ""} className={fieldClassName} />
           </label>
-          <label className="flex flex-col gap-2 text-sm font-medium">
+          <label className="flex min-w-0 flex-col gap-2 text-sm font-medium">
             Lokasi praktik
             <Input name="practiceLocation" required defaultValue={profile?.practiceLocation ?? ""} className={fieldClassName} />
           </label>
-          <label className="flex flex-col gap-2 text-sm font-medium">
+          <label className="flex min-w-0 flex-col gap-2 text-sm font-medium">
             Jam layanan
             <Input name="serviceHours" required defaultValue={profile?.serviceHours ?? ""} className={fieldClassName} />
           </label>
-          <label className="flex flex-col gap-2 text-sm font-medium sm:col-span-2">
+          <label className="flex min-w-0 flex-col gap-2 text-sm font-medium sm:col-span-2">
             Pengalaman
             <Textarea name="experienceSummary" required defaultValue={profile?.experienceSummary ?? ""} className={fieldClassName} />
           </label>
-          <label className="flex flex-col gap-2 text-sm font-medium sm:col-span-2">
+          <label className="flex min-w-0 flex-col gap-2 text-sm font-medium sm:col-span-2">
             Catatan admin
             <Textarea name="adminNote" defaultValue={profile?.adminNote ?? ""} className={fieldClassName} />
           </label>

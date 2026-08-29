@@ -66,9 +66,14 @@ function fileLink(label: string, src?: string | null) {
   if (!src) return <span className="text-muted-foreground">Tidak ada</span>
 
   return (
-    <a className="inline-flex items-center gap-1 underline-offset-4 hover:underline" href={src} target="_blank" rel="noreferrer">
-      {label}
-      <ExternalLinkIcon className="size-3" />
+    <a
+      className="inline-flex max-w-full min-w-0 items-center gap-1 overflow-hidden underline-offset-4 hover:underline"
+      href={src}
+      target="_blank"
+      rel="noreferrer"
+    >
+      <span className="truncate">{label}</span>
+      <ExternalLinkIcon className="size-3 shrink-0" />
     </a>
   )
 }
@@ -79,10 +84,10 @@ function CountGrid({
   counts: Array<[string, number]>
 }) {
   return (
-    <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+    <section className="grid min-w-0 gap-3 sm:grid-cols-2 lg:grid-cols-4">
       {counts.map(([label, value]) => (
-        <div key={label} className="rounded-xl bg-card p-4 shadow-none">
-          <p className="text-xs text-muted-foreground">{label}</p>
+        <div key={label} className="min-w-0 rounded-xl bg-card p-4 shadow-none">
+          <p className="truncate text-xs text-muted-foreground">{label}</p>
           <p className="mt-1 text-2xl font-semibold">{value}</p>
         </div>
       ))}
@@ -100,17 +105,17 @@ function SnapshotCard({
   rows: Array<[string, ReactNode]>
 }) {
   return (
-    <Card className="shadow-none">
+    <Card className="min-w-0 shadow-none">
       <CardHeader>
         <CardTitle>{title}</CardTitle>
         <CardDescription>{description}</CardDescription>
       </CardHeader>
-      <CardContent>
-        <dl className="grid gap-3 text-sm sm:grid-cols-2">
+      <CardContent className="min-w-0">
+        <dl className="grid min-w-0 gap-3 text-sm sm:grid-cols-2">
           {rows.map(([label, value]) => (
             <div key={label} className="min-w-0">
               <dt className="text-muted-foreground">{label}</dt>
-              <dd className="mt-1 min-w-0 font-medium">{value}</dd>
+              <dd className="mt-1 min-w-0 break-words font-medium">{value}</dd>
             </div>
           ))}
         </dl>
@@ -128,7 +133,7 @@ export default async function AdminUserDetailPage({ params }: PageProps) {
   const pharmacistStatus = user.pharmacistProfile?.verificationStatus as PharmacistVerificationStatusValue | undefined
 
   return (
-    <main className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-6 py-8">
+    <main className="mx-auto flex w-full max-w-7xl flex-col gap-6 overflow-x-hidden px-4 py-8 sm:px-6">
       <Button asChild variant="ghost" className="w-fit">
         <Link href="/admin/users">
           <ArrowLeftIcon data-icon="inline-start" />
@@ -136,10 +141,10 @@ export default async function AdminUserDetailPage({ params }: PageProps) {
         </Link>
       </Button>
 
-      <header className="flex flex-wrap items-start justify-between gap-3">
-        <div>
+      <header className="flex min-w-0 flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
           <p className="text-sm text-muted-foreground">User Management</p>
-          <h1 className="text-2xl font-semibold">{user.name}</h1>
+          <h1 className="break-words text-2xl font-semibold">{user.name}</h1>
           <div className="mt-2 flex flex-wrap gap-2">
             {statusPill(adminRoleLabels[user.role as UserRoleValue], "muted")}
             {statusPill(adminAccountStatusLabels[user.status as AccountStatusValue], accountTone(user.status as AccountStatusValue))}
@@ -163,8 +168,8 @@ export default async function AdminUserDetailPage({ params }: PageProps) {
         ]}
       />
 
-      <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-        <div className="flex flex-col gap-6">
+      <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
+        <div className="flex min-w-0 flex-col gap-6">
           <AdminUserAccountForm
             user={{
               id: user.id,
@@ -183,7 +188,7 @@ export default async function AdminUserDetailPage({ params }: PageProps) {
           ) : null}
         </div>
 
-        <div className="flex flex-col gap-6">
+        <div className="flex min-w-0 flex-col gap-6">
           <AdminUserSecurityActions userId={user.id} />
           <SnapshotCard
             title="Ringkasan"
@@ -199,23 +204,23 @@ export default async function AdminUserDetailPage({ params }: PageProps) {
               ["Notifikasi", user._count.notifications],
             ]}
           />
-          <Card className="shadow-none">
+          <Card className="min-w-0 shadow-none">
             <CardHeader>
               <CardTitle>Audit Log</CardTitle>
               <CardDescription>Riwayat perubahan admin.</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="min-w-0">
               {auditLogs.length ? (
-                <div className="flex flex-col gap-3">
+                <div className="flex min-w-0 flex-col gap-3">
                   {auditLogs.map((log) => (
-                    <div key={log.id} className="rounded-xl bg-secondary p-3">
-                      <div className="flex flex-wrap items-start justify-between gap-2">
-                        <p className="font-medium">
+                    <div key={log.id} className="min-w-0 rounded-xl bg-secondary p-3">
+                      <div className="flex min-w-0 flex-wrap items-start justify-between gap-2">
+                        <p className="min-w-0 break-words font-medium">
                           {adminUserActionLabels[log.action] ?? log.action}
                         </p>
-                        <p className="text-xs text-muted-foreground">{formatDateTime(log.createdAt)}</p>
+                        <p className="shrink-0 text-xs text-muted-foreground">{formatDateTime(log.createdAt)}</p>
                       </div>
-                      <p className="mt-1 text-sm text-muted-foreground">
+                      <p className="mt-1 truncate text-sm text-muted-foreground">
                         {log.actor?.name ?? "Admin"} · {log.actor?.email ?? "-"}
                       </p>
                     </div>
