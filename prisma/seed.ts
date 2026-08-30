@@ -7,9 +7,9 @@ import { db } from "../lib/db"
 
 const pharmacistPassword = "Apoteker123!"
 const patientPassword = "Pasien123!"
-const adminPassword = "Admin123!"
+const adminPassword = "Admin123!";
 
-const admin = {
+const admin = { 
   name: "Admin Medisigna",
   email: "admin@medisigna.local",
 } as const
